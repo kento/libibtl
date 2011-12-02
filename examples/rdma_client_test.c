@@ -23,7 +23,10 @@ int main(int argc, char **argv)
   //  int flag1, flag2;
   int flag1;
   double s,e;
-
+  if (argc < 2) {
+    printf("./rdma_client_test <host> <send size(Bytes)>\n");
+    exit(1);
+  }
   host = argv[1];
   size = atoi(argv[2]);
   
