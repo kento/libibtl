@@ -116,6 +116,7 @@ struct connection {
 
 
 void die(const char *reason);
+const char *rdma_err_status_str(enum ibv_wc_status status);
 const char *event_type_str(enum rdma_cm_event_type event);
 int send_control_msg (struct connection *conn, struct control_msg *cmsg);
 void post_receives(struct connection *conn);

@@ -222,7 +222,8 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
       conn = (struct connection *)(uintptr_t)wc.wr_id;
 
       if (wc.status != IBV_WC_SUCCESS) {
-	fprintf(stderr, "RDMA lib: RECV: ERROR: status is not IBV_WC_SUCCESS: Erro Code=%d @ %s:%d\n", wc.status, __FILE__, __LINE__);
+	const char* err_str = rdma_err_status_str(wc.status);
+	fprintf(stderr, "RDMA lib: RECV: ERROR: status is not IBV_WC_SUCCESS: Erro=%s(%d) @ %s:%d\n", err_str, wc.status, __FILE__, __LINE__);
 	exit(1);
       }
 
@@ -331,6 +332,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 
 	    //sge.addr = (uintptr_t)conn->rdma_msg_region;
 	    sge.addr = (uintptr_t)rdma_buff->recv_base_addr;
+	    //sge.addr = (long)rdma_buff->recv_base_addr;
 	    sge.length = mr_size;
 	    //	    sge.lkey = conn->rdma_msg_mr->lkey;
 	    sge.lkey = rdma_buff->mr->lkey;
