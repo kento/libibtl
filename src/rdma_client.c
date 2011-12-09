@@ -212,16 +212,18 @@ static void* poll_cq(struct poll_cq_args* args)
 
     while (ibv_poll_cq(cq, 1, &wc)){
       conn = (struct connection *)(uintptr_t)wc.wr_id;
-      debug(printf("Control MSG from: %lu\n", (uintptr_t)conn->id), 1);
+      debug(printf("Control MSG from: %lu\n", (uintptr_t)conn->id), 2);
       if (wc.status != IBV_WC_SUCCESS) {
-        die("RDMA lib: SEND: ERROR: on_completion: status is not IBV_WC_SUCCESS.");
+	const char* err_str = rdma_err_status_str(wc.status);
+        fprintf(stderr, "RDMA lib: RECV: ERROR: status is not IBV_WC_SUCCESS: Erro=%s(%d) @ %s:%d\n", err_str, wc.status, __FILE__, __LINE__);
+        exit(1);
       }
 
       if (wc.opcode == IBV_WC_RECV) {
         switch (conn->recv_msg->type)
           {
           case MR_INIT_ACK:
-	    debug(printf("Recived: Type=%d\n",  conn->recv_msg->type), 1);
+	    debug(printf("RDMA lib: SEND: Recieved MR_INIT_ACK: for tag=%d\n",  tag), 2);
 	    for (mr_index = 0; mr_index < RDMA_BUF_NUM_C; mr_index++) {
 	      debug(printf("Recived: Type=%d\n",  conn->recv_msg->type), 1);
 	      if (sent_size == buff_size) {
@@ -233,7 +235,7 @@ static void* poll_cq(struct poll_cq_args* args)
 		post_receives(conn);
 		debug(printf("RDMA lib: SEND: Recieved MR_INIT_ACK: for tag=%d\n",  tag), 1);
 	      } else {
-		debug(printf("RDMA lib: SEND: Recieved MR_INIT_ACK: for tag=%d\n",  tag), 1);
+
 		/*not sent all data yet*/
 		if (sent_size + rdma_buf_size > buff_size) {
 		  mr_size = buff_size - sent_size;
@@ -256,6 +258,7 @@ static void* poll_cq(struct poll_cq_args* args)
 		//		fprintf(stderr, "RDMA lib: SEND: CHUNK: tag=%d\n", tag);
 		post_receives(conn);
 	      }
+	      debug(printf("RDMA lib: SEND: Done MR_INIT_ACK: for tag=%d\n",  tag), 2);
 	    }
             break;
           case MR_CHUNK_ACK:
@@ -264,10 +267,10 @@ static void* poll_cq(struct poll_cq_args* args)
               /*sent all data*/
 	      cmsg.type=MR_FIN;
 	      cmsg.data1.tag=tag;
-	      debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK => FIN: for tag=%d\n",  tag), 1);
+	      debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK => FIN: for tag=%d\n",  tag), 2);
 	    } else {
               /*not sent all data yet*/
-	      debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK: for tag=%d\n",  tag), 1);
+	      debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK: for tag=%d\n",  tag), 2);
 	      if (sent_size + rdma_buf_size > buff_size) {
 		mr_size = buff_size - sent_size;
 	      } else {
@@ -291,9 +294,10 @@ static void* poll_cq(struct poll_cq_args* args)
 	    send_control_msg(conn, &cmsg);
 	    //	    fprintf(stderr, "RDMA lib: SEND: CHUNK2: tag=%d, slid=%lu\n", tag, (uintptr_t)wc.slid);
 	    post_receives(conn);
+	    debug(printf("RDMA lib: SEND: Done MR_CHUNK_ACK: for tag=%d\n",  tag), 2);
             break;
           case MR_FIN_ACK:
-            debug(printf("Recived: Type=%d\n",  conn->recv_msg->type),1);
+            debug(printf("RDMA lib: SEND: Recived MR_FIN_ACK: Type=%d\n",  conn->recv_msg->type),2);
 	    *flag = 1;
 
 	    // rdma_disconnect(comm->cm_id);
@@ -305,6 +309,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	    //	    fprintf(stderr, "RDMA lib: SEND: FIN_ACK: tag=%d\n", tag);
 	    //ip = get_ip_addr("ib0");
 	    //	    printf("RDMA lib: SEND: %s: send time= %f secs, send size= %lu MB, throughput = %f MB/s\n", ip, e - s, buff_size/1000000, buff_size/(e - s)/1000000.0);
+            debug(printf("RDMA lib: SEND: Done MR_FIN_ACK: Type=%d\n",  conn->recv_msg->type),1);
 	    return NULL;
           default:
             debug(printf("Unknown TYPE"), 1);
@@ -312,7 +317,7 @@ static void* poll_cq(struct poll_cq_args* args)
           }
       } else if (wc.opcode == IBV_WC_SEND) {
 	//	fprintf(stderr, "RDMA lib: SENT: DONE: tag=%d\n", tag);
-	debug(printf("RDMA lib: SEND: Sent: TYPE=%d, tag=%d\n", conn->send_msg->type, tag),1);
+	debug(printf("RDMA lib: SEND: Sent: TYPE=%d, tag=%d\n", conn->send_msg->type, tag),2);
       } else {
 	  die("unknow opecode.");
       }
