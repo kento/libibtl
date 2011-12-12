@@ -64,14 +64,44 @@ const char *event_type_str(enum rdma_cm_event_type event)
   return ("Unknown");
 }
 
+/*
+int get_cqe (struct context *s_ctx, struct ibv_wc *wc) {
+
+  struct ibv_cq *cq = NULL;
+  void* ctx;
+  int num_entries;
+
+  //TODO: Retrieve multiple wc, for now, num_entries=1, which means to get only 1 wc at once 
+  while ((num_entries = ibv_poll_cq(cq, 1, wc)) <= 0 || cq == NULL) {
+    printf("%d\n", num_entries);
+    if ((ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx))) {
+      fprintf(stderr, "RDMA lib: ERROR: ibv get cq event failed @ %s:%d\n", __FILE__, __LINE__);
+      exit(1);
+    }
+
+    ibv_ack_cq_events(cq, 1);
+
+    if ((ibv_req_notify_cq(cq, 0))) {
+      fprintf(stderr, "RDMA lib: ERROR: ibv request notification failed @ %s:%d\n", __FILE__, __LINE__);
+      exit(1);
+    }
+  }
+
+//  Check if the request is successed, otherwise print the reason
+  if (wc->status != IBV_WC_SUCCESS) {
+    const char* err_str = rdma_err_status_str(wc->status);
+    fprintf(stderr, "RDMA lib: RECV: ERROR: status is not IBV_WC_SUCCESS: Error=%s(%d) @ %s:%d\n", err_str, wc->status, __FILE__, __LINE__);
+    exit(1);
+  }
+}
+*/
+
 int send_control_msg (struct connection *conn, struct control_msg *cmsg)
 {
   struct ibv_send_wr wr, *bad_wr = NULL;
   struct ibv_sge sge;
 
-  //  struct connection *conn = (struct connection *)context;
   conn->send_msg->type = cmsg->type;
-  //  memcpy(&conn->send_msg->data.mr, conn->rdma_msg_mr, sizeof(struct ibv_mr));
   memcpy(&conn->send_msg->data.mr, &cmsg->data.mr, sizeof(struct ibv_mr));
   conn->send_msg->data1 = cmsg->data1;
 
@@ -85,14 +115,17 @@ int send_control_msg (struct connection *conn, struct control_msg *cmsg)
   wr.num_sge = 1;
   wr.send_flags = IBV_SEND_SIGNALED;
 
-  sge.addr = (uintptr_t)conn->send_msg;
-  sge.length = sizeof(struct control_msg);
-  sge.lkey = conn->send_mr->lkey;
+  sge.addr = conn->send_msg;
+  sge.length = (uint32_t)sizeof(struct control_msg);
+  sge.lkey = (uint32_t)conn->send_mr->lkey;
+  
+  printf("RDMA: sge.addr=%lu, sge.length=%lu, sge.lkey=%lu\n", sge.addr, sge.length, sge.lkey);
+  
   
   //  while (!conn->connected);
 
   TEST_NZ(ibv_post_send(conn->qp, &wr, &bad_wr));
-  debug(printf("Post Ssend: TYPE=%d\n", conn->send_msg->type), 1);
+  debug(printf("Post Send: TYPE=%d\n", conn->send_msg->type), 1);
   return 0;
 }
 

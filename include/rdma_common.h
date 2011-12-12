@@ -22,8 +22,20 @@
 #endif
 
 #ifndef MAX_RDMA_BUF_SIZE_C
-#define MAX_RDMA_BUF_SIZE_C (6*1000*1000)
+#define MAX_RDMA_BUF_SIZE_C (50*1000*1000)
 #endif
+
+//-------------
+
+//#ifndef MAX_RDMA_LOCKED_MEMORY_C
+//#define MAX_RDMA_LOCKED_MEMORY_C (1*1000*1000)
+//#endif
+
+//#ifndef MAX_RDMA_LOCKED_MEMORY_S
+//#define MAX_RDMA_LOCKED_MEMORY_S (100*1000)
+//#endif
+//-------------
+
 
 #ifndef RDMA_BUF_SIZE_C
 #define RDMA_BUF_SIZE_C ((MAX_RDMA_BUF_SIZE_C)/(RDMA_CLIENT_NUM_S))
@@ -65,9 +77,9 @@ struct control_msg {
     struct ibv_mr mr;
   } data;
   union {
-    uint64_t buff_size;
-    uint64_t mr_size;
-    int tag;
+    uint64_t buff_size; // for MR_INIT
+    uint32_t mr_size; // for MR_CHUNK
+    int tag; // for MR_FIN
   } data1 ;
 };
 

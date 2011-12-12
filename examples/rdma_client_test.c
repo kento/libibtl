@@ -37,6 +37,7 @@ int main(int argc, char **argv)
   s = get_dtime();
   RDMA_Active_Init(&comm, &param);
   e = get_dtime();
+
   /* ===== */
   data = (char*)malloc(size);
   int i;

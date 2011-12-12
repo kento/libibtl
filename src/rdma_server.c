@@ -30,7 +30,7 @@ static void* passive_init(void * arg /*(struct RDMA_communicator *comm)*/) ;
 static struct context *s_ctx = NULL;
 static int connections = 0;
 pthread_t listen_thread;
-static int allocated_mr_size = 0;
+static uint32_t allocated_mr_size = 0;
 static  int client_num = 0;
 
 //pthread_t poll_thread[RDMA_THREAD_NUM_S];
@@ -45,7 +45,7 @@ struct RDMA_buff {
   uint64_t buff_size;
   char *recv_base_addr;
   struct ibv_mr *mr;
-  uint64_t mr_size;
+  uint32_t mr_size;
   uint64_t recv_size;
 };
 
@@ -56,30 +56,6 @@ int main(int argc, char **argv) {
   return 0;
 }
 */
-
-int RDMA_Irecvr(char** buff, uint64_t* size, int* tag, struct RDMA_communicator *comm)
-{
-  struct RDMA_message *rdma_msg;
-  rdma_msg = get_current();
-  *buff = rdma_msg->buff;
-  *size = rdma_msg->size;
-  *tag = rdma_msg->tag;
-  return 0;
-  return 0;
-}
-
-int RDMA_Recvr(char** buff, uint64_t* size, int* tag, struct RDMA_communicator *comm)
-{
-  struct RDMA_message *rdma_msg;
-  while ((rdma_msg = get_current()) == NULL) {
-    usleep(1);
-  }
-  *buff = rdma_msg->buff;
-  *size = rdma_msg->size;
-  *tag = rdma_msg->tag;
-  return 0;
-}
-
 
 int RDMA_Passive_Init(struct RDMA_communicator *comm) 
 {
@@ -92,13 +68,12 @@ static void* passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
 {
   struct RDMA_communicator *comm;
   struct sockaddr_in addr;
-    struct rdma_cm_event *event = NULL;
+  struct rdma_cm_event *event = NULL;
   //  struct rdma_cm_id *listener = NULL;
   //  struct rdma_event_channel *ec = NULL;
   uint16_t port = 0;
   
   comm = (struct RDMA_communicator *) arg;
-
 
   char *value;
   value = getenv("RDMA_CLIENT_NUM_S");
@@ -131,7 +106,7 @@ static void* passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
 
   /* TODO: Determine appropriate backlog value */ 
   /*       backlog=10 is arbitrary */
-  if (rdma_listen(comm->cm_id, 100)) {
+  if (rdma_listen(comm->cm_id, 10)) {
     fprintf(stderr, "RDMA lib: ERROR: RDMA address binding failede @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   };
@@ -140,7 +115,6 @@ static void* passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   debug(printf("listening on port %d ...\n", port), 1);
 
   while (1) {
-
     int rc =0;
     debug(printf("Waiting for cm_event... "),1);
     if ((rc = rdma_get_cm_event(comm->ec, &event))){
@@ -167,6 +141,30 @@ static void* passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   return 0;
 }
 
+int RDMA_Irecvr(char** buff, uint64_t* size, int* tag, struct RDMA_communicator *comm)
+{
+  struct RDMA_message *rdma_msg;
+  rdma_msg = get_current();
+  *buff = rdma_msg->buff;
+  *size = rdma_msg->size;
+  *tag = rdma_msg->tag;
+  return 0;
+}
+
+int RDMA_Recvr(char** buff, uint64_t* size, int* tag, struct RDMA_communicator *comm)
+{
+  struct RDMA_message *rdma_msg;
+  while ((rdma_msg = get_current()) == NULL) {
+    usleep(1);
+  }
+  *buff = rdma_msg->buff;
+  *size = rdma_msg->size;
+  *tag = rdma_msg->tag;
+  return 0;
+}
+
+
+
 void RDMA_free (void* data) {
   free(data);
 }
@@ -185,7 +183,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 
   int tag;
 
-  uint64_t mr_size;
+  uint32_t mr_size;
   //  uint64_t conn_id;
 
   struct hashtable ht;
@@ -328,17 +326,17 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	    wr.sg_list = &sge;
 	    wr.num_sge = 1;
 	    wr.send_flags = IBV_SEND_SIGNALED;
-	    wr.wr.rdma.remote_addr = (uintptr_t)conn->peer_mr.addr;
+	    wr.wr.rdma.remote_addr = (uintptr_t)conn->peer_mr.addr; // wr.wr.rdma.remote_addr => uint64_t
 	    wr.wr.rdma.rkey = conn->peer_mr.rkey;
 	    
 
 	    //sge.addr = (uintptr_t)conn->rdma_msg_region;
 	    //sge.addr = (uintptr_t)rdma_buff->recv_base_addr;
-	    sge.addr = (uint64_t)rdma_buff->recv_base_addr;
+	    sge.addr = (uintptr_t)rdma_buff->recv_base_addr;
 	    sge.length = (uint32_t)mr_size;
 	    //	    sge.lkey = conn->rdma_msg_mr->lkey;
 	    sge.lkey = (uint32_t)rdma_buff->mr->lkey;
-	    debug(printf("RDMA lib: RECV: RDMA request satus: sge.addr=%lu, sge.length=%lu,  sge.lkey=%lu\n", sge.addr, sge.length, sge.lkey), 2);
+	    debug(printf("RDMA lib: RECV: RDMA request satus: remote_addr=%lu, rkey=%u, sge.addr=%lu, sge.length=%lu,  sge.lkey=%lu\n", wr.wr.rdma.remote_addr, wr.wr.rdma.rkey, sge.addr, sge.length, sge.lkey), 2);
 	    debug(printf("RDMA lib: Preparing RDMA transfer: Done\n"), 1);
 
 	    if ((ibv_post_send(conn->qp, &wr, &bad_wr))) {
@@ -347,8 +345,8 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	    }
 	    debug(printf("Post send: RDMA: id=%lu\n", wr.wr_id), 1);
 	    //	    printf("d\n");
-	    rdma_buff->recv_base_addr += mr_size;
-	    rdma_buff->recv_size += mr_size;
+	    rdma_buff->recv_base_addr += (uintptr_t)mr_size;
+	    rdma_buff->recv_size += (uint64_t)mr_size;
 	    cmsg.type=MR_CHUNK_ACK;
 	    send_control_msg(conn, &cmsg);
 	    debug(printf("RDMA lib: RECV: Done MR_CHUNK: for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
@@ -502,8 +500,8 @@ static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
   qp_attr->recv_cq = s_ctx->cq;
   qp_attr->qp_type = IBV_QPT_RC;
 
-  qp_attr->cap.max_send_wr = 200; //10
-  qp_attr->cap.max_recv_wr = 200; //10
+  qp_attr->cap.max_send_wr = 10; //10
+  qp_attr->cap.max_recv_wr = 10; //10
   qp_attr->cap.max_send_sge = 5; //5
   qp_attr->cap.max_recv_sge = 5;//5
 
