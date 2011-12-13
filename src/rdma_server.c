@@ -234,6 +234,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	    /*Allocat buffer for the client msg*/ 
 	    debug(printf("RDMA lib: RECV: Recieved MR_INI: for wc.slid=%lu\n",  (uintptr_t)wc.slid), 2);
 	    retry=0;
+
 	    while ((b_usage = buff_usage()) > 20 * 1000) {
 	      fprintf(stderr, "RDMA lib: RECV: Buffer Overflows (usage: %f M bytes) => sleep ... for a while: retry %d !!\n", b_usage, retry);
 	      usleep(1000 * 1000);

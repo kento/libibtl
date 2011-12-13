@@ -22,7 +22,7 @@
 #endif
 
 #ifndef MAX_RDMA_BUF_SIZE_C
-#define MAX_RDMA_BUF_SIZE_C (50 * 1000 * 1000)
+#define MAX_RDMA_BUF_SIZE_C (5 * 1000 * 1000)
 #endif
 
 //-------------

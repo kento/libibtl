@@ -1,5 +1,4 @@
 #include "rdma_common.h"
-
 #include <unistd.h>
 
 
