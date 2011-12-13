@@ -270,6 +270,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	    add_ht(&ht, (uintptr_t)wc.slid, rdma_buff);
 	    /**/
 	    cmsg.type=MR_INIT_ACK;
+	    post_receives(conn);
 	    send_control_msg(conn, &cmsg);
 	    debug(printf("RDMA lib: RECV: Done MR_INI : for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
 	    break;
@@ -348,6 +349,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	    rdma_buff->recv_base_addr += (uintptr_t)mr_size;
 	    rdma_buff->recv_size += (uint64_t)mr_size;
 	    cmsg.type=MR_CHUNK_ACK;
+	    post_receives(conn);
 	    send_control_msg(conn, &cmsg);
 	    debug(printf("RDMA lib: RECV: Done MR_CHUNK: for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
 	    //	    sprintf(log, "RDMA lib: RECV: Recieved MR_CHUNK DONE: for wc.slid=%lu\n", (uintptr_t)wc.slid);	    write_log(log);
@@ -356,6 +358,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	    tag = conn->recv_msg->data1.tag;
 	    debug(printf("RDMA lib: RECV: Recieved MR_FIN: Tag=%d for wc.slid=%lu\n", tag, (uintptr_t)wc.slid), 1);
 	    cmsg.type=MR_FIN_ACK;
+	    post_receives(conn);
 	    send_control_msg(conn, &cmsg);
 	    //	    write_log(log);
 	    /*Post reveived data*/
@@ -386,7 +389,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	    exit(1);
 	    break;
 	  }
-	post_receives(conn);
+
       } else if (wc.opcode == IBV_WC_SEND) {
 	debug(printf("RDMA lib: RECV: Sent: Sent out: TYPE=%d for wc.slid=%lu\n", conn->send_msg->type, (uintptr_t)wc.slid), 1);
       } else if (wc.opcode == IBV_WC_RDMA_READ) {

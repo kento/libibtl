@@ -233,7 +233,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	    for (mr_index = 0; mr_index < RDMA_BUF_NUM_C; mr_index++) {
 	      debug(printf("Recived: Type=%d\n",  conn->recv_msg->type), 1);
 	      if (sent_size == buff_size) {
-		debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK => FIN: for tag=%d\n",  tag), 2);
+		debug(printf("RDMA lib: SEND: Recieved MR_INIT_ACK => FIN: for tag=%d\n",  tag), 2);
 		/*sent all data*/
 		cmsg.type=MR_FIN;
 		cmsg.data1.tag=tag;
@@ -246,18 +246,15 @@ static void* poll_cq(struct poll_cq_args* args)
 		  mr_size = rdma_buf_size;
 		}
 
-
 		register_rdma_msg_mr(mr_index, send_base_addr, mr_size);
 		printf("RDMA lib: SEND: send_base_addr=%lu\n", send_base_addr);
 		send_base_addr += mr_size;
 		sent_size += (uint64_t)mr_size;
 		
 		cmsg.type=MR_CHUNK;
-		cmsg.data1.mr_size=mr_size;
-
 		memcpy(&cmsg.data.mr, rdma_msg_mr[mr_index], sizeof(struct ibv_mr));
+		cmsg.data1.mr_size = mr_size;//cmsg.data.mr.length;//mr_size - 1 ;
 		printf("RDMA lib: SEND:    remote_addr=%lu(%lu), rkey=%u, size=%u\n", cmsg.data.mr.addr, send_base_addr, cmsg.data.mr.rkey, cmsg.data.mr.length);
-
 
 	      }
 	      send_control_msg(conn, &cmsg);
@@ -266,11 +263,13 @@ static void* poll_cq(struct poll_cq_args* args)
 	    }
             break;
           case MR_CHUNK_ACK:
+
 	    if (sent_size == buff_size) {
 	      debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK => FIN: for tag=%d\n",  tag), 2);
               /*sent all data*/
 	      cmsg.type=MR_FIN;
 	      cmsg.data1.tag=tag;
+	      sleep(1);
 	    } else {
               /*not sent all data yet*/
 	      debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK: for tag=%d\n",  tag), 2);
@@ -279,10 +278,11 @@ static void* poll_cq(struct poll_cq_args* args)
 	      } else {
 		mr_size = rdma_buf_size;
 	      }
+
 	      debug(printf("mr_size=%lu\n", mr_size),2);
 
 	      mr_index = (mr_index+ 1) % RDMA_BUF_NUM_C;
-	      debug(printf("mr_index=%d\n", mr_index),1);
+	      debug(printf("mr_index=%d\n", mr_index),2);
 
 	      register_rdma_msg_mr(mr_index, send_base_addr, mr_size);
 	      printf("RDMA lib: SEND: send_base_addr=%lu\n", send_base_addr);
@@ -291,15 +291,16 @@ static void* poll_cq(struct poll_cq_args* args)
 	      sent_size += (uint64_t)mr_size;
 
 	      cmsg.type=MR_CHUNK;
-	      cmsg.data1.mr_size=mr_size;
 	      memcpy(&cmsg.data.mr, rdma_msg_mr[mr_index], sizeof(struct ibv_mr));
-	      printf("RDMA lib: SEND:    remote_addr=%lu(%lu), rkey=%u, size=%u\n", cmsg.data.mr.addr, send_base_addr, cmsg.data.mr.rkey, cmsg.data.mr.length);
+	      cmsg.data1.mr_size = mr_size;//cmsg.data.mr.length;
+	      printf("RDMA lib: SEND:    remote_addr=%lu(%lu), rkey=%u, size=%u, site_t=%ubyte\n", cmsg.data.mr.addr, send_base_addr, cmsg.data.mr.rkey, cmsg.data.mr.length, sizeof(mr_size));
 	    }
 	    send_control_msg(conn, &cmsg);
 	    post_receives(conn);
 	    debug(printf("RDMA lib: SEND: Done MR_CHUNK_ACK: for tag=%d\n",  tag), 2);
             break;
           case MR_FIN_ACK:
+	    sleep(1);
             debug(printf("RDMA lib: SEND: Recived MR_FIN_ACK: Type=%d\n",  conn->recv_msg->type),2);
 	    *flag = 1;
 
@@ -319,11 +320,12 @@ static void* poll_cq(struct poll_cq_args* args)
 	    return NULL;
           }
       } else if (wc.opcode == IBV_WC_SEND) {
-	//	fprintf(stderr, "RDMA lib: SENT: DONE: tag=%d\n", tag);
+	//fprintf(stderr, "RDMA lib: SENT: DONE: tag=%d\n", tag);
 	debug(printf("RDMA lib: SEND: Sent: TYPE=%d, tag=%d\n", conn->send_msg->type, tag),2);
       } else {
-	  die("unknow opecode.");
+	die("unknow opecode.");
       }
+
     }
   }
   return NULL;
@@ -332,8 +334,20 @@ static void* poll_cq(struct poll_cq_args* args)
 static void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size)
 { 
 
+
+
   if (rdma_msg_mr[mr_index] != NULL) {
-    ibv_dereg_mr(rdma_msg_mr[mr_index]);
+    int retry = 100;
+    //    sleep(1);
+    while (ibv_dereg_mr(rdma_msg_mr[mr_index]) != 0) {
+      fprintf(stderr, "RDMA lib: SEND: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
+	exit(1);
+      if (retry < 0) {
+	fprintf(stderr, "RDMA lib: SEND: ERROR: memory region deregistration failed @ %s:%d\n",  __FILE__, __LINE__);
+	exit(1);
+      }
+      retry--;
+    }
   }
 
   TEST_Z(rdma_msg_mr[mr_index] = ibv_reg_mr(

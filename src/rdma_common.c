@@ -95,54 +95,55 @@ int get_cqe (struct context *s_ctx, struct ibv_wc *wc) {
   }
 }
 */
-
 int send_control_msg (struct connection *conn, struct control_msg *cmsg)
 {
-  struct ibv_send_wr wr, *bad_wr = NULL;
-  struct ibv_sge sge;
+  struct ibv_send_wr wrs, *bad_wrs = NULL;
+  struct ibv_sge sges;
 
   conn->send_msg->type = cmsg->type;
   memcpy(&conn->send_msg->data.mr, &cmsg->data.mr, sizeof(struct ibv_mr));
   conn->send_msg->data1 = cmsg->data1;
 
-  memset(&wr, 0, sizeof(wr));
+  memset(&wrs, 0, sizeof(wrs));
 
-  wr.wr_id = (uintptr_t)conn;
+  wrs.wr_id = (uintptr_t)conn;
   //printf("wr.wr_id=%lu\n", wr.wr_id);
   //wr.wr_id = (uintptr_t)1;
-  wr.opcode = IBV_WR_SEND;
-  wr.sg_list = &sge;
-  wr.num_sge = 1;
-  wr.send_flags = IBV_SEND_SIGNALED;
+  wrs.opcode = IBV_WR_SEND;
+  wrs.sg_list = &sges;
+  wrs.num_sge = 1;
+  wrs.send_flags = IBV_SEND_SIGNALED;
 
-  sge.addr = conn->send_msg;
-  sge.length = (uint32_t)sizeof(struct control_msg);
-  sge.lkey = (uint32_t)conn->send_mr->lkey;
+  sges.addr = (uintptr_t)conn->send_msg;
+  sges.length = (uint32_t)sizeof(struct control_msg);
+  sges.lkey = (uint32_t)conn->send_mr->lkey;
   
-  printf("RDMA: sge.addr=%lu, sge.length=%lu, sge.lkey=%lu\n", sge.addr, sge.length, sge.lkey);
+  printf("RDMA: sge.addr=%lu, sge.length=%lu, sge.lkey=%lu\n", sges.addr, sges.length, sges.lkey);
   
   
   //  while (!conn->connected);
 
-  TEST_NZ(ibv_post_send(conn->qp, &wr, &bad_wr));
+  TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
   debug(printf("Post Send: TYPE=%d\n", conn->send_msg->type), 1);
   return 0;
 }
 
+
+
 void post_receives(struct connection *conn)
 { 
-  struct ibv_recv_wr wr, *bad_wr = NULL;
-  struct ibv_sge sge;
+  struct ibv_recv_wr wrr, *bad_wrr = NULL;
+  struct ibv_sge sger;
+  wrr.wr_id = (uintptr_t)conn;
+  wrr.next = NULL;
+  wrr.sg_list = &sger;
+  wrr.num_sge = 1;
 
-  wr.wr_id = (uintptr_t)conn;
-  wr.next = NULL;
-  wr.sg_list = &sge;
-  wr.num_sge = 1;
+  sger.addr = (uintptr_t)conn->recv_msg;
+  sger.length = sizeof(struct control_msg);
+  sger.lkey = conn->recv_mr->lkey;
 
-  sge.addr = (uintptr_t)conn->recv_msg;
-  sge.length = sizeof(struct control_msg);
-  sge.lkey = conn->recv_mr->lkey;
-
-  TEST_NZ(ibv_post_recv(conn->qp, &wr, &bad_wr));
-  debug(printf("Post Recive: id=%lu\n", wr.wr_id), 1);
+  TEST_NZ(ibv_post_recv(conn->qp, &wrr, &bad_wrr));
+  debug(printf("Post Recive: id=%lu\n", wrr.wr_id), 1);
+  return;
 }
