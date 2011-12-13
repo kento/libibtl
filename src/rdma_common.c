@@ -1,6 +1,8 @@
 #include "rdma_common.h"
 #include <unistd.h>
 
+static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data);
+
 
 
 void die(const char *reason)
@@ -94,6 +96,7 @@ int get_cqe (struct context *s_ctx, struct ibv_wc *wc) {
   }
 }
 */
+/*
 int send_control_msg (struct connection *conn, struct control_msg *cmsg)
 {
   struct ibv_send_wr wrs, *bad_wrs = NULL;
@@ -146,3 +149,82 @@ void post_receives(struct connection *conn)
   debug(printf("Post Recive: id=%lu\n", wrr.wr_id), 1);
   return;
 }
+*/
+
+int recv_ctl_msg (struct connection *conn, enum ctl_msg_type *cmt, struct ibv_mr *mr, uint64_t *data)
+{
+
+  return 0;
+
+}
+
+int send_ctl_msg (struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data)
+{ 
+  post_recv_ctl_msg(conn);
+  post_send_ctl_msg(conn, cmt, mr, data) ;
+  return 0;
+}
+
+static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data)
+{ 
+  struct ibv_send_wr wrs, *bad_wrs = NULL;
+  struct ibv_sge sges;
+
+  conn->send_msg->cmt = cmt;
+
+  switch (cmt) {
+  case MR_INIT:
+    conn->send_msg->data1.buff_size = data;
+    break;
+  case MR_INIT_ACK:
+    break;
+  case MR_CHUNK:
+    memcpy(&conn->send_msg->data.mr, mr, sizeof(struct ibv_mr));
+    conn->send_msg->data1.mr_size = data;
+    break;    
+  case MR_CHUNK_ACK:
+    break;
+  case MR_FIN:
+    conn->send_msg->data1.tag = data;
+    break;
+  case MR_FIN_ACK:
+    break;
+  default:
+    fprintf(stderr, "unknow msg type @ %s:%d", __FILE__, __LINE__);
+    exit(1);
+  }
+
+  memset(&wrs, 0, sizeof(wrs));
+  wrs.wr_id = (uintptr_t)conn;
+  wrs.opcode = IBV_WR_SEND;
+  wrs.sg_list = &sges;
+  wrs.num_sge = 1;
+  wrs.send_flags = IBV_SEND_SIGNALED;
+
+  sges.addr = (uintptr_t)conn->send_msg;
+  sges.length = (uint32_t)sizeof(struct control_msg);
+  sges.lkey = (uint32_t)conn->send_mr->lkey;
+
+  TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
+  printf("RDMA: sge.addr=%lu, sge.length=%lu, sge.lkey=%lu\n", sges.addr, sges.length, sges.lkey);
+  return 0;
+}
+
+int post_recv_ctl_msg(struct connection *conn)
+{ 
+  struct ibv_recv_wr wrr, *bad_wrr = NULL;
+  struct ibv_sge sger;
+  wrr.wr_id = (uintptr_t)conn;
+  wrr.next = NULL;
+  wrr.sg_list = &sger;
+  wrr.num_sge = 1;
+
+  sger.addr = (uintptr_t)conn->recv_msg;
+  sger.length = sizeof(struct control_msg);
+  sger.lkey = conn->recv_mr->lkey;
+
+  TEST_NZ(ibv_post_recv(conn->qp, &wrr, &bad_wrr));
+  return 0;
+}
+
+

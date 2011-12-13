@@ -14,7 +14,7 @@
 
 
 #ifndef RDMA_BUF_NUM_C
-#define RDMA_BUF_NUM_C (2)
+#define RDMA_BUF_NUM_C (1)
 #endif
 
 #ifndef RDMA_CLIENT_NUM_S
@@ -64,15 +64,18 @@
 #define debug(p,x)  if ((x) >= DEBUG_LEVEL){ p; }
 
 
+enum ctl_msg_type {
+  MR_INIT,
+  MR_INIT_ACK,
+  MR_CHUNK,
+  MR_CHUNK_ACK,
+  MR_FIN,
+  MR_FIN_ACK
+};
+
 struct control_msg {
-  enum {
-    MR_INIT,
-    MR_INIT_ACK,
-    MR_CHUNK,
-    MR_CHUNK_ACK,
-    MR_FIN,
-    MR_FIN_ACK
-  } type;
+  enum ctl_msg_type cmt;
+
   union {
     struct ibv_mr mr;
   } data;
@@ -130,8 +133,12 @@ struct connection {
 void die(const char *reason);
 const char *rdma_err_status_str(enum ibv_wc_status status);
 const char *event_type_str(enum rdma_cm_event_type event);
-int send_control_msg (struct connection *conn, struct control_msg *cmsg);
-void post_receives(struct connection *conn);
+//int send_control_msg (struct connection *conn, struct control_msg *cmsg);
+//void post_receives(struct connection *conn);
+int post_recv_ctl_msg(struct connection *conn);
+int send_ctl_msg (struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data);
+//int recv_ctl_msg (struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data);
+
 
 
 
