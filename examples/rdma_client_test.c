@@ -60,6 +60,7 @@ int main(int argc, char **argv)
   //  RDMA_Isendr(data, size, 1015, &flag2, &comm);
   /* ===== */
 
+
   e = get_dtime();
   //  RDMA_Wait (&flag2) ;
   printf("Send: %d %f %f GB/s\n", size,  e - s, size/(e - s)/1000000000.0);
