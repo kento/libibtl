@@ -159,7 +159,8 @@ int recv_ctl_msg (struct connection *conn, enum ctl_msg_type *cmt, struct ibv_mr
   
   while (ibv_poll_cq(cq, 1, &wc)){
     conn = (struct connection *)(uintptr_t)wc.wr_id;
-    debug(printf("Control MSG from: %lu\n", (uintptr_t)conn->id), 2);
+    
+debug(printf("Control MSG from: %lu\n", (uintptr_t)conn->id), 2);
     
     /*Check if a request was successed*/
     if (wc.status != IBV_WC_SUCCESS) {
