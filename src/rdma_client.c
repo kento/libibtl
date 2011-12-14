@@ -427,7 +427,6 @@ static void build_context(struct ibv_context *verbs)
   }
 
   s_ctx = (struct context *)malloc(sizeof(struct context));
-
   s_ctx->ctx = verbs;
 
   TEST_Z(s_ctx->pd = ibv_alloc_pd(s_ctx->ctx));
