@@ -135,9 +135,16 @@ const char *rdma_err_status_str(enum ibv_wc_status status);
 const char *event_type_str(enum rdma_cm_event_type event);
 //int send_control_msg (struct connection *conn, struct control_msg *cmsg);
 //void post_receives(struct connection *conn);
+int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, uint32_t mr_num);
+
+int recv_ctl_msg(struct connection *conn, enum ctl_msg_type *cmt, uint64_t *data);
+int send_ctl_msg (struct connection *conn, enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data);
+void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size);
+
 int post_recv_ctl_msg(struct connection *conn);
-int send_ctl_msg (struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data);
-//int recv_ctl_msg (struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data);
+
+
+
 
 
 
