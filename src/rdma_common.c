@@ -3,7 +3,7 @@
 
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data);
 
-
+struct ibv_cq *cq = NULL;
 
 void die(const char *reason)
 {
@@ -151,8 +151,46 @@ void post_receives(struct connection *conn)
 }
 */
 
+
 int recv_ctl_msg (struct connection *conn, enum ctl_msg_type *cmt, struct ibv_mr *mr, uint64_t *data)
 {
+  void* ctx;
+  struct ibv_wc wc;
+  
+  while (ibv_poll_cq(cq, 1, &wc)){
+    conn = (struct connection *)(uintptr_t)wc.wr_id;
+    debug(printf("Control MSG from: %lu\n", (uintptr_t)conn->id), 2);
+    
+    /*Check if a request was successed*/
+    if (wc.status != IBV_WC_SUCCESS) {
+      const char* err_str = rdma_err_status_str(wc.status);
+      fprintf(stderr, "RDMA lib: COMM: ERROR: status is not IBV_WC_SUCCESS: Erro=%s(%d) @ %s:%d\n", err_str, wc.status, __FILE__, __LINE__);
+      exit(1);
+    }
+
+    /*Check which request was successed*/
+    if (wc.opcode == IBV_WC_RECV) {
+
+    } else if (wc.opcode == IBV_WC_SEND) {
+      debug(printf("RDMA lib: COMM: Sent: Sent out: TYPE=%d for wc.slid=%lu\n", conn->send_msg->cmt, (uintptr_t)wc.slid), 1);
+    } else if (wc.opcode == IBV_WC_RDMA_READ) {
+      debug(printf("RDMA lib: COMM: Sent: RDMA: IBV_WC_RDMA_READ for wc.slid=%lu\n", (uintptr_t)wc.slid), 1);
+    } else {
+      die("unknow opecode.");
+    }
+
+  }
+  
+  if (ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx)) {
+    fprintf(stderr, "RDMA lib: SEND: ERROR: get cq event  failed @ %s:%d\n", __FILE__, __LINE__);
+    exit(1);
+  }
+  ibv_ack_cq_events(cq, 1);
+  if (ibv_req_notify_cq(cq, 0)) {
+    fprintf(stderr, "RDMA lib: SEND: ERROR: request notification failed @ %s:%d\n", __FILE__, __LINE__);
+    exit(1);
+  }
+
 
   return 0;
 
