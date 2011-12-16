@@ -144,7 +144,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
       case MR_INIT:
 	buff_size = *data;
 	/*Allocat buffer for the client msg*/ 
-	debug(printf("RDMA lib: RECV: Recieved MR_INI: for wc.slid=%lu\n",  slid), 2);
+	//	debug(printf("RDMA lib: RECV: Recieved MR_INI: for wc.slid=%lu\n",  slid), 2);
 
 	retry=0;	
 	while ((b_usage = buff_usage()) > 20 * 1000) {
@@ -153,171 +153,40 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	  retry++;
 	}
 
+	alloc_rdma_buffs(slid, buff_size);
 	data_in_count += buff_size / 1000.0;
 	debug(fprintf(stderr, "RDMA lib: RECV: IPoIB=%s Time= %f , in_count= %f \n", get_ip_addr("ib0"), get_dtime(), data_in_count), 2);
 
-	alloc_rdma_buffs(slid, buff_size);
-	/*
-	retry=0;
-	while ((rdma_buff = (struct RDMA_buff *) malloc(sizeof(struct RDMA_buff))) == NULL) {
-	  fprintf(stderr, "RDMA lib: RECV: No more buffer space !!\n");
-	  usleep(10000);
-	  retry++;
-	  //	      exit(1);
-	}
-	//	    alloc_size += sizeof(struct RDMA_buff);
-	retry=0;
-	while ((rdma_buff->buff = (char *)malloc(buff_size)) == NULL) {
-	  fprintf(stderr, "RDMA lib: RECV: No more buffer space !!\n");
-	  usleep(10000);
-	  retry++;
-	  //	      exit(1);
-	}
-
-	
-	rdma_buff->buff_size = buff_size;
-	rdma_buff->recv_base_addr = rdma_buff->buff;
-	rdma_buff->mr = NULL;
-	//	    rdma_buff->mr_size = 0;
-	rdma_buff->recv_size = 0;
-	add_ht(&ht, (uintptr_t)wc.slid, rdma_buff);
-	*/
-
-
-	/**/
-	//	    cmsg.type=MR_INIT_ACK;
-	//	    post_receives(conn);
-	//	    send_control_msg(conn, &cmsg);
 	send_ctl_msg (MR_INIT_ACK, 0, 0);
-	debug(printf("RDMA lib: RECV: Done MR_INI : for wc.slid=%u\n", slid), 2);
+	//	debug(printf("RDMA lib: RECV: Done MR_INI : for wc.slid=%u\n", slid), 2);
 	break;
       case MR_CHUNK:
-	//	    printf("a\n");
-
 	mr_size= *data;
 
-
 	rdma_read(slid, mr_size);
-	  /*
-	debug(printf("RDMA lib: RECV: Recieved MR_CHUNK : for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
-	//	    sprintf(log, "RDMA lib: RECV: Recieved MR_CHUNK : for wc.slid=%lu\n", (uintptr_t)wc.slid);	    write_log(log);
-
-	exit(1);
-	debug(fprintf(stderr,"copy remote memory region\n"), 1);
-	memcpy(&conn->peer_mr, &conn->recv_msg->data.mr, sizeof(conn->peer_mr));
-	debug(fprintf(stderr," done\n"), 1);
-	debug(fprintf(stderr,"rdma_buff:%p \n", rdma_buff), 1);
-	if (rdma_buff->mr != NULL) {
-	  debug(fprintf(stderr,"Deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-	  int retry=1000;
-	  while (ibv_dereg_mr(rdma_buff->mr)) {
-	    fprintf(stderr, "RDMA lib: FAILED: memory region dereg again (allocated_mr_size: %d bytes): retry = %d @ %s:%d\n", allocated_mr_size, retry, __FILE__, __LINE__);
-	    if (retry < 0) {
-	      fprintf(stderr, "RDMA lib: ERROR: memory region deregistration failed (allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-	      exit(1);
-	    }
-	    retry--;
-	  }
-	  allocated_mr_size = allocated_mr_size - rdma_buff->mr_size;
-	} else {
-	  debug(fprintf(stderr,"Not deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-	}
-	debug(fprintf(stderr, "Registering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-	if (!(rdma_buff->mr = ibv_reg_mr(
-					 s_ctx->pd,
-					 rdma_buff->recv_base_addr,
-					 mr_size,
-					 IBV_ACCESS_LOCAL_WRITE
-					 )
-	      )
-	    )
-	  {
-	    fprintf(stderr, "RDMA lib: ERROR: memory region registration failed (allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-	    exit(1);
-	  }
-	debug(printf("RDMA lib: RECV: ibv_reg_mr: addr=%lu, length=%lu,  lkey=%lu\n", rdma_buff->recv_base_addr, mr_size, rdma_buff->mr->lkey), 2);
-	rdma_buff->mr_size = mr_size;
-	allocated_mr_size += mr_size;
-	//	    fprintf(stderr, "(allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-	
-	debug(fprintf(stderr,"Preparing RDMA transfer\n"), 1);
-	// !! memset must be called !!
-	memset(&wr, 0, sizeof(wr));
-	//	    printf("c\n");
-	wr.wr_id = (uintptr_t)conn;
-	//	    wr.wr_id =  (uintptr_t)conn->rdma_msg_region;
-	wr.opcode = IBV_WR_RDMA_READ;
-	wr.sg_list = &sge;
-	wr.num_sge = 1;
-	wr.send_flags = IBV_SEND_SIGNALED;
-	wr.wr.rdma.remote_addr = (uintptr_t)conn->peer_mr.addr; // wr.wr.rdma.remote_addr => uint64_t
-	wr.wr.rdma.rkey = conn->peer_mr.rkey;
-	
-	
-	//sge.addr = (uintptr_t)conn->rdma_msg_region;
-	//sge.addr = (uintptr_t)rdma_buff->recv_base_addr;
-	sge.addr = (uintptr_t)rdma_buff->recv_base_addr;
-	sge.length = (uint32_t)mr_size;
-	//	    sge.lkey = conn->rdma_msg_mr->lkey;
-	sge.lkey = (uint32_t)rdma_buff->mr->lkey;
-	debug(printf("RDMA lib: RECV: RDMA request satus: remote_addr=%lu, rkey=%u, sge.addr=%lu, sge.length=%lu,  sge.lkey=%lu\n", wr.wr.rdma.remote_addr, wr.wr.rdma.rkey, sge.addr, sge.length, sge.lkey), 2);
-	debug(printf("RDMA lib: Preparing RDMA transfer: Done\n"), 1);
-	
-	if ((ibv_post_send(conn->qp, &wr, &bad_wr))) {
-	  fprintf(stderr, "RDMA lib: ERROR: post send failed @ %s:%d\n", __FILE__, __LINE__);
-	  exit(1);
-	}
-	debug(printf("Post send: RDMA: id=%lu\n", wr.wr_id), 1);
-	//	    printf("d\n");
-	rdma_buff->recv_base_addr += (uintptr_t)mr_size;
-	rdma_buff->recv_size += (uint64_t)mr_size;
-	//	    cmsg.type=MR_CHUNK_ACK;
-	//	    post_receives(conn);
-	//	    send_control_msg(conn, &cmsg);
-	*/
-
 	send_ctl_msg (MR_CHUNK_ACK, 0, 0);
-	debug(printf("RDMA lib: RECV: Done MR_CHUNK: for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
-	//	    sprintf(log, "RDMA lib: RECV: Recieved MR_CHUNK DONE: for wc.slid=%lu\n", (uintptr_t)wc.slid);	    write_log(log);
+
+	//	debug(printf("RDMA lib: RECV: Done MR_CHUNK: for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
 	break;
       case MR_FIN:
 	//	tag = *conn->recv_msg->data1.tag;
 	tag = *data;
 
-	debug(printf("RDMA lib: RECV: Recieved MR_FIN: Tag=%d for wc.slid=%lu\n", tag, slid), 2);
-	//	    cmsg.type=MR_FIN_ACK;
-	//	    post_receives(conn);
-	//	    send_control_msg(conn, &cmsg);	    
+	//	debug(printf("RDMA lib: RECV: Recieved MR_FIN: Tag=%d for wc.slid=%lu\n", tag, slid), 2);
+
 	send_ctl_msg (MR_CHUNK_ACK, 0, 0);
-	
-	
-	
-	//	    write_log(log);
+
 	/*Post reveived data*/
-	//	rdma_buff = get_ht(&ht, (uintptr_t)wc.slid);
+
 	rdma_msg = (struct RDMA_message*) malloc(sizeof(struct RDMA_message));
 	get_rdma_buff(slid, &rdma_msg->buff, &rdma_msg->size);
-	//	rdma_msg->buff = rdma_buff->buff;
-	//	rdma_msg->size = rdma_buff->buff_size;
 	rdma_msg->tag = tag;
 	append_rdma_msg(slid, rdma_msg);
 	/*Deregistering*/
 	debug(fprintf(stderr,"Deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-	/*
-	if (ibv_dereg_mr(rdma_buff->mr)) {
-	  fprintf(stderr, "RDMA lib: ERROR: memory region deregistration failed (allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-	  exit(1);
-	}
-	allocated_mr_size = allocated_mr_size - rdma_buff->mr_size;
-	*/
-	//	    fprintf(stderr, "(allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-	//	free(rdma_buff);
-	//	   del_ht(&ht, (uintptr_t)wc.slid);
-	//	    show_ht(&ht);
-	//	    printf("%s\n", rdma_msg->buff);
-	//	    rdma_disconnect(conn->id);
-	debug(printf("RDMA lib: RECV: Done MR_FIN: Tag=%d for wc.slid=%lu\n", tag, (uintptr_t)wc.slid), 2);
+
 	/*Log*/
+	debug(printf("RDMA lib: RECV: Done MR_FIN: Tag=%d for wc.slid=%lu\n", tag, (uintptr_t)wc.slid), 2);
 	break;
       default:
 	  debug(printf("Unknown TYPE"), 1);

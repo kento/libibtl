@@ -14,7 +14,7 @@
 
 
 #ifndef RDMA_BUF_NUM_C
-#define RDMA_BUF_NUM_C (1)
+#define RDMA_BUF_NUM_C (2)
 #endif
 
 #ifndef RDMA_CLIENT_NUM_S
