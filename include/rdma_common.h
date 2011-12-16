@@ -128,6 +128,16 @@ struct connection {
   char *rdma_msg_region;
 };
 
+struct RDMA_buff {
+  char *buff;
+  uint64_t buff_size;
+  char *recv_base_addr;
+  struct ibv_mr *mr;
+  uint32_t mr_size;
+  uint64_t recv_size;
+};
+
+
 
 
 void die(const char *reason);
@@ -135,23 +145,26 @@ const char *rdma_err_status_str(enum ibv_wc_status status);
 const char *event_type_str(enum rdma_cm_event_type event);
 //int send_control_msg (struct connection *conn, struct control_msg *cmsg);
 //void post_receives(struct connection *conn);
+
+
+
+int send_ctl_msg (enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data);
+int recv_ctl_msg(enum ctl_msg_type *cmt, uint64_t *data);
+int finalize_ctl_msg (uint32_t *cmt, uint64_t *data);
+
+void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size);
+int init_ctl_msg(uint32_t **cmt, uint64_t **data);
+
+/*For accitve side*/
 int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, uint32_t mr_num);
 
-int recv_ctl_msg(struct connection *conn, enum ctl_msg_type *cmt, uint64_t *data);
-int send_ctl_msg (struct connection *conn, enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data);
-void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size);
 
+/*For passive side*/
+int init_rdma_buffs(uint32_t num_client);
+int alloc_rdma_buffs(uint16_t id, uint64_t size);
+int rdma_read(uint16_t id, uint64_t size);
+int get_rdma_buff(uint16_t id, char** addr, uint64_t *size);
+
+void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/);
+int wait_accept();
 int post_recv_ctl_msg(struct connection *conn);
-
-
-
-
-
-
-
-
-
-
-
-
-

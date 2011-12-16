@@ -4,6 +4,7 @@
 #include "arpa/inet.h"
 #include "time.h"
 
+
 struct poll_cq_args{
   struct RDMA_communicator *comm;
   struct RDMA_message *msg;
@@ -97,7 +98,7 @@ int RDMA_Active_Init(struct RDMA_communicator *comm, struct RDMA_param *param)
   int i ;
 
   set_envs();
-  rdma_active_init(comm, param, 1);
+  rdma_active_init(comm, param, RDMA_BUF_NUM_C);
 
   //  for (i = 0; i < RDMA_BUF_NUM_C; i++){ rdma_msg_mr[i] = NULL;}
 
@@ -129,10 +130,10 @@ static void* poll_cq(struct poll_cq_args* args)
   int* flag = args->flag;
   int mr_index;
 
-  struct connection *conn;
-  uint32_t cmt;
+
+  uint32_t *cmt;
   struct ibv_mr *mr;
-  uint64_t data;
+  uint64_t *data;
 
 
   //for (i = 0; i < RDMA_BUF_NUM_C; i++){ rdma_msg_mr[i] = NULL;}
@@ -143,21 +144,22 @@ static void* poll_cq(struct poll_cq_args* args)
   buff_size= args->msg->size;
   tag= args->msg->tag;
 
+
   //cmsg.type=MR_INIT;
   //  cmsg.data1.buff_size=buff_size;
   //  send_control_msg(comm->cm_id->context, &cmsg);
   //  post_receives(comm->cm_id->context);
-
-  send_ctl_msg (comm->cm_id->context, MR_INIT, 0, buff_size);
+  
+  init_ctl_msg(&cmt, &data);
+  send_ctl_msg(MR_INIT, 0, buff_size);
 
   s = get_dtime();
   
   while (1) {
     //TODO 1: mr and data is NULL
-    //TODO 2: hide an existance of conn within recv_ctl_msg
-    recv_ctl_msg (conn, &cmt, &data);
-    printf("=======%d, %d\n",cmt, MR_INIT_ACK);
-    switch (cmt)
+    recv_ctl_msg (cmt, data);
+
+    switch (*cmt)
       {
       case MR_INIT_ACK:
 
@@ -168,7 +170,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	    /*sent all data*/
 	    //		cmsg.type=MR_FIN;
 	    //		cmsg.data1.tag=tag;
-	    send_ctl_msg (conn, MR_FIN, 0, tag);
+	    send_ctl_msg (MR_FIN, 0, tag);
 	  } else {
 	    debug(printf("RDMA lib: SEND: Recieved MR_INIT_ACK: for tag=%d\n",  tag), 2);
 	    /*not sent all data yet*/
@@ -187,7 +189,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	    //		memcpy(&cmsg.data.mr, rdma_msg_mr[mr_index], sizeof(struct ibv_mr));
 	    //		cmsg.data1.mr_size = mr_size;//cmsg.data.mr.length;//mr_size - 1 ;
 	    printf("RDMA lib: SEND:    remote_addr=%lu(%lu), rkey=%u, size=%u\n", cmsg.data.mr.addr, send_base_addr, cmsg.data.mr.rkey, cmsg.data.mr.length);
-	    send_ctl_msg (conn, MR_CHUNK, mr_index, mr_size);
+	    send_ctl_msg (MR_CHUNK, mr_index, mr_size);
 	  }
 	  debug(printf("RDMA lib: SEND: Done MR_INIT_ACK: for tag=%d\n",  tag), 2);
 	}
@@ -199,7 +201,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	  /*sent all data*/
 	  //cmsg.type=MR_FIN;
 	  //cmsg.data1.tag=tag;
-	  send_ctl_msg (conn, MR_FIN, 0, tag);
+	  send_ctl_msg (MR_FIN, 0, tag);
 	} else {
 	  /*not sent all data yet*/
 	  debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK: for tag=%d\n",  tag), 2);
@@ -224,7 +226,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	  //	      memcpy(&cmsg.data.mr, rdma_msg_mr[mr_index], sizeof(struct ibv_mr));
 	  //	      cmsg.data1.mr_size = mr_size;//cmsg.data.mr.length;
 	  printf("RDMA lib: SEND:    remote_addr=%lu(%lu), rkey=%u, size=%u, site_t=%ubyte\n", cmsg.data.mr.addr, send_base_addr, cmsg.data.mr.rkey, cmsg.data.mr.length, sizeof(mr_size));
-	  send_ctl_msg (conn, MR_CHUNK, mr_index, mr_size);
+	  send_ctl_msg (MR_CHUNK, mr_index, mr_size);
 	}
 	//	    send_control_msg(conn, &cmsg);
 	//	    post_receives(conn);
@@ -245,6 +247,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	//ip = get_ip_addr("ib0");
 	//	    printf("RDMA lib: SEND: %s: send time= %f secs, send size= %lu MB, throughput = %f MB/s\n", ip, e - s, buff_size/1000000, buff_size/(e - s)/1000000.0);
 	debug(printf("RDMA lib: SEND: Done MR_FIN_ACK: Type=%d\n",  cmt),1);
+	finalize_ctl_msg(cmt, data);
 	return NULL;
       default:
 	debug(printf("Unknown TYPE"), 1);
