@@ -46,6 +46,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_rdma_client_test_OBJECTS =  \
 	rdma_client_test-rdma_client_test.$(OBJEXT) \
 	rdma_client_test-rdma_client.$(OBJEXT) \
+	rdma_client_test-hashtable.$(OBJEXT) \
 	rdma_client_test-rdma_common.$(OBJEXT) \
 	rdma_client_test-common.$(OBJEXT)
 rdma_client_test_OBJECTS = $(am_rdma_client_test_OBJECTS)
@@ -164,6 +165,8 @@ rdma_client_test_SOURCES = \
 	rdma_client_test.c \
 	$(SRC_DIR)/rdma_client.c \
 	$(INCLUDE_DIR)/rdma_client.h \
+	$(SRC_DIR)/hashtable.c \
+	$(INCLUDE_DIR)/hashtable.h \
 	$(SRC_DIR)/rdma_common.c \
 	$(INCLUDE_DIR)/rdma_common.h \
 	$(SRC_DIR)/common.c \
@@ -256,6 +259,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/rdma_client_test-common.Po
+include ./$(DEPDIR)/rdma_client_test-hashtable.Po
 include ./$(DEPDIR)/rdma_client_test-rdma_client.Po
 include ./$(DEPDIR)/rdma_client_test-rdma_client_test.Po
 include ./$(DEPDIR)/rdma_client_test-rdma_common.Po
@@ -307,6 +311,20 @@ rdma_client_test-rdma_client.obj: $(SRC_DIR)/rdma_client.c
 #	source='$(SRC_DIR)/rdma_client.c' object='rdma_client_test-rdma_client.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
+
+rdma_client_test-hashtable.o: $(SRC_DIR)/hashtable.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-hashtable.o -MD -MP -MF $(DEPDIR)/rdma_client_test-hashtable.Tpo -c -o rdma_client_test-hashtable.o `test -f '$(SRC_DIR)/hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/hashtable.c
+	mv -f $(DEPDIR)/rdma_client_test-hashtable.Tpo $(DEPDIR)/rdma_client_test-hashtable.Po
+#	source='$(SRC_DIR)/hashtable.c' object='rdma_client_test-hashtable.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-hashtable.o `test -f '$(SRC_DIR)/hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/hashtable.c
+
+rdma_client_test-hashtable.obj: $(SRC_DIR)/hashtable.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-hashtable.obj -MD -MP -MF $(DEPDIR)/rdma_client_test-hashtable.Tpo -c -o rdma_client_test-hashtable.obj `if test -f '$(SRC_DIR)/hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/hashtable.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_test-hashtable.Tpo $(DEPDIR)/rdma_client_test-hashtable.Po
+#	source='$(SRC_DIR)/hashtable.c' object='rdma_client_test-hashtable.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-hashtable.obj `if test -f '$(SRC_DIR)/hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/hashtable.c'; fi`
 
 rdma_client_test-rdma_common.o: $(SRC_DIR)/rdma_common.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-rdma_common.o -MD -MP -MF $(DEPDIR)/rdma_client_test-rdma_common.Tpo -c -o rdma_client_test-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c

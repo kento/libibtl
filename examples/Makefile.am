@@ -7,6 +7,8 @@ rdma_client_test_SOURCES = \
 	rdma_client_test.c \
 	$(SRC_DIR)/rdma_client.c \
 	$(INCLUDE_DIR)/rdma_client.h \
+	$(SRC_DIR)/hashtable.c \
+	$(INCLUDE_DIR)/hashtable.h \
 	$(SRC_DIR)/rdma_common.c \
 	$(INCLUDE_DIR)/rdma_common.h \
 	$(SRC_DIR)/common.c \
