@@ -25,10 +25,13 @@ static uint32_t allocated_mr_size = 0;
 
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event);
 static void build_connection(struct rdma_cm_id *id);
+static struct connection* create_connection(struct rdma_cm_id *id);
+static int free_connection(struct connection* conn);
 static void build_context(struct ibv_context *verbs);
 static void build_params(struct rdma_conn_param *params);
 static void build_qp_attr(struct ibv_qp_init_attr *qp_attr);
 static void register_memory(struct connection *conn);
+static void dereg_mr(struct ibv_mr *mr);
 
 /*Just for a pasive side*/
 static void accept_connection(struct rdma_cm_id *id);
@@ -349,24 +352,66 @@ static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
 
 static void build_connection(struct rdma_cm_id *id)
 {
-  struct connection *conn;
+  struct connection *conn, *clone;
   struct ibv_qp_init_attr qp_attr;
 
   build_context(id->verbs);
   build_qp_attr(&qp_attr);
 
   TEST_NZ(rdma_create_qp(id, s_ctx->pd, &qp_attr));
-
+  /*
   id->context = conn = (struct connection *)malloc(sizeof(struct connection));
+
+  conn->id = id;
+  conn->qp = id->qp;
+
+  
+  conn->connected = 0;
+
+  register_memory(conn);
+  */
+
+  id->context = conn = create_connection(id);
+  return;
+}
+
+static struct connection* create_connection(struct rdma_cm_id *id) 
+{
+  struct connection* conn = (struct connection *)malloc(sizeof(struct connection));
 
   conn->id = id;
   conn->qp = id->qp;
   conn->connected = 0;
 
-  register_memory(conn);
-  return;
+  conn->send_msg = malloc(sizeof(struct control_msg));
+  conn->recv_msg = malloc(sizeof(struct control_msg));
+
+  TEST_Z(conn->send_mr = ibv_reg_mr(
+                                    s_ctx->pd,
+                                    conn->send_msg,
+                                    sizeof(struct control_msg),
+                                    IBV_ACCESS_LOCAL_WRITE));
+
+  TEST_Z(conn->recv_mr = ibv_reg_mr(
+                                    s_ctx->pd,
+                                    conn->recv_msg,
+                                    sizeof(struct control_msg),
+                                    IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_READ));
+
+  conn->rdma_msg_mr=NULL;
+  // struct ibv_mr peer_mr; 
+  //  char *rdma_msg_region;
+  return conn;
 }
 
+static int free_connection(struct connection* conn) 
+{
+  free(conn->send_msg);
+  free(conn->recv_msg);
+
+}
+
+/*
 static void register_memory(struct connection *conn)
 {
   conn->send_msg = malloc(sizeof(struct control_msg));
@@ -386,10 +431,15 @@ static void register_memory(struct connection *conn)
 
   return;
 }
+*/
 
 void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size)
 {
   if (rdma_msg_mr[mr_index] != NULL) {
+
+    dereg_mr(rdma_msg_mr[mr_index]);
+    debug(printf("RDMA lib: SEND: Derg RDMA_MR: mr_idx=%d\n", mr_index),2);
+    /*
     int retry = 100;
     while (ibv_dereg_mr(rdma_msg_mr[mr_index]) != 0) {
       fprintf(stderr, "RDMA lib: SEND: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
@@ -401,6 +451,7 @@ void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size)
       retry--;
       debug(printf("RDMA lib: SEND: Derg RDMA_MR: mr_idx=%d\n", mr_index),2);
     }
+    */
   }
   
   TEST_Z(rdma_msg_mr[mr_index] = ibv_reg_mr(
@@ -412,6 +463,21 @@ void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size)
 					    | IBV_ACCESS_REMOTE_WRITE));
   debug(printf("RDMA lib: SEND: Rgst RDMA_MR: mr_idx=%d, remote_addr=%lu(%p), rkey=%u, size=%u\n", mr_index, addr, addr, rdma_msg_mr[mr_index]->rkey, size),2);
   return;
+}
+
+static void dereg_mr(struct ibv_mr *mr) 
+{
+  int retry = 100;
+  while (ibv_dereg_mr(mr) != 0) {
+    fprintf(stderr, "RDMA lib: SEND: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
+    exit(1);
+    if (retry < 0) {
+      fprintf(stderr, "RDMA lib: SEND: ERROR: memory region deregistration failed @ %s:%d\n",  __FILE__, __LINE__);
+      exit(1);
+    }
+    retry--;
+
+  }
 }
 
 
@@ -706,6 +772,9 @@ int send_ctl_msg (enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data)
 
   return 0;
 }
+
+
+
 
 
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data)
