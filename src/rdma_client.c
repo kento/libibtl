@@ -13,10 +13,8 @@ struct poll_cq_args{
 
 
 static void* poll_cq(struct poll_cq_args* args);
-
-
-
 static void set_envs (void);
+static int send_rdma_read_req (int mr_index, char* addr, uint64_t size, uint64_t* total_sent_size, int tag);
 
 
 static pthread_t cq_poller_thread;
@@ -63,7 +61,7 @@ int RDMA_Sendr_ns (char *buff, uint64_t size, int tag, struct RDMA_communicator 
   while (flag == 0) {
     usleep(1);
   } ;
-  fprintf(stderr, "WCOUNT_S\n");
+  //  fprintf(stderr, "WCOUNT_S\n");
   //  fprintf(stderr, "WCOUNT_S: %d\n", count);
   return 0;
 }
@@ -126,6 +124,8 @@ static void* poll_cq(struct poll_cq_args* args)
   uint32_t mr_size=0;
   uint64_t sent_size=0;
   char* send_base_addr;
+  uint64_t total_sent_size=0;
+  int fin_flag=0;
 
   int* flag = args->flag;
   int mr_index;
@@ -134,6 +134,10 @@ static void* poll_cq(struct poll_cq_args* args)
   uint32_t *cmt;
   struct ibv_mr *mr;
   uint64_t *data;
+  
+  
+  uint64_t waiting_msg_count = 0;
+  uint64_t i;
 
 
   //for (i = 0; i < RDMA_BUF_NUM_C; i++){ rdma_msg_mr[i] = NULL;}
@@ -152,80 +156,59 @@ static void* poll_cq(struct poll_cq_args* args)
   
   init_ctl_msg(&cmt, &data);
   send_ctl_msg(MR_INIT, 0, buff_size);
-
+  waiting_msg_count++;
   s = get_dtime();
   
   while (1) {
     //TODO 1: mr and data is NULL
-        double s = get_dtime();
+    double ss = get_dtime();
     recv_ctl_msg (cmt, data);
-        double e = get_dtime();
-        printf("TIME=========> %f\n", e - s);
-    
+    waiting_msg_count--;
+    double ee = get_dtime();
+    printf("TIME=========> %f, %s\n", ee - ss, rdma_ctl_msg_type_str(*cmt));
+
     switch (*cmt)
       {
       case MR_INIT_ACK:
-
 	for (mr_index = 0; mr_index < RDMA_BUF_NUM_C; mr_index++) {
-	  //	  debug(printf("Recived: Type=%d\n",  cmt), 1);
-	  if (sent_size == buff_size) {
-	    /*sent all data*/
-	    debug(printf("RDMA lib: SEND: Recieved MR_INIT_ACK => FIN: for tag=%d\n",  tag), 1);
-	    send_ctl_msg (MR_FIN, 0, tag);
+	  if((sent_size = send_rdma_read_req (mr_index, send_base_addr, buff_size, &total_sent_size, tag)) > 0) {
+	    waiting_msg_count++;
+	    send_base_addr += sent_size;
 	  } else {
-	    debug(printf("RDMA lib: SEND: Recieved MR_INIT_ACK: for tag=%d\n",  tag), 1);
-	    /*not sent all data yet*/
-	    if (sent_size + rdma_buf_size > buff_size) {
-	      mr_size = (uint32_t)(buff_size - sent_size);
-	    } else {
-	      mr_size = rdma_buf_size;
-	    }
-	    
-	    register_rdma_msg_mr(mr_index, send_base_addr, mr_size);
-	    //	    printf("RDMA lib: SEND: send_base_addr=%lu\n", send_base_addr);
-	    send_base_addr += mr_size;
-	    sent_size += (uint64_t)mr_size;
-
-	    send_ctl_msg (MR_CHUNK, mr_index, mr_size);
+	    fin_flag = 1;
+	    break;
 	  }
-	  //	  debug(printf("RDMA lib: SEND: Done MR_INIT_ACK: for tag=%d\n",  tag), 1);
+	  //	  usleep(10000);
 	}
 	break;
       case MR_CHUNK_ACK:
-	mr_index = (mr_index+ 1) % RDMA_BUF_NUM_C;
 
-	if (sent_size == buff_size) {
-	  /*sent all data*/
-	  debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK => FIN: for tag=%d\n",  tag), 1);
-	  send_ctl_msg (MR_FIN, 0, tag);
-	} else {
-	  /*not sent all data yet*/
-	  debug(printf("RDMA lib: SEND: Recieved MR_CHUNK_ACK: for tag=%d\n",  tag), 1);
-	  if (sent_size + rdma_buf_size > buff_size) {
-	    mr_size = (uint32_t)(buff_size - sent_size);
+	if(fin_flag == 0) {
+	  mr_index = (mr_index+ 1) % RDMA_BUF_NUM_C;
+	  if((sent_size = send_rdma_read_req (mr_index, send_base_addr, buff_size, &total_sent_size, tag)) > 0) {
+	    waiting_msg_count++;
+	    send_base_addr += sent_size;
 	  } else {
-	    mr_size = rdma_buf_size;
+	    fin_flag = 1;;
+	    break;
 	  }
-	  
-	  register_rdma_msg_mr(mr_index, send_base_addr, mr_size);
-	  
-	  send_base_addr += mr_size;
-	  sent_size += (uint64_t)mr_size;
-
-	  send_ctl_msg (MR_CHUNK, mr_index, mr_size);
 	}
-	//	debug(printf("RDMA lib: SEND: Done MR_CHUNK_ACK: for tag=%d\n",  tag), 2);
+
 	break;
       case MR_FIN_ACK:
-	debug(printf("RDMA lib: SEND: Recived MR_FIN_ACK: Type=%d\n",  cmt),2);
-	*flag = 1;
 
 	e = get_dtime();
 	free(args->msg);
 	free(args);
+	ip = get_ip_addr("ib0");
 	printf("RDMA lib: SEND: %s: send time= %f secs, send size= %lu MB, throughput = %f MB/s\n", ip, e - s, buff_size/1000000, buff_size/(e - s)/1000000.0);
-	debug(printf("RDMA lib: SEND: Done MR_FIN_ACK: Type=%d\n",  cmt),1);
+
+	for (i = 0; i < waiting_msg_count-1; i++) {
+	  recv_ctl_msg (cmt, data);
+	}
+
 	finalize_ctl_msg(cmt, data);
+	*flag = 1;
 	return NULL;
       default:
 	debug(printf("Unknown TYPE"), 1);
@@ -236,8 +219,33 @@ static void* poll_cq(struct poll_cq_args* args)
 }
 
 
-static send_rdma_read_req() {
+static int send_rdma_read_req (int mr_index, char* addr, uint64_t addr_size, uint64_t* total_sent_size, int tag)
+{
+  uint64_t sent_size = 0;
+  uint32_t mr_size;
 
+  if (addr_size == *total_sent_size) {
+    /*sent all data*/
+    /*TODO: Get this function work without a below usleep(10)*/
+    usleep(10);
+    send_ctl_msg (MR_FIN, 0, tag);
+    return 0;
+  } else {
+    /*not sent all data yet*/
+    if (*total_sent_size + rdma_buf_size > addr_size) {
+      mr_size = (uint32_t)(addr_size - *total_sent_size);
+    } else {
+      mr_size = rdma_buf_size;
+    }
+
+    register_rdma_msg_mr(mr_index, addr, mr_size);
+
+    *total_sent_size += (uint64_t)mr_size;
+    send_ctl_msg (MR_CHUNK, mr_index, mr_size);
+    sent_size = mr_size;
+  }
+
+  return sent_size;
 }
 
 

@@ -1,5 +1,6 @@
 #include <unistd.h>
 
+#include "common.h"
 #include "rdma_common.h"
 #include "hashtable.h"
 
@@ -21,6 +22,7 @@ int connections = 0;
 struct hashtable ht;
 static uint32_t allocated_mr_size = 0;
 
+
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event);
 static void build_connection(struct rdma_cm_id *id);
 static void build_context(struct ibv_context *verbs);
@@ -30,6 +32,7 @@ static void register_memory(struct connection *conn);
 
 /*Just for a pasive side*/
 static void accept_connection(struct rdma_cm_id *id);
+static int wait_msg_sent(void);
 
 void die(const char *reason)
 {
@@ -191,7 +194,7 @@ int wait_accept()
   while (accepted == 0) {
     usleep(1000);
   }
-  return;
+  return 0;
 }
 
 
@@ -335,8 +338,8 @@ static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
   qp_attr->recv_cq = s_ctx->cq;
   qp_attr->qp_type = IBV_QPT_RC;
 
-  qp_attr->cap.max_send_wr = 10;// 10                                                                                                                                 
-  qp_attr->cap.max_recv_wr = 10;//10                                                                                                                                  
+  qp_attr->cap.max_send_wr = 100;// 10                                                                                                                                 
+  qp_attr->cap.max_recv_wr = 100;//10                                                                                                                                  
   qp_attr->cap.max_send_sge = 5;//1                                                                                                                                   
   qp_attr->cap.max_recv_sge = 5;//1                                                                                                                                   
 
@@ -388,7 +391,6 @@ void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size)
 {
   if (rdma_msg_mr[mr_index] != NULL) {
     int retry = 100;
-    usleep(100);
     while (ibv_dereg_mr(rdma_msg_mr[mr_index]) != 0) {
       fprintf(stderr, "RDMA lib: SEND: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
       exit(1);
@@ -466,7 +468,7 @@ int rdma_read(uint16_t id, uint64_t mr_size)
 
   rdma_buff = get_ht(&ht, id);
   memcpy(&conn->peer_mr, &conn->recv_msg->data.mr, sizeof(conn->peer_mr));
-
+  /*
   if (rdma_buff->mr != NULL) {
    debug(fprintf(stderr,"Deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
    int retry=1000;
@@ -482,6 +484,7 @@ int rdma_read(uint16_t id, uint64_t mr_size)
   } else {
     debug(fprintf(stderr,"Not deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
   }
+  */
   debug(fprintf(stderr, "Registering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
   if (!(rdma_buff->mr = ibv_reg_mr(
 				   s_ctx->pd,
@@ -537,12 +540,16 @@ int get_rdma_buff(uint16_t id, char** addr, uint64_t *size)
   *addr = rdma_buff->buff;
   *size = rdma_buff->buff_size;
 
+  int wait_msg_sent();
+  /*
+  usleep(1000);
   if (ibv_dereg_mr(rdma_buff->mr)) {
     fprintf(stderr, "RDMA lib: ERROR: memory region deregistration failed (allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
     exit(1);
   }
+  */
   allocated_mr_size = allocated_mr_size - rdma_buff->mr_size;
-  free(rdma_buff); 
+  ///  free(rdma_buff); 
   return 0;
 }
 
@@ -558,6 +565,7 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data)
   void* ctx;
   struct ibv_wc wc;
   uint16_t slid;
+
 
   while(1) {
     if (cq != NULL) {
@@ -577,7 +585,7 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data)
 	/*Check which request was successed*/
 	if (wc.opcode == IBV_WC_RECV) {
 	  *cmt = conn->recv_msg->cmt;
-	  debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u\n", rdma_ctl_msg_type_str(*cmt), conn->id, slid), 2);
+
 	  switch (conn->recv_msg->cmt) 
 	    {
 	    case MR_INIT:
@@ -602,8 +610,7 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data)
 	    }
 	  
 	} else if (wc.opcode == IBV_WC_SEND) {
-	  *cmt = conn->send_msg->cmt;
-	  debug(printf("RDMA lib: COMM: Sent %s: id=%lu\n", rdma_ctl_msg_type_str(*cmt), conn->id), 2);
+	  debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu |%f\n", conn->id, get_dtime()), 2);
 	  continue;
 	} else if (wc.opcode == IBV_WC_RDMA_READ) {
 	  debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu\n", conn->id), 2);
@@ -612,11 +619,10 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data)
 	  die("unknow opecode.");
 	  continue;
 	}
+	debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u |%f\n", rdma_ctl_msg_type_str(*cmt), conn->id, slid, get_dtime()), 2);
 	return (int)slid;
       }
     }
-
-
 
     if (ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx)) {
       fprintf(stderr, "RDMA lib: SEND: ERROR: get cq event  failed @ %s:%d\n", __FILE__, __LINE__);
@@ -629,30 +635,82 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data)
       fprintf(stderr, "RDMA lib: SEND: ERROR: request notification failed @ %s:%d\n", __FILE__, __LINE__);
       exit(1);
     }
-
-    
   }
   return 0;
 }
+
+static int wait_msg_sent()
+{
+  void* ctx;
+  struct ibv_wc wc;
+  uint16_t slid;
+  
+  while(1) {
+    if (cq != NULL) {
+      while (ibv_poll_cq(cq, 1, &wc)) {
+	conn = (struct connection *)(uintptr_t)wc.wr_id;
+	slid = wc.slid;
+	/*Check if a request was successed*/
+	if (wc.status != IBV_WC_SUCCESS) {
+	  const char* err_str = rdma_err_status_str(wc.status);
+	  fprintf(stderr, "RDMA lib: COMM: ERROR: status is not IBV_WC_SUCCESS: Erro=%s(%d) @ %s:%d\n", err_str, wc.status, __FILE__, __LINE__);
+	  exit(1);
+	}
+	/*Check which request was successed*/
+	if (wc.opcode == IBV_WC_RECV) {
+	  die("unknow opecode.");
+	  continue;
+	} else if (wc.opcode == IBV_WC_SEND) {
+	  debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu |%f\n", conn->id, get_dtime()), 2);
+	  return 0;
+	} else if (wc.opcode == IBV_WC_RDMA_READ) {
+	  die("unknow opecode.");
+	  continue;
+	} else {
+	  die("unknow opecode.");
+	  continue;
+	}
+      }
+    }
+
+    if (ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx)) {
+      fprintf(stderr, "RDMA lib: SEND: ERROR: get cq event  failed @ %s:%d\n", __FILE__, __LINE__);
+      exit(1);
+    }
+    
+    ibv_ack_cq_events(cq, 1);
+    
+    if (ibv_req_notify_cq(cq, 0)) {
+      fprintf(stderr, "RDMA lib: SEND: ERROR: request notification failed @ %s:%d\n", __FILE__, __LINE__);
+      exit(1);
+    }
+  }
+  return 0;
+}
+
+
 
 
 /*Note: If cmt=MR_CHUNK, a register_rdma_msg_mr(...) function has to be called to register [mr_index]th memory region  */
 int send_ctl_msg (enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data)
 { 
 
-  post_recv_ctl_msg(conn);
+
   if (cmt == MR_CHUNK) {
     post_send_ctl_msg(conn, cmt, rdma_msg_mr[mr_index], data) ;
   } else {
     post_send_ctl_msg(conn, cmt, NULL, data) ;
   }
+  post_recv_ctl_msg(conn);
   //  debug(printf("RDMA lib: COMM: Post %s\n",  rdma_ctl_msg_type_str(cmt)), 2);
+
   return 0;
 }
 
 
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data)
 { 
+  static uint64_t post_count = 0;
   struct ibv_send_wr wrs, *bad_wrs = NULL;
   struct ibv_sge sges;
 
@@ -679,20 +737,23 @@ static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, str
     fprintf(stderr, "unknow msg type @ %s:%d", __FILE__, __LINE__);
     exit(1);
   }
-
   memset(&wrs, 0, sizeof(wrs));
+ 
   wrs.wr_id = (uintptr_t)conn;
   wrs.opcode = IBV_WR_SEND;
   wrs.sg_list = &sges;
   wrs.num_sge = 1;
   wrs.send_flags = IBV_SEND_SIGNALED;
+  //  wrs.send_flags = IBV_SEND_INLINE;
+  wrs.imm_data = post_count++;
 
   sges.addr = (uintptr_t)conn->send_msg;
   sges.length = (uint32_t)sizeof(struct control_msg);
   sges.lkey = (uint32_t)conn->send_mr->lkey;
 
+
   TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
-  debug(printf("RDMA lib: COMM: Post %s: id=%lu, local_addr=%lu, length=%lu, lkey=%lu\n", rdma_ctl_msg_type_str(cmt), conn->id, sges.addr, sges.length, sges.lkey), 2);
+  debug(printf("RDMA lib: COMM: Post %s: post_count=%lu, local_addr=%lu, length=%lu, lkey=%lu\n", rdma_ctl_msg_type_str(cmt), wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
 
   return 0;
 }

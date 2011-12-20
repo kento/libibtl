@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
 int RDMA_Passive_Init(struct RDMA_communicator *comm) 
 {
-
+  static int thread_running = 0;
   char *value;
   value = getenv("RDMA_CLIENT_NUM_S");
   if (value == NULL) {
@@ -64,7 +64,10 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
 
   TEST_NZ(pthread_create(&listen_thread, NULL, (void *) rdma_passive_init, comm));
   wait_accept();
-  TEST_NZ(pthread_create(&listen_thread, NULL, poll_cq, NULL));
+  if (thread_running == 0) {
+    TEST_NZ(pthread_create(&listen_thread, NULL, poll_cq, NULL));
+    thread_running = 1;
+  }
 
   return 0;
 }
@@ -137,8 +140,10 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 
   while (1) {
 
+    double ss = get_dtime();
     slid = recv_ctl_msg (cmt, data);
-
+    double ee = get_dtime();
+    printf("Time =====> %f\n", ee - ss);
     switch (*cmt)
       {
       case MR_INIT:
@@ -174,19 +179,21 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 
 	//	debug(printf("RDMA lib: RECV: Recieved MR_FIN: Tag=%d for wc.slid=%lu\n", tag, slid), 2);
 
-	send_ctl_msg (MR_CHUNK_ACK, 0, 0);
+	send_ctl_msg (MR_FIN_ACK, 0, 0);
 
 	/*Post reveived data*/
 
 	rdma_msg = (struct RDMA_message*) malloc(sizeof(struct RDMA_message));
+
 	get_rdma_buff(slid, &rdma_msg->buff, &rdma_msg->size);
 	rdma_msg->tag = tag;
 	append_rdma_msg(slid, rdma_msg);
+
 	/*Deregistering*/
 	debug(fprintf(stderr,"Deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
 
 	/*Log*/
-	debug(printf("RDMA lib: RECV: Done MR_FIN: Tag=%d for wc.slid=%lu\n", tag, (uintptr_t)wc.slid), 2);
+	//	debug(printf("RDMA lib: RECV: Done MR_FIN: Tag=%d for wc.slid=%lu\n", tag, (uintptr_t)wc.slid), 2);
 	break;
       default:
 	  debug(printf("Unknown TYPE"), 1);
