@@ -141,7 +141,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
   while (1) {
 
     double ss = get_dtime();
-    slid = recv_ctl_msg (cmt, data);
+    slid = recv_ctl_msg (cmt, data, &conn);
     double ee = get_dtime();
     printf("Time =====> %f\n", ee - ss);
     switch (*cmt)
@@ -162,14 +162,14 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	data_in_count += buff_size / 1000.0;
 	debug(fprintf(stderr, "RDMA lib: RECV: IPoIB=%s Time= %f , in_count= %f \n", get_ip_addr("ib0"), get_dtime(), data_in_count), 2);
 
-	send_ctl_msg (MR_INIT_ACK, 0, 0);
+	send_ctl_msg (conn, MR_INIT_ACK, 0, 0);
 	//	debug(printf("RDMA lib: RECV: Done MR_INI : for wc.slid=%u\n", slid), 2);
 	break;
       case MR_CHUNK:
 	mr_size= *data;
 
-	rdma_read(slid, mr_size);
-	send_ctl_msg (MR_CHUNK_ACK, 0, 0);
+	rdma_read(conn, slid, mr_size);
+	send_ctl_msg (conn, MR_CHUNK_ACK, 0, 0);
 
 	//	debug(printf("RDMA lib: RECV: Done MR_CHUNK: for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
 	break;
@@ -179,21 +179,13 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 
 	//	debug(printf("RDMA lib: RECV: Recieved MR_FIN: Tag=%d for wc.slid=%lu\n", tag, slid), 2);
 
-	send_ctl_msg (MR_FIN_ACK, 0, 0);
+	send_ctl_msg (conn, MR_FIN_ACK, 0, 0);
 
 	/*Post reveived data*/
-
 	rdma_msg = (struct RDMA_message*) malloc(sizeof(struct RDMA_message));
-
-	get_rdma_buff(slid, &rdma_msg->buff, &rdma_msg->size);
+	get_rdma_buff(conn, slid, &rdma_msg->buff, &rdma_msg->size);
 	rdma_msg->tag = tag;
 	append_rdma_msg(slid, rdma_msg);
-
-	/*Deregistering*/
-	debug(fprintf(stderr,"Deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-
-	/*Log*/
-	//	debug(printf("RDMA lib: RECV: Done MR_FIN: Tag=%d for wc.slid=%lu\n", tag, (uintptr_t)wc.slid), 2);
 	break;
       default:
 	  debug(printf("Unknown TYPE"), 1);

@@ -14,7 +14,7 @@
 
 
 #ifndef RDMA_BUF_NUM_C
-#define RDMA_BUF_NUM_C (5)
+#define RDMA_BUF_NUM_C (10)
 #endif
 
 #ifndef RDMA_CLIENT_NUM_S
@@ -22,7 +22,7 @@
 #endif
 
 #ifndef MAX_RDMA_BUF_SIZE_C
-#define MAX_RDMA_BUF_SIZE_C (50 * 1000 * 1000)
+#define MAX_RDMA_BUF_SIZE_C (100 * 1000 * 1000)
 #endif
 
 //-------------
@@ -148,8 +148,9 @@ const char *event_type_str(enum rdma_cm_event_type event);
 
 
 
-int send_ctl_msg (enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data);
-int recv_ctl_msg(enum ctl_msg_type *cmt, uint64_t *data);
+int send_ctl_msg (struct connection* conn, enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data);
+//int recv_ctl_msg(enum ctl_msg_type *cmt, uint64_t *data);
+int recv_ctl_msg(enum ctl_msg_type *cmt, uint64_t *data, struct connection** conn);
 int finalize_ctl_msg (uint32_t *cmt, uint64_t *data);
 
 void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size);
@@ -162,8 +163,8 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, u
 /*For passive side*/
 int init_rdma_buffs(uint32_t num_client);
 int alloc_rdma_buffs(uint16_t id, uint64_t size);
-int rdma_read(uint16_t id, uint64_t size);
-int get_rdma_buff(uint16_t id, char** addr, uint64_t *size);
+int rdma_read(struct connection* conn, uint16_t id, uint64_t size);
+int get_rdma_buff(struct connection* conn, uint16_t id, char** addr, uint64_t *size);
 
 void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/);
 int wait_accept();
