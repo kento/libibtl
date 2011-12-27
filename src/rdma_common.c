@@ -413,7 +413,7 @@ static int free_connection(struct connection* conn)
   if (conn->rdma_msg_mr != NULL) {
     dereg_mr(conn->rdma_msg_mr);
   }
-  free(conn);
+  //  free(conn);
   return 0;
 }
 
@@ -667,17 +667,20 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data, struct connection** conn_output)
 	    {
 	    case MR_INIT:
 	      *data = conn->recv_msg->data1.buff_size;
+	      //	      memcpy(data, &conn->recv_msg->data1.buff_size, sizeof(uint64_t));
 	      break;
 	    case MR_INIT_ACK:
 	      break;
 	    case MR_CHUNK:
 	      *data = conn->recv_msg->data1.mr_size;
+	      //	      memcpy(data, &conn->recv_msg->data1.mr_size, sizeof(uint64_t));
 	      memcpy(&conn->peer_mr, &conn->recv_msg->data.mr, sizeof(struct ibv_mr));
 	      break;    
 	    case MR_CHUNK_ACK:
 	      break;
 	    case MR_FIN:
 	      *data = conn->recv_msg->data1.tag;
+	      //	      memcpy(data, &conn->recv_msg->data1.tag, sizeof(uint64_t));
 	      break;
 	    case MR_FIN_ACK:
 	      break;
@@ -685,19 +688,20 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data, struct connection** conn_output)
 	      fprintf(stderr, "unknow msg type @ %s:%d", __FILE__, __LINE__);
 	      exit(1);
 	    }
-	  
+	  debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u |%f\n", rdma_ctl_msg_type_str(*cmt), conn->id, slid, get_dtime()), 2);
+	  return (int)slid;
 	} else if (wc.opcode == IBV_WC_SEND) {
 	  debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu |%f\n", (uintptr_t)conn, get_dtime()), 2);
+	  free_connection(conn);
 	  continue;
 	} else if (wc.opcode == IBV_WC_RDMA_READ) {
 	  debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu\n", (uintptr_t)conn), 2);
+	  //	  free_connection(conn);
 	  continue;
 	} else {
 	  die("unknow opecode.");
 	  continue;
 	}
-	debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u |%f\n", rdma_ctl_msg_type_str(*cmt), conn->id, slid, get_dtime()), 2);
-	return (int)slid;
       }
     }
 
@@ -716,6 +720,7 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data, struct connection** conn_output)
   return 0;
 }
 
+/*
 static int wait_msg_sent()
 {
   void* ctx;
@@ -728,13 +733,13 @@ static int wait_msg_sent()
       while (ibv_poll_cq(cq, 1, &wc)) {
 	conn = (struct connection *)(uintptr_t)wc.wr_id;
 	slid = wc.slid;
-	/*Check if a request was successed*/
+	//Check if a request was successed
 	if (wc.status != IBV_WC_SUCCESS) {
 	  const char* err_str = rdma_err_status_str(wc.status);
 	  fprintf(stderr, "RDMA lib: COMM: ERROR: status is not IBV_WC_SUCCESS: Erro=%s(%d) @ %s:%d\n", err_str, wc.status, __FILE__, __LINE__);
 	  exit(1);
 	}
-	/*Check which request was successed*/
+        //Check which request was successed
 	if (wc.opcode == IBV_WC_RECV) {
 	  die("unknow opecode.");
 	  continue;
@@ -765,28 +770,23 @@ static int wait_msg_sent()
   }
   return 0;
 }
-
-
-
+*/
 
 /*Note: If cmt=MR_CHUNK, a register_rdma_msg_mr(...) function has to be called to register [mr_index]th memory region  */
 int send_ctl_msg (struct connection* conn, enum ctl_msg_type cmt, uint32_t mr_index, uint64_t data)
 { 
-
   if (cmt == MR_CHUNK) {
     post_send_ctl_msg(conn, cmt, rdma_msg_mr[mr_index], data) ;
   } else {
     post_send_ctl_msg(conn, cmt, NULL, data) ;
   }
   post_recv_ctl_msg(conn);
+  //TODO: free_connection(conn);
+  //free_connection(conn);
   //  debug(printf("RDMA lib: COMM: Post %s\n",  rdma_ctl_msg_type_str(cmt)), 2);
 
   return 0;
 }
-
-
-
-
 
 static int post_send_ctl_msg(struct connection *conn_old, enum ctl_msg_type cmt, struct ibv_mr *mr, uint64_t data)
 { 
@@ -837,7 +837,6 @@ static int post_send_ctl_msg(struct connection *conn_old, enum ctl_msg_type cmt,
   //  fprintf(stderr, "%p, %p\n", conn_old->id->qp, conn->id->qp);
   TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
   debug(printf("RDMA lib: COMM: Post %s: id=%d,  post_count=%lu, local_addr=%lu, length=%lu, lkey=%lu\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
-
   return 0;
 }
 

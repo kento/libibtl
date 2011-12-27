@@ -207,9 +207,8 @@ static void* poll_cq(struct poll_cq_args* args)
 	ip = get_ip_addr("ib0");
 	printf("RDMA lib: SEND: %s: send time= %f secs, send size= %lu MB, throughput = %f MB/s\n", ip, e - s, buff_size/1000000, buff_size/(e - s)/1000000.0);
 	//	for (i = 0; i < waiting_msg_count-1; i++) {
-	  recv_ctl_msg (cmt, data, &conn);
+	//	recv_ctl_msg (cmt, data, &conn);
 	  //	}
-
 	finalize_ctl_msg(cmt, data);
 	*flag = 1;
 	return NULL;

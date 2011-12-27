@@ -63,6 +63,7 @@ int main(int argc, char **argv)
   e = get_dtime();
   //  RDMA_Wait (&flag2) ;
   printf("Send: %d %f %f GB/s\n", size,  e - s, size/(e - s)/1000000000.0);
+  sleep(2);
   return 0;
   //  RDMA_Active_Finalize(&comm);
 

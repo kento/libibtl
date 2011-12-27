@@ -167,7 +167,6 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	break;
       case MR_CHUNK:
 	mr_size= *data;
-
 	rdma_read(conn, slid, mr_size);
 	send_ctl_msg (conn, MR_CHUNK_ACK, 0, 0);
 
