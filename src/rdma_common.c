@@ -342,8 +342,8 @@ static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
   qp_attr->recv_cq = s_ctx->cq;
   qp_attr->qp_type = IBV_QPT_RC;
 
-  qp_attr->cap.max_send_wr = 100;// 10
-  qp_attr->cap.max_recv_wr = 100;//10
+  qp_attr->cap.max_send_wr = 10000;// 10
+  qp_attr->cap.max_recv_wr = 10000;//10
   qp_attr->cap.max_send_sge = 5;//1
   qp_attr->cap.max_recv_sge = 5;//1
 }
@@ -507,6 +507,7 @@ int alloc_rdma_buffs(uint16_t id, uint64_t size)
   int64_t retry=0;
   struct RDMA_buff *rdma_buff = NULL;
 
+  //  while ((rdma_buff = (struct RDMA_buff *) malloc(sizeof(struct RDMA_buff))) == NULL) {
   while ((rdma_buff = (struct RDMA_buff *) malloc(sizeof(struct RDMA_buff))) == NULL) {                                                                         
     fprintf(stderr, "RDMA lib: RECV: No more buffer space !!\n");                                                                                               
     usleep(10000);                                                                                                                                              
@@ -515,7 +516,7 @@ int alloc_rdma_buffs(uint16_t id, uint64_t size)
   }                                                                                                                                                             
   //          alloc_size += sizeof(struct RDMA_buff);                                                                                                           
   retry=0;                                                                                                                                                      
-  while ((rdma_buff->buff = (char *)malloc(size)) == NULL) {                                                                                               
+  while ((rdma_buff->buff = (char *)valloc(size)) == NULL) {                                                                                               
     fprintf(stderr, "RDMA lib: RECV: No more buffer space !!\n");                                                                                               
     usleep(10000);                                                                                                                                              
     retry++;                                                                                                                                                    

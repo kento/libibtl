@@ -39,7 +39,8 @@ int main(int argc, char **argv)
   e = get_dtime();
 
   /* ===== */
-  data = (char*)malloc(size);
+  //  data = (char*)malloc(size);
+  data = (char*)valloc(size);
   int i;
   flag1 = 0;
   for (i=size-2; i >= 0; i--) {

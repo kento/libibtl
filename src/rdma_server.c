@@ -143,7 +143,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
     double ss = get_dtime();
     slid = recv_ctl_msg (cmt, data, &conn);
     double ee = get_dtime();
-    printf("Time =====> %f\n", ee - ss);
+    debug(fprintf(stdout, "Time =====> %f\n", ee - ss), 2);
     switch (*cmt)
       {
       case MR_INIT:
@@ -169,17 +169,13 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
 	mr_size= *data;
 	rdma_read(conn, slid, mr_size);
 	send_ctl_msg (conn, MR_CHUNK_ACK, 0, 0);
-
 	//	debug(printf("RDMA lib: RECV: Done MR_CHUNK: for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
 	break;
       case MR_FIN:
 	//	tag = *conn->recv_msg->data1.tag;
 	tag = *data;
-
 	//	debug(printf("RDMA lib: RECV: Recieved MR_FIN: Tag=%d for wc.slid=%lu\n", tag, slid), 2);
-
 	send_ctl_msg (conn, MR_FIN_ACK, 0, 0);
-
 	/*Post reveived data*/
 	rdma_msg = (struct RDMA_message*) malloc(sizeof(struct RDMA_message));
 	get_rdma_buff(conn, slid, &rdma_msg->buff, &rdma_msg->size);

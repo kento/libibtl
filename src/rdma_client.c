@@ -169,7 +169,8 @@ static void* poll_cq(struct poll_cq_args* args)
 
     waiting_msg_count--;
     double ee = get_dtime();
-    printf("TIME=========> %f, %s\n", ee - ss, rdma_ctl_msg_type_str(*cmt));
+
+    debug(printf("TIME=========> %f, %s\n", ee - ss, rdma_ctl_msg_type_str(*cmt)),2);
 
     
     switch (*cmt)
@@ -183,7 +184,6 @@ static void* poll_cq(struct poll_cq_args* args)
 	    fin_flag = 1;
 	    break;
 	  }
-	  //	  usleep(10000);
 	}
 	break;
       case MR_CHUNK_ACK:
@@ -230,7 +230,7 @@ static int send_rdma_read_req (struct connection* conn, int mr_index, char* addr
   if (addr_size == *total_sent_size) {
     /*sent all data*/
     /*TODO: Get this function work without a below usleep(10)*/
-    usleep(10);
+    //    usleep(10);
     send_ctl_msg (conn, MR_FIN, 0, tag);
     return 0;
   } else {
