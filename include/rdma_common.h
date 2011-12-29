@@ -14,7 +14,7 @@
 
 
 #ifndef RDMA_BUF_NUM_C
-#define RDMA_BUF_NUM_C (1024)
+#define RDMA_BUF_NUM_C (10)
 #endif
 
 #ifndef RDMA_CLIENT_NUM_S
@@ -22,7 +22,7 @@
 #endif
 
 #ifndef MAX_RDMA_BUF_SIZE_C
-#define MAX_RDMA_BUF_SIZE_C ( 1 * 1 * 128 * 1024)
+#define MAX_RDMA_BUF_SIZE_C ( 1 * 128 * 1024 * 1024)
 #endif
 
 //-------------
@@ -118,9 +118,9 @@ struct connection {
       
   struct ibv_mr *recv_mr;
   struct ibv_mr *send_mr;
-  struct ibv_mr *rdma_msg_mr;
 
-  struct ibv_mr peer_mr;
+  struct ibv_mr *rdma_msg_mr;/* Local memory region for RDMA*/
+  struct ibv_mr peer_mr;     /* Remote memory region*/
 
   struct control_msg *recv_msg;
   struct control_msg *send_msg;

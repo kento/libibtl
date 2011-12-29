@@ -171,12 +171,10 @@ static void* poll_cq(struct poll_cq_args* args)
     double ee = get_dtime();
 
     debug(printf("TIME=========> %f, %s\n", ee - ss, rdma_ctl_msg_type_str(*cmt)),2);
-
-    
     switch (*cmt)
       {
       case MR_INIT_ACK:
-	for (mr_index = 0; mr_index < RDMA_BUF_NUM_C; mr_index++) {
+	for (mr_index = 0; mr_index < RDMA_BUF_NUM_C;  mr_index++) {
 	  if((sent_size = send_rdma_read_req (conn, mr_index, send_base_addr, buff_size, &total_sent_size, tag)) > 0) {
 	    waiting_msg_count++;
 	    send_base_addr += sent_size;
@@ -185,10 +183,10 @@ static void* poll_cq(struct poll_cq_args* args)
 	    break;
 	  }
 	}
+	mr_index = mr_index % RDMA_BUF_NUM_C;
 	break;
       case MR_CHUNK_ACK:
-	if(fin_flag == 0) {
-	  mr_index = (mr_index+ 1) % RDMA_BUF_NUM_C;
+	if(fin_flag == 0){
 	  if((sent_size = send_rdma_read_req (conn, mr_index, send_base_addr, buff_size, &total_sent_size, tag)) > 0) {
 	    waiting_msg_count++;
 	    send_base_addr += sent_size;
@@ -196,8 +194,8 @@ static void* poll_cq(struct poll_cq_args* args)
 	    fin_flag = 1;;
 	    break;
 	  }
+	  mr_index = (mr_index+ 1) % RDMA_BUF_NUM_C;
 	}
-
 	break;
       case MR_FIN_ACK:
 

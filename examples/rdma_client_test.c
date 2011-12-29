@@ -44,7 +44,8 @@ int main(int argc, char **argv)
   int i;
   flag1 = 0;
   for (i=size-2; i >= 0; i--) {
-    data[i] = (char) (i % 26 + 'a');
+    //data[i] = (char) (i % 26 + 'a');
+    data[i] = 'x';
   }
   data[size-1] += '\0';
   printf("Initialization: %f\n",e - s);

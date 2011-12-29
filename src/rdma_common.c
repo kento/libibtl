@@ -14,6 +14,8 @@ static struct context *s_ctx = NULL;
 
 struct ibv_mr **rdma_msg_mr;
 
+/*For active side*/
+static uint32_t mr_number = 0;
 
 /*Just for passive side valiables*/
 int accepted = 0;
@@ -21,6 +23,8 @@ int connections = 0;
 //struct ibv_mr *peer_mr;
 struct hashtable ht;
 static uint32_t allocated_mr_size = 0;
+
+
 
 
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event);
@@ -262,6 +266,7 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, u
   }
 
   rdma_msg_mr = (struct ibv_mr **) malloc(sizeof(struct ibv_mr*) * mr_num);
+  mr_number = mr_num;
   for (i = 0; i < mr_num; i++){ 
     rdma_msg_mr[i] = NULL;
   }
@@ -442,33 +447,28 @@ static void register_memory(struct connection *conn)
 void register_rdma_msg_mr(int mr_index, void* addr, uint32_t size)
 {
   if (rdma_msg_mr[mr_index] != NULL) {
+    dereg_mr(rdma_msg_mr[mr_index]);
+    //    memset(rdma_msg_mr[mr_index]->addr, 'a', rdma_msg_mr[mr_index]->length);
 
-    //dereg_mr(rdma_msg_mr[mr_index]);
+    rdma_msg_mr[mr_index] = NULL;
     debug(printf("RDMA lib: SEND: Derg RDMA_MR: mr_idx=%d\n", mr_index),2);
-    /*
-    int retry = 100;
-    while (ibv_dereg_mr(rdma_msg_mr[mr_index]) != 0) {
-      fprintf(stderr, "RDMA lib: SEND: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
-      exit(1);
-      if (retry < 0) {
-        fprintf(stderr, "RDMA lib: SEND: ERROR: memory region deregistration failed @ %s:%d\n",  __FILE__, __LINE__);
-        exit(1);
-      }
-      retry--;
-      debug(printf("RDMA lib: SEND: Derg RDMA_MR: mr_idx=%d\n", mr_index),2);
-    }
-    */
   }
   
   TEST_Z(rdma_msg_mr[mr_index] = ibv_reg_mr(
 					    s_ctx->pd,
 					    addr,
 					    size,
-                                  IBV_ACCESS_LOCAL_WRITE
-                                  | IBV_ACCESS_REMOTE_READ
+					    IBV_ACCESS_LOCAL_WRITE
+					    | IBV_ACCESS_REMOTE_READ
 					    | IBV_ACCESS_REMOTE_WRITE));
   debug(printf("RDMA lib: SEND: Rgst RDMA_MR: mr_idx=%d, remote_addr=%lu(%p), rkey=%u, size=%u\n", mr_index, addr, addr, rdma_msg_mr[mr_index]->rkey, size),2);
   return;
+}
+
+void deregister_rdma_msg_mr()
+{
+
+
 }
 
 static void dereg_mr(struct ibv_mr *mr) 
@@ -482,7 +482,6 @@ static void dereg_mr(struct ibv_mr *mr)
       exit(1);
     }
     retry--;
-
   }
 }
 
@@ -512,9 +511,8 @@ int alloc_rdma_buffs(uint16_t id, uint64_t size)
     fprintf(stderr, "RDMA lib: RECV: No more buffer space !!\n");                                                                                               
     usleep(10000);                                                                                                                                              
     retry++;                                                                                                                                                    
-    //          exit(1);                                                                                                                                        
-  }                                                                                                                                                             
-  //          alloc_size += sizeof(struct RDMA_buff);                                                                                                           
+    //          exit(1);                                                                                                                                          }                                                                                                                                                             ER
+  //          alloc_size += sizeof(struct RDMA_buff);                                                                                                           s
   retry=0;                                                                                                                                                      
   while ((rdma_buff->buff = (char *)valloc(size)) == NULL) {                                                                                               
     fprintf(stderr, "RDMA lib: RECV: No more buffer space !!\n");                                                                                               
@@ -559,7 +557,7 @@ int rdma_read(struct connection* conn, uint16_t id, uint64_t mr_size)
   }
   */
   debug(fprintf(stderr, "Registering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-  if (!(rdma_buff->mr = ibv_reg_mr(
+  while (!(rdma_buff->mr = ibv_reg_mr(
 				   s_ctx->pd,
 				   rdma_buff->recv_base_addr,
 				   mr_size,
@@ -568,7 +566,6 @@ int rdma_read(struct connection* conn, uint16_t id, uint64_t mr_size)
       )                                                                                                        
     {
       fprintf(stderr, "RDMA lib: ERROR: memory region registration failed (allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-      exit(1);
     }
   debug(printf("RDMA lib: RECV: Rgst RDMA_MR: local_addr=%lu(%p), lkey=%lu, size=%lu\n", rdma_buff->recv_base_addr, rdma_buff->recv_base_addr, rdma_buff->mr->lkey, mr_size), 2);
   rdma_buff->mr_size = mr_size;
@@ -697,6 +694,7 @@ int recv_ctl_msg(uint32_t *cmt, uint64_t *data, struct connection** conn_output)
 	  continue;
 	} else if (wc.opcode == IBV_WC_RDMA_READ) {
 	  debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu\n", (uintptr_t)conn), 2);
+	  send_ctl_msg (conn, MR_CHUNK_ACK, 0, 0);
 	  //	  free_connection(conn);
 	  continue;
 	} else {
@@ -836,7 +834,7 @@ static int post_send_ctl_msg(struct connection *conn_old, enum ctl_msg_type cmt,
   sges.lkey = (uint32_t)conn->send_mr->lkey;
 
   //  fprintf(stderr, "%p, %p\n", conn_old->id->qp, conn->id->qp);
-  TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
+    TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
   debug(printf("RDMA lib: COMM: Post %s: id=%d,  post_count=%lu, local_addr=%lu, length=%lu, lkey=%lu\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
   return 0;
 }

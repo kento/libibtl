@@ -68,7 +68,6 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
     TEST_NZ(pthread_create(&listen_thread, NULL, poll_cq, NULL));
     thread_running = 1;
   }
-
   return 0;
 }
 
@@ -168,7 +167,7 @@ static void * poll_cq(void *ctx /*ctx == NULL*/)
       case MR_CHUNK:
 	mr_size= *data;
 	rdma_read(conn, slid, mr_size);
-	send_ctl_msg (conn, MR_CHUNK_ACK, 0, 0);
+	//	send_ctl_msg (conn, MR_CHUNK_ACK, 0, 0);
 	//	debug(printf("RDMA lib: RECV: Done MR_CHUNK: for wc.slid=%lu\n", (uintptr_t)wc.slid), 2);
 	break;
       case MR_FIN:

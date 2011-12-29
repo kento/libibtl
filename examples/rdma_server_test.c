@@ -16,7 +16,8 @@ int main(int argc, char **argv) {
     //printf("%d: size=%lu: %s\n", ctl_tag, size, data);
     
     printf("%d: size=%lu: \n", ctl_tag, size);
-    //    dump(data, size);
+    //printf("%s\n", data);
+    //dump(data, size);
   }
 
   //  RDMA_show_buffer();  
