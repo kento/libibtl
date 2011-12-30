@@ -285,11 +285,11 @@ static void* poll_cq(struct poll_cq_args* args)
     waiting_msg_count--;
     mm = ss - ee;
     ee = get_dtime();
-    debug(printf("RDMA lib: SEND: recv_wc time = %f(%f) (%s)\n", ee - ss, mm, ibv_wc_opcode_str(conn_recv->opcode)),2);
+    debug(printf("RDMA lib: SEND: recv_wc time = %f(%f) (%s)\n", ee - ss, mm, ibv_wc_opcode_str(conn_recv->opcode)),1);
 
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
-      debug(printf("RDMA lib: SEND: Recv %s: id=%lu(%lu), slid=%u |%f\n",  rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->count, conn_recv->id, conn_recv->slid, get_dtime()), 2);
+      debug(printf("RDMA lib: SEND: Recv %s: id=%lu(%lu), slid=%u recv_wc time=%f(%f)\n",  rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->count, conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
       switch (conn_recv->cmt)
 	{
 	case MR_INIT_ACK:
@@ -342,7 +342,7 @@ static void* poll_cq(struct poll_cq_args* args)
 	}
 
     } else if (conn_recv->opcode == IBV_WC_SEND) {
-      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) |%f\n", conn_recv->count, (uintptr_t)conn_recv, get_dtime()), 2);
+      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
 
       continue;
     } else {

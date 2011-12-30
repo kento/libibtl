@@ -137,15 +137,16 @@ static void * poll_cq(struct RDMA_communicator *comm)
 
   while (1) {
     double mm, ss, ee;
+
     ss = get_dtime();
     num_entries = recv_wc(1, &conn_recv);
     mm = ss - ee;
     ee = get_dtime();
-    debug(fprintf(stdout, "RDMA lib: RECV: recv_wc time: %f(%f) (%s)\n", ee - ss, mm, ibv_wc_opcode_str(conn_recv->opcode) ), 2);
+    debug(fprintf(stdout, "RDMA lib: RECV: recv_wc time: %f(%f) (%s)\n", ee - ss, mm, ibv_wc_opcode_str(conn_recv->opcode) ), 1);
 
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
-      debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u |%f\n", rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->id, conn_recv->slid, get_dtime()), 2);
+      debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u recv_wc time=%f(%f)\n", rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
       switch (conn_recv->cmt)
 	{
 	case MR_INIT:
@@ -172,6 +173,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
 	  conn_send = create_connection(comm->cm_id);
 	  memcpy(&conn_send->peer_mr, &conn_recv->recv_msg->data.mr, sizeof(conn_send->peer_mr));
 	  rdma_read(conn_send, conn_recv->slid, mr_size);
+
 	  free_connection(conn_recv);
 	  break;
 	case MR_FIN:
@@ -194,11 +196,10 @@ static void * poll_cq(struct RDMA_communicator *comm)
 	}
       
     } else if (conn_recv->opcode == IBV_WC_SEND) {
-      debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) | %f\n", conn_recv->count, (uintptr_t)conn_recv, get_dtime()), 2);
-      //      free_connection(conn);
+      debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
       continue;
     } else if (conn_recv->opcode == IBV_WC_RDMA_READ) {
-      debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu(%lu)\n", conn_recv->count, (uintptr_t)conn_recv), 2);
+      debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
       //      conn_send = create_connection(comm->cm_id);
       send_ctl_msg (conn_recv, MR_CHUNK_ACK, 0);
       continue;

@@ -20,7 +20,11 @@
 #endif
 
 #ifndef MAX_RDMA_BUF_SIZE_C
-#define MAX_RDMA_BUF_SIZE_C ( 1 * 1 * 1024 * 1024)
+#define MAX_RDMA_BUF_SIZE_C ( 1 * 4 * 1024 * 1024)
+#endif
+
+#ifndef RDMA_READ_UNIT_S
+#define RDMA_READ_UNIT_S ( 1 * 1 * 1024 * 1024)
 #endif
 
 //-------------

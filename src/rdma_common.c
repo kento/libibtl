@@ -366,6 +366,7 @@ static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
   qp_attr->send_cq = s_ctx->cq;
   qp_attr->recv_cq = s_ctx->cq;
   qp_attr->qp_type = IBV_QPT_RC;
+  qp_attr->sq_sig_all = 0;
 
   qp_attr->cap.max_send_wr = 10000;// 10
   qp_attr->cap.max_recv_wr = 10000;//10
@@ -595,9 +596,7 @@ int rdma_read(struct connection* conn, uint16_t id, uint64_t mr_size)
 	)
 	)*/
   double ss = get_dtime();
-  while (!(rdma_buff->mr = reg_mr(rdma_buff->recv_base_addr, mr_size))) {
-      fprintf(stderr, "RDMA lib: ERROR: memory region registration failed (allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-  }
+  rdma_buff->mr = reg_mr(rdma_buff->recv_base_addr, mr_size);
   double ee = get_dtime();
   debug(printf("RDMA lib: RECV: Rgst RDMA_MR: local_addr=%lu(%p), lkey=%lu, size=%lu, time=%f\n", rdma_buff->recv_base_addr, rdma_buff->recv_base_addr, rdma_buff->mr->lkey, mr_size, ee - ss), 2);
   rdma_buff->mr_size = mr_size;
