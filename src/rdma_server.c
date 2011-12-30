@@ -145,6 +145,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
 
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
+      debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u |%f\n", rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->id, conn_recv->slid, get_dtime()), 2);
       switch (conn_recv->cmt)
 	{
 	case MR_INIT:
@@ -191,7 +192,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
 	  exit(1);
 	  break;
 	}
-      debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u |%f\n", rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->id, conn_recv->slid, get_dtime()), 2);
+      
     } else if (conn_recv->opcode == IBV_WC_SEND) {
       debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) | %f\n", conn_recv->count, (uintptr_t)conn_recv, get_dtime()), 2);
       //      free_connection(conn);
