@@ -559,7 +559,7 @@ int alloc_rdma_buffs(uint16_t id, uint64_t size)
   add_ht(&ht, id, rdma_buff);
 }
 
-int rdma_read(struct connection* conn, uint16_t id, uint64_t mr_size)
+int rdma_read(struct connection* conn, uint16_t id, uint64_t offset, uint64_t mr_size, int signal)
 {
 
   struct RDMA_buff *rdma_buff = NULL;
@@ -568,35 +568,13 @@ int rdma_read(struct connection* conn, uint16_t id, uint64_t mr_size)
   struct ibv_sge sge;
 
   rdma_buff = get_ht(&ht, id);
-  //  memcpy(&conn->peer_mr, &conn->recv_msg->data.mr, sizeof(conn->peer_mr));
-  /*
-  if (rdma_buff->mr != NULL) {
-   debug(fprintf(stderr,"Deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-   int retry=1000;
-   while (ibv_dereg_mr(rdma_buff->mr)) {
-     fprintf(stderr, "RDMA lib: FAILED: memory region dereg again (allocated_mr_size: %d bytes): retry = %d @ %s:%d\n", allocated_mr_size, retry, __FILE__, __LINE__);
-     if (retry < 0) {
-       fprintf(stderr, "RDMA lib: ERROR: memory region deregistration failed (allocated_mr_size: %d bytes) @ %s:%d\n", allocated_mr_size, __FILE__, __LINE__);
-       exit(1);
-      }
-      retry--;
-    }
-    allocated_mr_size = allocated_mr_size - rdma_buff->mr_size;
-  } else {
-    debug(fprintf(stderr,"Not deregistering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-  }
-  */
   debug(fprintf(stderr, "Registering RDMA MR: %lu\n", rdma_buff->mr_size), 1);
-  /*
-  while (!(rdma_buff->mr = ibv_reg_mr(
-				   s_ctx->pd,
-				   rdma_buff->recv_base_addr,
-				   mr_size,
-				   IBV_ACCESS_LOCAL_WRITE)
-	)
-	)*/
+
+
+
+
   double ss = get_dtime();
-  rdma_buff->mr = reg_mr(rdma_buff->recv_base_addr, mr_size);
+  conn->rdma_msg_mr = rdma_buff->mr = reg_mr(rdma_buff->recv_base_addr, mr_size);
   double ee = get_dtime();
   debug(printf("RDMA lib: RECV: Rgst RDMA_MR: local_addr=%lu(%p), lkey=%lu, size=%lu, time=%f\n", rdma_buff->recv_base_addr, rdma_buff->recv_base_addr, rdma_buff->mr->lkey, mr_size, ee - ss), 2);
   rdma_buff->mr_size = mr_size;
@@ -609,8 +587,10 @@ int rdma_read(struct connection* conn, uint16_t id, uint64_t mr_size)
   wr.opcode = IBV_WR_RDMA_READ;
   wr.sg_list = &sge;
   wr.num_sge = 1;
-  wr.send_flags = IBV_SEND_SIGNALED;
-  wr.wr.rdma.remote_addr = (uintptr_t)conn->peer_mr.addr; // wr.wr.rdma.remote_addr => uint64_t
+  if (signal == 1) {
+    wr.send_flags = IBV_SEND_SIGNALED;
+  }
+  wr.wr.rdma.remote_addr = (uintptr_t)conn->peer_mr.addr + offset; // wr.wr.rdma.remote_addr => uint64_t
   wr.wr.rdma.rkey = conn->peer_mr.rkey;
 
   sge.addr = (uintptr_t)rdma_buff->recv_base_addr;
@@ -624,7 +604,8 @@ int rdma_read(struct connection* conn, uint16_t id, uint64_t mr_size)
     fprintf(stderr, "RDMA lib: ERROR: post send failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
-  debug(printf("RDMA lib: RECV: Post RDMA_READ: id=%lu(%d), remote_addr=%lu, rkey=%u, sge.addr=%lu, sge.length=%lu,  sge.lkey=%lu\n", conn->count, (uintptr_t)conn, wr.wr.rdma.remote_addr, wr.wr.rdma.rkey, sge.addr, sge.length, sge.lkey), 2);
+
+  debug(printf("RDMA lib: RECV: Post RDMA_READ: id=%lu(%d), remote_addr=%lu, rkey=%u, sge.addr=%lu, sge.length=%u,  sge.lkey=%lu\n", conn->count, (uintptr_t)conn, wr.wr.rdma.remote_addr, wr.wr.rdma.rkey, sge.addr, sge.length, sge.lkey), 2);
 
 
   rdma_buff->recv_base_addr += (uintptr_t)mr_size;
@@ -851,7 +832,7 @@ static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, uin
   sges.lkey = (uint32_t)conn->send_mr->lkey;
   //  fprintf(stderr, "%p, %p\n", conn_old->id->qp, conn->id->qp);
   TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
-  debug(printf("RDMA lib: COMM: Post %s: id=%lu(%d),  post_count=%lu, local_addr=%lu, length=%lu, lkey=%lu\n", rdma_ctl_msg_type_str(cmt), conn->count, (uintptr_t)conn, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
+  debug(printf("RDMA lib: COMM: Post %s: id=%lu(%d),  post_count=%lu, local_addr=%lu, length=%u, lkey=%lu\n", rdma_ctl_msg_type_str(cmt), conn->count, (uintptr_t)conn, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
   return 0;
 }
 

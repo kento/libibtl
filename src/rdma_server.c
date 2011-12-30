@@ -18,9 +18,10 @@ static void build_context(struct ibv_context *verbs);
 static void build_params(struct rdma_conn_param *params);
 static void build_qp_attr(struct ibv_qp_init_attr *qp_attr);
 static void register_memory(struct connection *conn);
-static void register_rdma_region(struct connection *conn,  void* addr, uint64_t size);
+
 static void append_rdma_msg(uint64_t conn_id, struct RDMA_message *msg);
 static void* passive_init(void * arg /*(struct RDMA_communicator *comm)*/) ;
+static void set_envs(void);
 
 
 //int RDMA_Passive_Init(struct RDMA_communicator *comm);
@@ -31,7 +32,8 @@ static struct context *s_ctx = NULL;
 static int connections = 0;
 pthread_t listen_thread;
 //static uint32_t allocated_mr_size = 0;
-static  int client_num = 0;
+static int client_num = 0;
+static int rdma_read_unit_size = 0;
 
 //pthread_t poll_thread[RDMA_THREAD_NUM_S];
 //int poll_thread_count = 0;
@@ -49,9 +51,8 @@ int main(int argc, char **argv) {
 }
 */
 
-int RDMA_Passive_Init(struct RDMA_communicator *comm) 
+static void set_envs()
 {
-  static int thread_running = 0;
   char *value;
   value = getenv("RDMA_CLIENT_NUM_S");
   if (value == NULL) {
@@ -60,6 +61,19 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
     client_num = atoi(value);
   }
   fprintf(stderr, "client num: %d\n", client_num);
+
+  //TODO:
+  rdma_read_unit_size = RDMA_READ_UNIT_SIZE_S;
+
+  
+
+}
+
+int RDMA_Passive_Init(struct RDMA_communicator *comm) 
+{
+  static int thread_running = 0;
+
+  set_envs();
   create_hashtable(client_num);
 
   TEST_NZ(pthread_create(&listen_thread, NULL, (void *) rdma_passive_init, comm));
@@ -138,6 +152,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
   while (1) {
     double mm, ss, ee;
 
+    //    usleep(1000*10);
     ss = get_dtime();
     num_entries = recv_wc(1, &conn_recv);
     mm = ss - ee;
@@ -146,6 +161,9 @@ static void * poll_cq(struct RDMA_communicator *comm)
 
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
+      uint64_t rdma_read_sum = 0;
+      uint64_t rrs = 0;
+      int last_rdma_read = 0;
       debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u recv_wc time=%f(%f)\n", rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
       switch (conn_recv->cmt)
 	{
@@ -169,10 +187,32 @@ static void * poll_cq(struct RDMA_communicator *comm)
 	   //	debug(printf("RDMA lib: RECV: Done MR_INI : for wc.slid=%u\n", slid), 2);
 	   break;
 	case MR_CHUNK:
-	  mr_size= conn_recv->recv_msg->data1.mr_size;
-	  conn_send = create_connection(comm->cm_id);
-	  memcpy(&conn_send->peer_mr, &conn_recv->recv_msg->data.mr, sizeof(conn_send->peer_mr));
-	  rdma_read(conn_send, conn_recv->slid, mr_size);
+	  mr_size = conn_recv->recv_msg->data1.mr_size;
+
+	  while(1) {
+	    if (rdma_read_sum + rdma_read_unit_size > mr_size) {
+	      rrs = mr_size - rdma_read_sum;
+	      last_rdma_read = 1;
+	    } else {
+	      rrs = rdma_read_unit_size;
+	    }
+
+	    conn_send = create_connection(comm->cm_id);
+	    memcpy(&conn_send->peer_mr, &conn_recv->recv_msg->data.mr, sizeof(conn_send->peer_mr));
+
+	    //	    printf("rrs: %lu, rdma_read_sum: %lu, mr_size: %lu\n", rrs, rdma_read_sum, mr_size);
+	    if (rdma_read_sum + rrs == mr_size) {
+	      rdma_read(conn_send, conn_recv->slid, rdma_read_sum, rrs, 1);
+	      break;
+	    } else {
+	      rdma_read(conn_send, conn_recv->slid, rdma_read_sum, rrs, 0);
+	    }
+	    
+	    rdma_read_sum += rrs;
+	  }
+
+
+
 
 	  free_connection(conn_recv);
 	  break;
@@ -227,21 +267,6 @@ void RDMA_show_buffer(void)
 }
 
 
-static void register_rdma_region(struct connection *conn,  void* addr, uint64_t size)
-{
-  if (conn->rdma_msg_mr != NULL) {
-    ibv_dereg_mr(conn->rdma_msg_mr);
-  }
-
-  TEST_Z(conn->rdma_msg_mr = ibv_reg_mr(
-                                        s_ctx->pd,
-                                        addr,
-                                        size,
-					IBV_ACCESS_LOCAL_WRITE
-					| IBV_ACCESS_REMOTE_READ
-                                        | IBV_ACCESS_REMOTE_WRITE));
-  return;
-}
 
 
 int RDMA_Passive_Finalize(struct RDMA_communicator *comm)

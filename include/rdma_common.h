@@ -20,11 +20,11 @@
 #endif
 
 #ifndef MAX_RDMA_BUF_SIZE_C
-#define MAX_RDMA_BUF_SIZE_C ( 1 * 4 * 1024 * 1024)
+#define MAX_RDMA_BUF_SIZE_C ( 1 * 128 * 1024 * 1024)
 #endif
 
-#ifndef RDMA_READ_UNIT_S
-#define RDMA_READ_UNIT_S ( 1 * 1 * 1024 * 1024)
+#ifndef RDMA_READ_UNIT_SIZE_S
+#define RDMA_READ_UNIT_SIZE_S ( 1 * 16 * 1024 * 1024)
 #endif
 
 //-------------
@@ -175,7 +175,7 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, u
 /*For passive side*/
 int init_rdma_buffs(uint32_t num_client);
 int alloc_rdma_buffs(uint16_t id, uint64_t size);
-int rdma_read(struct connection* conn, uint16_t id, uint64_t size);
+int rdma_read(struct connection* conn, uint16_t id, uint64_t offset, uint64_t mr_size, int signal);
 int get_rdma_buff(uint16_t id, char** addr, uint64_t *size);
 
 void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/);
