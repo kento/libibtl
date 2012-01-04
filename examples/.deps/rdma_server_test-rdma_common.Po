@@ -4,7 +4,8 @@ rdma_server_test-rdma_common.o: ../src/rdma_common.c \
   /usr/include/gnu/stubs-64.h /usr/include/bits/posix_opt.h \
   /usr/include/bits/types.h /usr/include/bits/typesizes.h \
   /usr/lib64/gcc/x86_64-suse-linux/4.3/include/stddef.h \
-  /usr/include/bits/confname.h /usr/include/getopt.h ../include/common.h \
+  /usr/include/bits/confname.h /usr/include/getopt.h \
+  /usr/include/sys/mman.h /usr/include/bits/mman.h ../include/common.h \
   ../include/rdma_common.h /usr/include/netdb.h /usr/include/netinet/in.h \
   /usr/include/stdint.h /usr/include/bits/wchar.h \
   /usr/include/sys/socket.h /usr/include/sys/uio.h \
@@ -52,6 +53,10 @@ rdma_server_test-rdma_common.o: ../src/rdma_common.c \
 /usr/include/bits/confname.h:
 
 /usr/include/getopt.h:
+
+/usr/include/sys/mman.h:
+
+/usr/include/bits/mman.h:
 
 ../include/common.h:
 

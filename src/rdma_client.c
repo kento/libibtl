@@ -57,6 +57,7 @@ int RDMA_Sendr (char *buff, uint64_t size, int tag, struct RDMA_communicator *co
 int RDMA_Sendr_ns (char *buff, uint64_t size, int tag, struct RDMA_communicator *comm)
 {
   int flag=0;
+
   RDMA_Isendr(buff, size, tag, &flag, comm);
   while (flag == 0) {
     usleep(1);
@@ -78,6 +79,7 @@ int RDMA_Isendr(char *buff, uint64_t size, int tag, int *flag, struct RDMA_commu
   msg->buff = buff;
   msg->size = size;
   msg->tag  = tag;
+  
 
 
   if (pthread_create(&cq_poller_thread, NULL,(void *)poll_cq, args)) {

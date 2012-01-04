@@ -41,16 +41,24 @@ int main(int argc, char **argv)
   /* ===== */
   //  data = (char*)malloc(size);
   data = (char*)valloc(size);
+
   int i;
-  flag1 = 0;
-  for (i=size-2; i >= 0; i--) {
+  char * a;
+  flag1= 0;
+  for (i=0; i <= size-2; i++) {
     //data[i] = (char) (i % 26 + 'a');
     data[i] = 'x';
+    a = data[i];
+    data[i] = a;
   }
   data[size-1] += '\0';
+
+  
   printf("Initialization: %f\n",e - s);
   
   s = get_dtime();
+
+
   RDMA_Sendr_ns(data, size, get_tag(), &comm);
   /*=======*/
   // data = (char*)malloc(size);

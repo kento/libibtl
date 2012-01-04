@@ -1,8 +1,10 @@
 #include <unistd.h>
+#include <sys/mman.h>
 
 #include "common.h"
 #include "rdma_common.h"
 #include "hashtable.h"
+
 
 
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, uint64_t data);
@@ -145,6 +147,8 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   uint16_t port = 0;
 
   comm = (struct RDMA_communicator *) arg;
+
+ 
 
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
@@ -345,6 +349,8 @@ static void build_context(struct ibv_context *verbs)
   TEST_Z(s_ctx->cq = ibv_create_cq(s_ctx->ctx, 1000, NULL, s_ctx->comp_channel, 0)); /* cqe=10 is arbitrary up to 131071 (36 nodes =>200 cq) */
   TEST_NZ(ibv_req_notify_cq(s_ctx->cq, 0));
 
+
+
   //  TEST_NZ(pthread_create(&s_ctx->cq_poller_thread, NULL, poll_cq, NULL));
 }
 
@@ -352,8 +358,8 @@ static void build_params(struct rdma_conn_param *params)
 {
   memset(params, 0, sizeof(*params));
 
-  params->initiator_depth = 2;
-  params->responder_resources = 2;
+  params->initiator_depth = 10;
+  params->responder_resources = 10;
   params->rnr_retry_count = 7; /*7= infinite retry */
   params->retry_count = 7;
 }
@@ -368,8 +374,8 @@ static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
   qp_attr->qp_type = IBV_QPT_RC;
   qp_attr->sq_sig_all = 0;
 
-  qp_attr->cap.max_send_wr = 10000;// 10
-  qp_attr->cap.max_recv_wr = 10000;//10
+  qp_attr->cap.max_send_wr = 1000;// 10
+  qp_attr->cap.max_recv_wr = 1000;//10
   qp_attr->cap.max_send_sge = 5;//1
   qp_attr->cap.max_recv_sge = 5;//1
 }
@@ -471,6 +477,44 @@ void register_rdma_msg_mr(struct connection* conn, void* addr, uint32_t size)
   ee = get_dtime();
   rmr =  conn->rdma_msg_mr;
   debug(printf("RDMA lib: COMM: Rgst: id=%d, addr=%lu(%p), length=%lu, rkey=%u, lkey=%lu, time=%f\n", (uintptr_t)conn, rmr->addr, rmr->addr, rmr->length, rmr->rkey, rmr->lkey, ee - ss), 2);
+  /*
+  uint64_t s = 1024 * 1024;
+  char* a;
+
+  while (s < 1024 * 1024 * 1024) {
+    a = malloc(s);
+    ss = get_dtime();
+    ibv_reg_mr(
+	       s_ctx->pd,
+	       a,
+	       s,
+	       IBV_ACCESS_LOCAL_WRITE
+	       | IBV_ACCESS_REMOTE_READ);
+    ee = get_dtime();
+    fprintf(stderr,"Size: %lu Time: %f\n", s, ee-ss);
+    free(a);
+    s *= 2;
+    }*/
+  /*
+  uint64_t s = 1024 * 1024;
+  char* a;
+  char* b;
+
+  while (s < 1024 * 1024 * 1024) {
+    a = (char*)malloc(s);
+    //    b = (char*)malloc(s);
+    ss = get_dtime();
+    mlock(a,s);
+    ee = get_dtime();
+    fprintf(stderr,"Size: %lu Time: %f\n", s, ee-ss);
+    free(a);
+    s *= 2;
+  }
+  */
+
+
+
+
   return;
 }
 
@@ -497,6 +541,8 @@ static void dereg_mr(struct ibv_mr *mr)
 
 static struct ibv_mr* reg_mr (void* addr, uint32_t size) 
 {
+
+
   struct ibv_mr *mr;
   mr = ibv_reg_mr(
 		  s_ctx->pd,
@@ -508,6 +554,9 @@ static struct ibv_mr* reg_mr (void* addr, uint32_t size)
     fprintf(stderr, "RDMA lib: COMM: ERROR: Memory region registration failed @ %s:%d\n",  __FILE__, __LINE__);
     exit(1);
   }
+
+
+
   return mr;
 }
 
@@ -542,20 +591,28 @@ int alloc_rdma_buffs(uint16_t id, uint64_t size)
     retry++;
     exit(1);
   }
-  //          alloc_size += sizeof(struct RDMA_buff);                                                                                                     
-  retry=0;                                                                                                                                                      
-  while ((rdma_buff->buff = (char *)malloc(size)) == NULL) {                                                                                               
+
+  //          alloc_size += sizeof(struct RDMA_buff);
+  retry=0;
+  while ((rdma_buff->buff = (char *)malloc(size)) == NULL) {
     fprintf(stderr, "RDMA lib: RECV: No more buffer space for size %lu bytes!!\n", size);
     usleep(10000);
-    retry++;                                                                                                                                                    
-    exit(1);                                                                                                                                        
-  }                                                                                                                                                             
-  
-  rdma_buff->buff_size = size;                                                                                                                             
-  rdma_buff->recv_base_addr = rdma_buff->buff;                                                                                                                  
-  rdma_buff->mr = NULL;                                                                                                                                         
-  //          rdma_buff->mr_size = 0;                                                                                                                           
-  rdma_buff->recv_size = 0;                                                                                                                                     
+    retry++;
+    exit(1);
+  }  
+  double ss,ee;
+  //  ss = get_dtime();
+  //   memset(rdma_buff->buff, 0, size);
+
+  //  ee = get_dtime();
+  //  printf("====%f \n", ee - ss);
+  //   exit(1);
+
+  rdma_buff->buff_size = size;
+  rdma_buff->recv_base_addr = rdma_buff->buff;
+  rdma_buff->mr = NULL;
+  //          rdma_buff->mr_size = 0;
+  rdma_buff->recv_size = 0;
   add_ht(&ht, id, rdma_buff);
 }
 
@@ -851,6 +908,8 @@ int post_recv_ctl_msg(struct connection *conn)
   sger.lkey = conn->recv_mr->lkey;
 
   TEST_NZ(ibv_post_recv(conn->qp, &wrr, &bad_wrr));
+
+
   return 0;
 }
 

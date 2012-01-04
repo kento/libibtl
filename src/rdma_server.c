@@ -1,8 +1,11 @@
+#include <time.h>
+#include <sys/mman.h>
+
 #include "common.h"
 #include "rdma_server.h"
 #include "buffer_table.h"
 #include "hashtable.h"
-#include <time.h>
+
 
 /*
 static int on_connect_request(struct rdma_cm_id *id);
@@ -65,7 +68,6 @@ static void set_envs()
   //TODO:
   rdma_read_unit_size = RDMA_READ_UNIT_SIZE_S;
 
-  
 
 }
 
@@ -154,6 +156,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
 
     //    usleep(1000*10);
     ss = get_dtime();
+
     num_entries = recv_wc(1, &conn_recv);
     mm = ss - ee;
     ee = get_dtime();
@@ -183,6 +186,8 @@ static void * poll_cq(struct RDMA_communicator *comm)
 	  debug(fprintf(stderr, "RDMA lib: RECV: IPoIB=%s Time= %f , in_count= %f \n", get_ip_addr("ib0"), get_dtime(), data_in_count), 2);
 	  conn_send = create_connection(comm->cm_id);
 	  send_ctl_msg (conn_send, MR_INIT_ACK, 0);
+
+
 	  free_connection(conn_recv);
 	   //	debug(printf("RDMA lib: RECV: Done MR_INI : for wc.slid=%u\n", slid), 2);
 	   break;
@@ -237,6 +242,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
       
     } else if (conn_recv->opcode == IBV_WC_SEND) {
       debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
+
       continue;
     } else if (conn_recv->opcode == IBV_WC_RDMA_READ) {
       debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);

@@ -24,7 +24,7 @@
 #endif
 
 #ifndef RDMA_READ_UNIT_SIZE_S
-#define RDMA_READ_UNIT_SIZE_S ( 1 * 16 * 1024 * 1024)
+#define RDMA_READ_UNIT_SIZE_S ( 1 * 32 * 1024 * 1024)
 #endif
 
 //-------------
