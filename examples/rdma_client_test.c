@@ -1,5 +1,3 @@
-#include "rdma_client.h"
-#include "common.h"
 #include <sys/time.h>
 #include <stdio.h>
 
@@ -10,6 +8,9 @@
 #include <netinet/in.h>
 #include <net/if.h>
 #include <arpa/inet.h>
+
+#include "ibtls.h"
+#include "common.h"
 
 
 int get_tag(void);
@@ -59,7 +60,9 @@ int main(int argc, char **argv)
   s = get_dtime();
 
 
-  RDMA_Sendr_ns(data, size, get_tag(), &comm);
+  // RDMA_Sendr_ns(data, size, get_tag(), &comm);
+  struct RDMA_request req;
+  RDMA_Isend(data, size, NULL, 0, 2, &comm, &req);
   /*=======*/
   // data = (char*)malloc(size);
   //    flag2 = 0;
@@ -71,9 +74,9 @@ int main(int argc, char **argv)
   //  data[size-1] += '\0';
   //  RDMA_Isendr(data, size, 1015, &flag2, &comm);
   /* ===== */
-
+  RDMA_Wait (&req) ;
   e = get_dtime();
-  //  RDMA_Wait (&flag2) ;
+  
   printf("Send: %d %f %f GB/s\n", size,  e - s, size/(e - s)/1000000000.0);
   sleep(2);
   return 0;

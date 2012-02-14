@@ -437,6 +437,12 @@ struct connection* create_connection(struct rdma_cm_id *id)
   return conn;
 }
 
+int rdma_wait(struct RDMA_request *request)
+{
+  sem_wait(&(request->is_rdma_completed));
+  return 1;
+}
+
 int free_connection(struct connection* conn) 
 {
   if (conn->active_rrre != NULL) {free(conn->active_rrre);}
@@ -469,7 +475,7 @@ void dereg_mr(struct ibv_mr *mr)
   }
   pthread_mutex_lock(&regmem_sum_mutex);
   regmem_sum = regmem_sum - size/1000000;
-  printf(" ---%lu\n", regmem_sum);
+  //  printf(" ---%lu\n", regmem_sum);
   pthread_mutex_unlock(&regmem_sum_mutex);
   return;
 }

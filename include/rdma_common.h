@@ -1,3 +1,6 @@
+#ifndef _RDMA_COMMON
+#define _RDMA_COMMON
+
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -173,7 +176,7 @@ struct rdma_read_request_entry {
   /*
     The lock is used to know if a RDMA request is completed with minimal CPU usage.
    */
-  sem_t is_rdma_completed;
+  sem_t *is_rdma_completed;
 
   /*
     Size of the registered active side memory region(mr).
@@ -183,7 +186,7 @@ struct rdma_read_request_entry {
 };
 
 struct RDMA_request {
-  sem_t *is_rdma_completed;
+  sem_t is_rdma_completed;
 } ;
 
 
@@ -229,3 +232,9 @@ int get_rdma_buff(uint16_t id, char** addr, uint64_t *size);
 void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/);
 int wait_accept();
 int post_recv_ctl_msg(struct connection *conn);
+
+
+int rdma_wait(struct RDMA_request *request);
+#endif //_RDMA_COMMON
+
+

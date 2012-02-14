@@ -1,8 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "rdma_server.h"
-
+#include "ibtls.h"
 
 
 int main(int argc, char **argv) {
@@ -20,14 +19,16 @@ int main(int argc, char **argv) {
   fprintf(stderr, "%p: size=%lu: \n", data, size);
   while (1) {
     req1 = (struct RDMA_request *)malloc(sizeof(struct RDMA_request));
-    req2 = (struct RDMA_request *)malloc(sizeof(struct RDMA_request));
-    rdma_irecv_r (data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, req1);  
-    rdma_irecv_r (data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, req2);  
-    rdma_wait(req1);
-    rdma_wait(req2);
+
+    RDMA_Recv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);  
+
+    //    fprintf(stderr, "===============\n");
+    //    RDMA_Wait(req1);
+    //    fprintf(stderr, "===============\n");
+    //    rdma_wait(req2);
     free(req1);
-    free(req2);
-    sleep(1);
+    //    free(req2);
+    //    sleep(1);
   }
 
   fprintf(stderr, "%p: size=%lu: \n", data, size);

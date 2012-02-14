@@ -87,7 +87,7 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
   static int thread_running = 0;
 
   set_envs();
-  create_hashtable(client_num);
+  //  create_hashtable(client_num);
 
   TEST_NZ(pthread_create(&listen_thread, NULL, (void *) rdma_passive_init, comm));
   wait_accept();
@@ -100,7 +100,7 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
 }
 
 
-
+/*
 int RDMA_Irecvr(char** buff, uint64_t* size, int* tag, struct RDMA_communicator *comm)
 {
   struct RDMA_message *rdma_msg;
@@ -128,6 +128,7 @@ int RDMA_Recvr(char** buff, uint64_t* size, int* tag, struct RDMA_communicator *
 void RDMA_free (void* data) {
   free(data);
 }
+*/
 
 static void * poll_cq(struct RDMA_communicator *comm)
 {  
@@ -167,8 +168,8 @@ static void * poll_cq(struct RDMA_communicator *comm)
       debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
       conn_send = create_connection(conn_recv->id);
       passive_rrre = conn_recv->passive_rrre;
-      sem_post(&(passive_rrre->is_rdma_completed));
-      //TODO: free_rrre(active_rrre, passive_rrre)
+      sem_post(passive_rrre->is_rdma_completed);
+
       free_rrre(ACTIVE, conn_recv->active_rrre);
       free_rrre(PASSIVE, conn_recv->passive_rrre);
       free_connection(conn_recv);
@@ -200,7 +201,7 @@ static int free_rrre(int mode, struct rdma_read_request_entry *rrre)
   case ACTIVE:
     break;
   case PASSIVE:
-    sem_destroy(&(rrre->is_rdma_completed));
+    sem_destroy(rrre->is_rdma_completed);
     dereg_mr(rrre->passive_mr);
     break;
   }
@@ -233,7 +234,7 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
   }
   lq_init_it(target_rrre_q);
   while ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
-    fprintf(stderr,"id: %lu-%lu, tag: %lu-%lu\n", target_rrre->id, cur_rrre->id, target_rrre->tag, cur_rrre->tag);
+    //    fprintf(stderr,"id: %lu-%lu, tag: %lu-%lu\n", target_rrre->id, cur_rrre->id, target_rrre->tag, cur_rrre->tag);
     //TODO: write more sophisticated code !!
     if (target_rrre->id == RDMA_ANY_SOURCE || 
 	cur_rrre->id    == RDMA_ANY_SOURCE || 
@@ -278,8 +279,10 @@ int rdma_irecv_r (void *buf, int size, void* datatype, int source, int tag, stru
   //TODO: use order for something.
   rrre->order = 0;
   rrre->tag = tag;
-  sem_init(&(rrre->is_rdma_completed), 0, 0);
-  request->is_rdma_completed  = &(rrre->is_rdma_completed);
+  
+  sem_init(&(request->is_rdma_completed), 0, 0);
+  rrre->is_rdma_completed = &(request->is_rdma_completed);
+
   passive_mr = reg_mr(buf, size);
   memcpy(&(rrre->mr), passive_mr, sizeof(struct ibv_mr));
   rrre->passive_mr =  passive_mr;
@@ -292,11 +295,13 @@ int rdma_irecv_r (void *buf, int size, void* datatype, int source, int tag, stru
   return 1;
 }
 
+/*
 int rdma_wait(struct RDMA_request *request)
 {
-  sem_wait(request->is_rdma_completed);
+  sem_wait(&(request->is_rdma_completed));
   return 1;
-}
+  }*/
+
 
 /*
  Note: post RDMA request to the quere pair
@@ -347,10 +352,12 @@ static void append_rdma_msg(uint64_t slid, struct RDMA_message *msg)
   return;
 }
 
+/*
 void RDMA_show_buffer(void)
 {
   show();
 }
+*/
 
 int RDMA_Passive_Finalize(struct RDMA_communicator *comm)
 {
