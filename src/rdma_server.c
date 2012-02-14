@@ -201,7 +201,7 @@ static int free_rrre(int mode, struct rdma_read_request_entry *rrre)
     break;
   case PASSIVE:
     sem_destroy(&(rrre->is_rdma_completed));
-    dereg_mr(&(rrre->mr));
+    dereg_mr(rrre->passive_mr);
     break;
   }
   //  free(rrre);
@@ -272,6 +272,7 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
 int rdma_irecv_r (void *buf, int size, void* datatype, int source, int tag, struct RDMA_communicator *rdma_com, struct RDMA_request *request)
 {
   struct rdma_read_request_entry *rrre;
+  struct ibv_mr *passive_mr;
   rrre = (struct rdma_read_request_entry *) malloc(sizeof(struct rdma_read_request_entry));
   rrre->id = source;
   //TODO: use order for something.
@@ -279,7 +280,9 @@ int rdma_irecv_r (void *buf, int size, void* datatype, int source, int tag, stru
   rrre->tag = tag;
   sem_init(&(rrre->is_rdma_completed), 0, 0);
   request->is_rdma_completed  = &(rrre->is_rdma_completed);
-  memcpy(&(rrre->mr), reg_mr(buf, size), sizeof(struct ibv_mr));
+  passive_mr = reg_mr(buf, size);
+  memcpy(&(rrre->mr), passive_mr, sizeof(struct ibv_mr));
+  rrre->passive_mr =  passive_mr;
   printf("RDMA lib: RECV: local_addr=%p, length=%lu, lkey=%lu\n", rrre->mr.addr, rrre->mr.length, rrre->mr.lkey);
   if (!post_matched_request (ACTIVE, rrre)) {
     printf("irecv Skiped\n");

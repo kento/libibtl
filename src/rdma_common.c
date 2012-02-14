@@ -468,7 +468,8 @@ void dereg_mr(struct ibv_mr *mr)
     retry--;
   }
   pthread_mutex_lock(&regmem_sum_mutex);
-  //  regmem_sum = regmem_sum - size/1000000;
+  regmem_sum = regmem_sum - size/1000000;
+  printf(" ---%lu\n", regmem_sum);
   pthread_mutex_unlock(&regmem_sum_mutex);
   return;
 }
@@ -494,7 +495,7 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
   } while(mr == NULL);
   pthread_mutex_lock(&regmem_sum_mutex);
   regmem_sum = regmem_sum +  size/1000000;
-  printf(" ---%lu\n", regmem_sum);
+
   pthread_mutex_unlock(&regmem_sum_mutex);
   return mr;
 }

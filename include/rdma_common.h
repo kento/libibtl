@@ -167,6 +167,8 @@ struct rdma_read_request_entry {
     mr.addr and mr.rkey to be used for the purpose. 
   */
   struct ibv_mr mr;
+  
+  struct ibv_mr *passive_mr;
 
   /*
     The lock is used to know if a RDMA request is completed with minimal CPU usage.
