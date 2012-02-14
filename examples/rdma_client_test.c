@@ -48,8 +48,8 @@ int main(int argc, char **argv)
   for (i=0; i <= size-2; i++) {
     //data[i] = (char) (i % 26 + 'a');
     data[i] = 'x';
-    a = data[i];
-    data[i] = a;
+    //    a = data[i];
+    //    data[i] = a;
   }
   data[size-1] += '\0';
 
@@ -66,6 +66,8 @@ int main(int argc, char **argv)
   //  for (i=size-2; i >= 0; i--) {
   //    data[i] = (char) (i % 26 + 'a');
   //  }
+
+
   //  data[size-1] += '\0';
   //  RDMA_Isendr(data, size, 1015, &flag2, &comm);
   /* ===== */

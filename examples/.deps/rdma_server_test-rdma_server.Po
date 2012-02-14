@@ -30,7 +30,9 @@ rdma_server_test-rdma_server.o: ../src/rdma_server.c /usr/include/time.h \
   /usr/include/infiniband/verbs.h /usr/include/pthread.h \
   /usr/include/sched.h /usr/include/bits/sched.h /usr/include/signal.h \
   /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
-  ../include/buffer_table.h ../include/hashtable.h
+  /usr/include/semaphore.h /usr/include/bits/semaphore.h \
+  ../include/buffer_table.h ../include/hashtable.h \
+  ../include/list_queue.h
 
 /usr/include/time.h:
 
@@ -164,6 +166,12 @@ rdma_server_test-rdma_server.o: ../src/rdma_server.c /usr/include/time.h \
 
 /usr/include/infiniband/sa.h:
 
+/usr/include/semaphore.h:
+
+/usr/include/bits/semaphore.h:
+
 ../include/buffer_table.h:
 
 ../include/hashtable.h:
+
+../include/list_queue.h:

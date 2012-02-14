@@ -28,6 +28,7 @@ rdma_server_test-rdma_common.o: ../src/rdma_common.c \
   /usr/include/infiniband/verbs.h /usr/include/pthread.h \
   /usr/include/sched.h /usr/include/bits/sched.h /usr/include/signal.h \
   /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
+  /usr/include/semaphore.h /usr/include/bits/semaphore.h \
   ../include/hashtable.h
 
 /usr/include/unistd.h:
@@ -159,5 +160,9 @@ rdma_server_test-rdma_common.o: ../src/rdma_common.c \
 /usr/include/bits/setjmp.h:
 
 /usr/include/infiniband/sa.h:
+
+/usr/include/semaphore.h:
+
+/usr/include/bits/semaphore.h:
 
 ../include/hashtable.h:

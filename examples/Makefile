@@ -56,6 +56,7 @@ rdma_client_test_LINK = $(CCLD) $(rdma_client_test_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_rdma_server_test_OBJECTS =  \
 	rdma_server_test-rdma_server_test.$(OBJEXT) \
+	rdma_server_test-list_queue.$(OBJEXT) \
 	rdma_server_test-rdma_server.$(OBJEXT) \
 	rdma_server_test-hashtable.$(OBJEXT) \
 	rdma_server_test-rdma_common.$(OBJEXT) \
@@ -176,6 +177,8 @@ rdma_client_test_CFLAGS = -I$(INCLUDE_DIR)
 rdma_client_test_LDADD = ${LDFLAGS} -lrdmacm
 rdma_server_test_SOURCES = \
 	rdma_server_test.c \
+	$(SRC_DIR)/list_queue.c \
+	$(INCLUDE_DIR)/list_queue.h \
 	$(SRC_DIR)/rdma_server.c \
 	$(INCLUDE_DIR)/rdma_server.h \
 	$(SRC_DIR)/hashtable.c \
@@ -188,7 +191,7 @@ rdma_server_test_SOURCES = \
 	$(INCLUDE_DIR)/common.h
 
 rdma_server_test_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm
+rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 all: all-am
 
 .SUFFIXES:
@@ -266,6 +269,7 @@ include ./$(DEPDIR)/rdma_client_test-rdma_common.Po
 include ./$(DEPDIR)/rdma_server_test-buffer_table.Po
 include ./$(DEPDIR)/rdma_server_test-common.Po
 include ./$(DEPDIR)/rdma_server_test-hashtable.Po
+include ./$(DEPDIR)/rdma_server_test-list_queue.Po
 include ./$(DEPDIR)/rdma_server_test-rdma_common.Po
 include ./$(DEPDIR)/rdma_server_test-rdma_server.Po
 include ./$(DEPDIR)/rdma_server_test-rdma_server_test.Po
@@ -367,6 +371,20 @@ rdma_server_test-rdma_server_test.obj: rdma_server_test.c
 #	source='rdma_server_test.c' object='rdma_server_test-rdma_server_test.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-rdma_server_test.obj `if test -f 'rdma_server_test.c'; then $(CYGPATH_W) 'rdma_server_test.c'; else $(CYGPATH_W) '$(srcdir)/rdma_server_test.c'; fi`
+
+rdma_server_test-list_queue.o: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-list_queue.o -MD -MP -MF $(DEPDIR)/rdma_server_test-list_queue.Tpo -c -o rdma_server_test-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+	mv -f $(DEPDIR)/rdma_server_test-list_queue.Tpo $(DEPDIR)/rdma_server_test-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='rdma_server_test-list_queue.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+
+rdma_server_test-list_queue.obj: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-list_queue.obj -MD -MP -MF $(DEPDIR)/rdma_server_test-list_queue.Tpo -c -o rdma_server_test-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_test-list_queue.Tpo $(DEPDIR)/rdma_server_test-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='rdma_server_test-list_queue.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
 
 rdma_server_test-rdma_server.o: $(SRC_DIR)/rdma_server.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-rdma_server.o -MD -MP -MF $(DEPDIR)/rdma_server_test-rdma_server.Tpo -c -o rdma_server_test-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c

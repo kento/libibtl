@@ -29,6 +29,7 @@ rdma_client_test-rdma_client_test.o: rdma_client_test.c \
   /usr/include/infiniband/verbs.h /usr/include/pthread.h \
   /usr/include/sched.h /usr/include/bits/sched.h /usr/include/signal.h \
   /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
+  /usr/include/semaphore.h /usr/include/bits/semaphore.h \
   ../include/common.h /usr/include/sys/time.h /usr/include/sys/ioctl.h \
   /usr/include/bits/ioctls.h /usr/include/asm/ioctls.h \
   /usr/include/asm-generic/ioctls.h /usr/include/linux/ioctl.h \
@@ -161,6 +162,10 @@ rdma_client_test-rdma_client_test.o: rdma_client_test.c \
 /usr/include/bits/setjmp.h:
 
 /usr/include/infiniband/sa.h:
+
+/usr/include/semaphore.h:
+
+/usr/include/bits/semaphore.h:
 
 ../include/common.h:
 

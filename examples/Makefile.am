@@ -18,6 +18,8 @@ rdma_client_test_LDADD = ${LDFLAGS} -lrdmacm
 
 rdma_server_test_SOURCES = \
 	rdma_server_test.c \
+	$(SRC_DIR)/list_queue.c \
+	$(INCLUDE_DIR)/list_queue.h \
 	$(SRC_DIR)/rdma_server.c \
 	$(INCLUDE_DIR)/rdma_server.h \
 	$(SRC_DIR)/hashtable.c \
@@ -29,4 +31,4 @@ rdma_server_test_SOURCES = \
 	$(SRC_DIR)/common.c \
 	$(INCLUDE_DIR)/common.h
 rdma_server_test_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm
+rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread

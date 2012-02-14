@@ -5,14 +5,8 @@
 #include "rdma_server.h"
 #include "buffer_table.h"
 #include "hashtable.h"
+#include "list_queue.h"
 
-
-/*
-static int on_connect_request(struct rdma_cm_id *id);
-static int on_connection(struct rdma_cm_id *id);
-static int on_disconnect(struct rdma_cm_id *id);
-static int on_event(struct rdma_cm_event *event);
-*/
 
 static void accept_connection(struct rdma_cm_id *id);
 static void *poll_cq(struct RDMA_communicator *comm);
@@ -26,6 +20,11 @@ static void append_rdma_msg(uint64_t conn_id, struct RDMA_message *msg);
 static void* passive_init(void * arg /*(struct RDMA_communicator *comm)*/) ;
 static void set_envs(void);
 
+static int free_rrre(int mode, struct rdma_read_request_entry *rrre);
+static int create_rrre(struct connection *conn, struct rdma_read_request_entry *rrre);
+static int post_matched_request (int target_q_id, struct rdma_read_request_entry* cur_rrre);
+static void post_RDMA_read (struct connection* conn, uint64_t remote_addr, uint32_t rkey, uint64_t local_addr, uint32_t length, uint32_t lkey);
+
 
 //int RDMA_Passive_Init(struct RDMA_communicator *comm);
 //int RDMA_Irecv(char* buff, int* size, int* tag, struct RDMA_communicator *comm);
@@ -37,6 +36,18 @@ pthread_t listen_thread;
 //static uint32_t allocated_mr_size = 0;
 static int client_num = 0;
 static int rdma_read_unit_size = 0;
+
+/*Queue in which RDMA requests from active sides are put */
+static lq rdma_request_aq;
+#define ACTIVE 0
+
+/*Queue in which RDMA requests on this process are put */
+static lq rdma_request_pq;
+#define PASSIVE 10
+
+
+/*Lock for post_matched_request*/
+static pthread_mutex_t post_req_lock = PTHREAD_MUTEX_INITIALIZER;
 
 //pthread_t poll_thread[RDMA_THREAD_NUM_S];
 //int poll_thread_count = 0;
@@ -80,6 +91,7 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
 
   TEST_NZ(pthread_create(&listen_thread, NULL, (void *) rdma_passive_init, comm));
   wait_accept();
+  //TODO: chage the below as a thread safe region.
   if (thread_running == 0) {
     thread_running = 1;
     TEST_NZ(pthread_create(&listen_thread, NULL, (void *)poll_cq, comm));
@@ -119,44 +131,19 @@ void RDMA_free (void* data) {
 
 static void * poll_cq(struct RDMA_communicator *comm)
 {  
-
-  struct ibv_cq *cq;
-  struct ibv_wc wc;
-  struct ibv_send_wr wr, *bad_wr = NULL;
-  struct ibv_sge sge;
-
-  struct control_msg cmsg;
-  struct RDMA_message *rdma_msg;
-
-  int tag;
-
-  uint32_t mr_size;
-
-  struct RDMA_buff *rdma_buff;
-
-  char log[256];
-
-  double b_usage;
-  double data_in_count = 0;
-  char *ip;
-  int retry=0;
-  
-
-  uint64_t buff_size;
-
   int num_entries;
+
   struct connection* conn_send;
   struct connection* conn_recv;
 
-
-  init_rdma_buffs (client_num);
+  lq_init(&rdma_request_aq);
+  lq_init(&rdma_request_pq);
 
   while (1) {
     double mm, ss, ee;
+    struct rdma_read_request_entry* rrre;
 
-    //    usleep(1000*10);
     ss = get_dtime();
-
     num_entries = recv_wc(1, &conn_recv);
     mm = ss - ee;
     ee = get_dtime();
@@ -167,99 +154,189 @@ static void * poll_cq(struct RDMA_communicator *comm)
       uint64_t rdma_read_sum = 0;
       uint64_t rrs = 0;
       int last_rdma_read = 0;
-      debug(printf("RDMA lib: COMM: Recv %s: id=%lu, wc.slid=%u recv_wc time=%f(%f)\n", rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
-      switch (conn_recv->cmt)
-	{
-	case MR_INIT:
-	  buff_size = conn_recv->recv_msg->data1.buff_size;
-	  /*Allocat buffer for the client msg*/ 
-	  //	debug(printf("RDMA lib: RECV: Recieved MR_INI: for wc.slid=%lu\n",  slid), 2);
-	  retry=0;	
-	  while ((b_usage = buff_usage()) > 20 * 1000) {
-	    fprintf(stderr, "RDMA lib: RECV: Buffer Overflows (usage: %f M bytes) => sleep ... for a while: retry %d !!\n", b_usage, retry);
-	    usleep(1000 * 1000);
-	    retry++;
-	  }
-	  
-	  alloc_rdma_buffs(conn_recv->slid, buff_size);
-	  data_in_count += buff_size / 1000.0;
-	  debug(fprintf(stderr, "RDMA lib: RECV: IPoIB=%s Time= %f , in_count= %f \n", get_ip_addr("ib0"), get_dtime(), data_in_count), 2);
-	  conn_send = create_connection(comm->cm_id);
-	  send_ctl_msg (conn_send, MR_INIT_ACK, 0);
-
-
-	  free_connection(conn_recv);
-	   //	debug(printf("RDMA lib: RECV: Done MR_INI : for wc.slid=%u\n", slid), 2);
-	   break;
-	case MR_CHUNK:
-	  mr_size = conn_recv->recv_msg->data1.mr_size;
-
-	  while(1) {
-	    if (rdma_read_sum + rdma_read_unit_size > mr_size) {
-	      rrs = mr_size - rdma_read_sum;
-	      last_rdma_read = 1;
-	    } else {
-	      rrs = rdma_read_unit_size;
-	    }
-
-	    conn_send = create_connection(comm->cm_id);
-	    memcpy(&conn_send->peer_mr, &conn_recv->recv_msg->data.mr, sizeof(conn_send->peer_mr));
-
-	    //	    printf("rrs: %lu, rdma_read_sum: %lu, mr_size: %lu\n", rrs, rdma_read_sum, mr_size);
-	    if (rdma_read_sum + rrs == mr_size) {
-	      rdma_read(conn_send, conn_recv->slid, rdma_read_sum, rrs, 1);
-	      break;
-	    } else {
-	      rdma_read(conn_send, conn_recv->slid, rdma_read_sum, rrs, 0);
-	    }
-	    
-	    rdma_read_sum += rrs;
-	  }
-
-
-
-
-	  free_connection(conn_recv);
-	  break;
-	case MR_FIN:
-	  //	tag = *conn->recv_msg->data1.tag;
-	  tag = conn_recv->recv_msg->data1.tag;
-	  //	debug(printf("RDMA lib: RECV: Recieved MR_FIN: Tag=%d for wc.slid=%lu\n", tag, slid), 2);
-	  conn_send = create_connection(comm->cm_id);
-	  send_ctl_msg (conn_send, MR_FIN_ACK, 0);
-	  /*Post reveived data*/
-	  rdma_msg = (struct RDMA_message*) malloc(sizeof(struct RDMA_message));
-	  get_rdma_buff(conn_recv->slid, &rdma_msg->buff, &rdma_msg->size);
-	  rdma_msg->tag = tag;
-	  append_rdma_msg(conn_recv->slid, rdma_msg);
-	  free_connection(conn_recv);
-	  break;
-	default:
-	  debug(printf("Unknown TYPE"), 1);
-	  exit(1);
-	  break;
-	}
-      
-    } else if (conn_recv->opcode == IBV_WC_SEND) {
-      debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
-
-      continue;
+      debug(printf("RDMA lib: COMM: Recv REQ: id=%lu, wc.slid=%u recv_wc time=%f(%f)\n",  conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
+      rrre = (struct rdma_read_request_entry*)malloc(sizeof(struct rdma_read_request_entry));
+      memcpy(rrre, conn_recv->recv_msg, sizeof(struct rdma_read_request_entry));      
+      debug(printf("RDMA lib: RECV: qp= %lu, id=%lu, order=%lu, tag=%lu, addr=%p, length=%lu, rkey=%lu, wc.slid=%u recv_wc time=%f(%f)\n", conn_recv->id->qp, rrre->id, rrre->order, rrre->tag, rrre->mr.addr, rrre->mr.length, rrre->mr.rkey, conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
+      conn_send = create_connection(conn_recv->id);
+      free_connection(conn_recv);
+      rrre->conn = conn_send;
+      post_matched_request(PASSIVE, rrre);
     } else if (conn_recv->opcode == IBV_WC_RDMA_READ) {
+      struct rdma_read_request_entry *passive_rrre;
       debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
-      //      conn_send = create_connection(comm->cm_id);
-      send_ctl_msg (conn_recv, MR_CHUNK_ACK, 0);
+      conn_send = create_connection(conn_recv->id);
+      passive_rrre = conn_recv->passive_rrre;
+      sem_post(&(passive_rrre->is_rdma_completed));
+      //TODO: free_rrre(active_rrre, passive_rrre)
+      free_rrre(ACTIVE, conn_recv->active_rrre);
+      free_rrre(PASSIVE, conn_recv->passive_rrre);
+      free_connection(conn_recv);
+      send_ctl_msg (conn_send, MR_INIT_ACK, 0);
+      continue;
+    } else if (conn_recv->opcode == IBV_WC_SEND) {
+      free_connection(conn_recv);
+      debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
       continue;
     } else {
       die("unknow opecode.");
       continue;
     }
-
-
-
   }
   return NULL;
 }
 
+static int create_rrre(struct connection *conn, struct rdma_read_request_entry *rrre)
+{
+  rrre = (struct rdma_read_request_entry*)malloc(sizeof(struct rdma_read_request_entry));
+  memset(rrre, 0, sizeof(struct rdma_read_request_entry));
+  memcpy(rrre, conn->recv_msg, sizeof(struct rdma_read_request_entry));
+  rrre->conn = conn;
+}
+
+static int free_rrre(int mode, struct rdma_read_request_entry *rrre)
+{
+  switch(mode){
+  case ACTIVE:
+    break;
+  case PASSIVE:
+    sem_destroy(&(rrre->is_rdma_completed));
+    dereg_mr(&(rrre->mr));
+    break;
+  }
+  //  free(rrre);
+}
+
+static int post_matched_request (int target_q_id, struct rdma_read_request_entry* cur_rrre)
+{
+  struct rdma_read_request_entry* target_rrre;
+  struct rdma_read_request_entry** active_rrre, **passive_rrre;
+  lq *target_rrre_q, *cur_rrre_q;
+
+  pthread_mutex_lock(&post_req_lock);
+  switch (target_q_id){
+  case ACTIVE:
+    target_rrre_q = &rdma_request_aq;
+    cur_rrre_q = &rdma_request_pq;
+    active_rrre = &target_rrre;
+    passive_rrre = &cur_rrre;
+    break;
+  case PASSIVE:
+    target_rrre_q = &rdma_request_pq;
+    cur_rrre_q = &rdma_request_aq;
+    active_rrre = &cur_rrre;
+    passive_rrre = &target_rrre;
+    break;
+  default:
+    fprintf(stderr, "Wrong Q id \n");
+    exit(1);
+  }
+  lq_init_it(target_rrre_q);
+  while ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
+    fprintf(stderr,"id: %lu-%lu, tag: %lu-%lu\n", target_rrre->id, cur_rrre->id, target_rrre->tag, cur_rrre->tag);
+    //TODO: write more sophisticated code !!
+    if (target_rrre->id == RDMA_ANY_SOURCE || 
+	cur_rrre->id    == RDMA_ANY_SOURCE || 
+	target_rrre->id == cur_rrre->id) {
+      if (target_rrre->tag == RDMA_ANY_TAG || 
+	  cur_rrre->tag   == RDMA_ANY_TAG || 
+	  target_rrre->tag == cur_rrre->tag) {
+	(*active_rrre)->conn->active_rrre = *active_rrre;
+	(*active_rrre)->conn->passive_rrre = *passive_rrre;
+	post_RDMA_read ((*active_rrre)->conn, (uint64_t)(*active_rrre)->mr.addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rrre)->mr.addr, (*active_rrre)->mr.length, (*passive_rrre)->mr.lkey) ;
+	lq_remove(target_rrre_q, target_rrre);
+	lq_fin_it(target_rrre_q);
+	
+	pthread_mutex_unlock(&post_req_lock);
+	  return 1;
+
+      }
+    }
+
+  }
+  lq_enq(cur_rrre_q, cur_rrre);
+  fprintf(stderr,"Queued: %p: id:%lu, tag:%lu\n", cur_rrre_q, cur_rrre->id, cur_rrre->tag);
+  lq_fin_it(target_rrre_q);
+  {
+    struct rdma_read_request_entry *rrre;
+    lq_init_it(cur_rrre_q);
+    while ((rrre = (struct rdma_read_request_entry*)lq_next(cur_rrre_q)) != NULL) { printf("Q: %p: rrre:%d\n", cur_rrre_q, rrre->mr.length);}
+    lq_fin_it(cur_rrre_q);
+  }
+
+  pthread_mutex_unlock(&post_req_lock);
+  return 0;
+}
+
+
+int rdma_irecv_r (void *buf, int size, void* datatype, int source, int tag, struct RDMA_communicator *rdma_com, struct RDMA_request *request)
+{
+  struct rdma_read_request_entry *rrre;
+  rrre = (struct rdma_read_request_entry *) malloc(sizeof(struct rdma_read_request_entry));
+  rrre->id = source;
+  //TODO: use order for something.
+  rrre->order = 0;
+  rrre->tag = tag;
+  sem_init(&(rrre->is_rdma_completed), 0, 0);
+  request->is_rdma_completed  = &(rrre->is_rdma_completed);
+  memcpy(&(rrre->mr), reg_mr(buf, size), sizeof(struct ibv_mr));
+  printf("RDMA lib: RECV: local_addr=%p, length=%lu, lkey=%lu\n", rrre->mr.addr, rrre->mr.length, rrre->mr.lkey);
+  if (!post_matched_request (ACTIVE, rrre)) {
+    printf("irecv Skiped\n");
+    return 0;
+  }
+  printf("irecv RDMA\n");
+  return 1;
+}
+
+int rdma_wait(struct RDMA_request *request)
+{
+  sem_wait(request->is_rdma_completed);
+  return 1;
+}
+
+/*
+ Note: post RDMA request to the quere pair
+   INPUT
+     conn       : 
+     remote_addr: Remote virtual address to be read from
+     rkey       : Remote key
+     local_addr : Local virtual address to be read to
+     length     : Length to be read from remote memory
+     lkey       : Local key
+   OUTPUT
+     N/A
+*/
+static void post_RDMA_read (struct connection* conn, uint64_t remote_addr, uint32_t rkey, uint64_t local_addr, uint32_t length, uint32_t lkey) 
+{
+    struct RDMA_buff *rdma_buff = NULL;
+    struct ibv_wc wc;
+    struct ibv_send_wr wr, *bad_wr;
+    struct ibv_sge sge;
+
+    /* !! memset must be called to initialize ibv_wc !!*/
+    memset(&wr, 0, sizeof(wr));
+
+    wr.wr_id = (uintptr_t)conn;
+    wr.opcode = IBV_WR_RDMA_READ;
+    wr.sg_list = &sge;
+    wr.num_sge = 1;
+    wr.send_flags = IBV_SEND_SIGNALED;
+    wr.wr.rdma.remote_addr = remote_addr;
+    wr.wr.rdma.rkey = rkey;
+
+    sge.addr = local_addr;
+    sge.length = length;
+    sge.lkey = lkey;
+
+    debug(printf("RDMA lib: Preparing RDMA transfer: Done\n"), 1);
+    if ((ibv_post_send(conn->qp, &wr, &bad_wr))) {
+      fprintf(stderr, "RDMA lib: ERROR: post send failed @ %s:%d\n", __FILE__, __LINE__);
+      exit(1);
+    }
+
+    debug(printf("RDMA lib: RECV: Post RDMA_READ: qp=%lu, id=%lu(%d), remote_addr=%p(%lu), rkey=%u, sge.addr=%lu, sge.length=%u,  sge.lkey=%lu\n", conn->qp, conn->count, (uintptr_t)conn, wr.wr.rdma.remote_addr, wr.wr.rdma.remote_addr, wr.wr.rdma.rkey, sge.addr, sge.length, sge.lkey), 2);
+}
 
 static void append_rdma_msg(uint64_t slid, struct RDMA_message *msg)
 {
@@ -272,12 +349,10 @@ void RDMA_show_buffer(void)
   show();
 }
 
-
-
-
 int RDMA_Passive_Finalize(struct RDMA_communicator *comm)
 {
   rdma_destroy_id(comm->cm_id);
   rdma_destroy_event_channel(comm->ec);
   return 0;
 }
+

@@ -238,7 +238,7 @@ static void* poll_cq(struct poll_cq_args* args)
   struct control_msg cmsg;
   void* ctx;
   char* buff; 
-  uint64_t buff_size;
+  uint32_t buff_size;
   int tag;
 
   uint32_t mr_size=0;
@@ -254,10 +254,8 @@ static void* poll_cq(struct poll_cq_args* args)
   struct ibv_mr *mr;
   //  uint64_t *data;
   
-  
   uint64_t waiting_msg_count = 0;
   uint64_t i;
-
 
   //for (i = 0; i < RDMA_BUF_NUM_C; i++){ rdma_msg_mr[i] = NULL;}
   
@@ -274,8 +272,16 @@ static void* poll_cq(struct poll_cq_args* args)
   //  post_receives(comm->cm_id->context);
   
   //  init_ctl_msg(&cmt, &data);
+  struct rdma_read_request_entry rrre;
+  rrre.id = 1;
+  rrre.order = 2;
+  rrre.tag = 3;
+  memcpy(&rrre.mr, reg_mr(send_base_addr, buff_size), sizeof(struct ibv_mr));
+  printf("addr=%p, length=%lu, rkey=%lu\n", rrre.mr.addr, rrre.mr.length, rrre.mr.rkey);
+
   conn_send = create_connection(comm->cm_id);
-  send_ctl_msg(conn_send, MR_INIT, buff_size);
+  
+  send_ctl_msg(conn_send, MR_INIT, &rrre);
   waiting_msg_count++;
   s = get_dtime();
   
@@ -291,61 +297,11 @@ static void* poll_cq(struct poll_cq_args* args)
 
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
-      debug(printf("RDMA lib: SEND: Recv %s: id=%lu(%lu), slid=%u recv_wc time=%f(%f)\n",  rdma_ctl_msg_type_str(conn_recv->cmt), conn_recv->count, conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
-      switch (conn_recv->cmt)
-	{
-	case MR_INIT_ACK:
-	  for (mr_index = 0; mr_index < RDMA_BUF_NUM_C;  mr_index++) {
-	    conn_send = create_connection(comm->cm_id);
-	    if((sent_size = send_rdma_read_req (conn_send, send_base_addr, buff_size, &total_sent_size, tag)) > 0) {
-	      waiting_msg_count++;
-	      send_base_addr += sent_size;
-	    } else {
-	      fin_flag = 1;
-	      break;
-	    }
-	  }
-	  mr_index = mr_index % RDMA_BUF_NUM_C;
-	  free_connection(conn_recv);
-
-	  break;
-	case MR_CHUNK_ACK:
-	  //	  sleep(3);
-	  if(fin_flag == 0){
-	    conn_send = create_connection(comm->cm_id);
-	    if((sent_size = send_rdma_read_req (conn_send, send_base_addr, buff_size, &total_sent_size, tag)) > 0) {
-	      waiting_msg_count++;
-	      send_base_addr += sent_size;
-	    } else {
-	      fin_flag = 1;;
-	      break;
-	    }
-	    mr_index = (mr_index+ 1) % RDMA_BUF_NUM_C;
-	  }
-	  free_connection(conn_recv);
-	  break;
-	case MR_FIN_ACK:
-	  
-	  e = get_dtime();
-	  free(args->msg);
-	  free(args);
-	  ip = get_ip_addr("ib0");
-	  printf("RDMA lib: SEND: %s: send time= %f secs, send size= %lu MB, throughput = %f MB/s\n", ip, e - s, buff_size/1000000, buff_size/(e - s)/1000000.0);
-	  //	for (i = 0; i < waiting_msg_count-1; i++) {
-	  //	recv_ctl_msg (cmt, data, &conn);
-	  //	}
-	  //	  finalize_ctl_msg(cmt, data);
-	  *flag = 1;
-	  free_connection(conn_recv);
-	  return NULL;
-	default:
-	  debug(printf("Unknown TYPE"), 1);
-	  return NULL;
-	}
-
+      debug(printf("RDMA lib: SEND: Recv REQ: id=%lu(%lu), slid=%u recv_wc time=%f(%f)\n",  conn_recv->count, conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
+      *(args->flag) = 1;
+      return;
     } else if (conn_recv->opcode == IBV_WC_SEND) {
       debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
-
       continue;
     } else {
       die("unknow opecode.");
@@ -361,11 +317,12 @@ static int send_rdma_read_req (struct connection* conn, char* addr, uint64_t add
   uint64_t sent_size = 0;
   uint32_t mr_size;
 
+  printf("addr_size: %lu\n", addr_size );
   if (addr_size == *total_sent_size) {
     /*sent all data*/
     /*TODO: Get this function work without a below usleep(10)*/
     //    usleep(10);
-    send_ctl_msg (conn, MR_FIN, tag);
+    //NEW:    send_ctl_msg (conn, MR_FIN, tag);
     return 0;
   } else {
     /*not sent all data yet*/
@@ -377,7 +334,7 @@ static int send_rdma_read_req (struct connection* conn, char* addr, uint64_t add
 
     register_rdma_msg_mr(conn, addr, mr_size);
     *total_sent_size += (uint64_t)mr_size;
-    send_ctl_msg (conn, MR_CHUNK, mr_size);
+    //NEW:    send_ctl_msg (conn, MR_CHUNK, mr_size);
     sent_size = mr_size;
   }
 
