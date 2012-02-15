@@ -464,6 +464,8 @@ void dereg_mr(struct ibv_mr *mr)
 {
   int retry = 100;
   uint64_t size = mr->length;
+  void* addr = mr->addr;
+
   while (ibv_dereg_mr(mr) != 0) {
     fprintf(stderr, "RDMA lib: COMM: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
     exit(1);
@@ -477,6 +479,7 @@ void dereg_mr(struct ibv_mr *mr)
   regmem_sum = regmem_sum - size/1000000;
   //  printf(" ---%lu\n", regmem_sum);
   pthread_mutex_unlock(&regmem_sum_mutex);
+  fprintf(stderr, "RDMA lib: COMM: Dereg: addr=%p, length=%lu\n", addr, size);
   return;
 }
 
@@ -499,6 +502,7 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
       exit(1);
     }
   } while(mr == NULL);
+  fprintf(stderr, "RDMA lib: COMM: Reg: addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr->addr, mr->length, mr->lkey, mr->rkey);
   pthread_mutex_lock(&regmem_sum_mutex);
   regmem_sum = regmem_sum +  size/1000000;
 
@@ -594,7 +598,7 @@ static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, str
   sges.lkey = (uint32_t)conn->send_mr->lkey;
   //  fprintf(stderr, "%p, %p\n", conn_old->id->qp, conn->id->qp);
   TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
-  debug(printf("RDMA lib: COMM: Post %s: id=%lu(%d),  post_count=%lu, local_addr=%lu, length=%u, lkey=%lu\n", rdma_ctl_msg_type_str(cmt), conn->count, (uintptr_t)conn, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
+  debug(printf("RDMA lib: COMM: Post %s: id=%lu,  post_count=%lu, imm_data=%d, local_addr=%p, length=%u, lkey=%p\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, conn->count, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
   return 0;
 }
 
@@ -613,7 +617,7 @@ int post_recv_ctl_msg(struct connection *conn)
   sger.lkey = conn->recv_mr->lkey;
 
   TEST_NZ(ibv_post_recv(conn->qp, &wrr, &bad_wrr));
-
+  debug(printf("RDMA lib: COMM: Post Recv: id=%lu,  post_count=%lu, local_addr=%p, length=%u, lkey=%p\n", (uintptr_t)conn, conn->count,  sger.addr, sger.length, sger.lkey), 2);
 
   return 0;
 }

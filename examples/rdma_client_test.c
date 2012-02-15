@@ -12,6 +12,8 @@
 #include "ibtls.h"
 #include "common.h"
 
+#define NUM 2
+#define ITE 1
 
 int get_tag(void);
 //char* get_ip_addr (char* interface);
@@ -43,7 +45,7 @@ int main(int argc, char **argv)
   //  data = (char*)malloc(size);
   data = (char*)valloc(size);
 
-  int i;
+  int i, j;
   char * a;
   flag1= 0;
   for (i=0; i <= size-2; i++) {
@@ -61,23 +63,19 @@ int main(int argc, char **argv)
 
 
   // RDMA_Sendr_ns(data, size, get_tag(), &comm);
-  struct RDMA_request req;
-  RDMA_Isend(data, size, NULL, 0, 2, &comm, &req);
-  /*=======*/
-  // data = (char*)malloc(size);
-  //    flag2 = 0;
-  //  for (i=size-2; i >= 0; i--) {
-  //    data[i] = (char) (i % 26 + 'a');
-  //  }
-
-
-  //  data[size-1] += '\0';
-  //  RDMA_Isendr(data, size, 1015, &flag2, &comm);
-  /* ===== */
-  RDMA_Wait (&req) ;
+  struct RDMA_request req[NUM];
+  
+  for (j = 0; j < ITE; j++) {
+    for (i = 0; i < NUM; i++) {
+      RDMA_Isend(data + i * (size/NUM), size/NUM, NULL, 0, 2, &comm, &req[i]);
+    }
+    for (i = 0; i < NUM; i++) {
+      RDMA_Wait(&req[i]);
+    }
+  }
   e = get_dtime();
   
-  printf("Send: %d %f %f GB/s\n", size,  e - s, size/(e - s)/1000000000.0);
+  printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) * ITE ,  e - s, (size/1000000000.0 * ITE )/(e - s));
   sleep(2);
   return 0;
   //  RDMA_Active_Finalize(&comm);

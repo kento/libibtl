@@ -206,7 +206,7 @@ static void* poll_cq(struct poll_cq_args* args)
 
   //To free resources after the ack.
   conn_send->active_rrre = &rrre;
-  
+
   send_ctl_msg(conn_send, MR_INIT, &rrre);
   waiting_msg_count++;
   s = get_dtime();
@@ -224,11 +224,13 @@ static void* poll_cq(struct poll_cq_args* args)
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
       struct rdma_read_request_entry *active_rrre;
-      debug(printf("RDMA lib: SEND: Recv REQ: id=%lu(%lu), slid=%u recv_wc time=%f(%f)\n",  conn_recv->count, conn_recv->id, conn_recv->slid, ee - ss, mm), 2);
+      debug(printf("RDMA lib: SEND: Recv REQ: id=%lu, count=%lu,  slid=%u recv_wc time=%f(%f)\n",   conn_recv->id, conn_recv->count, conn_recv->slid, ee - ss, mm), 2);
     
       active_rrre = conn_recv->active_rrre;
-      sem_post(active_rrre->is_rdma_completed);
-      
+      sem_post(args->is_rdma_completed);
+      //  sem_post(active_rrre->is_rdma_completed);
+
+
       /*TODO: more sophisticated free*/
       conn_recv->active_rrre = NULL;
       conn_recv->passive_rrre = NULL;

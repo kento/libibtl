@@ -7,6 +7,7 @@
 #include "hashtable.h"
 #include "list_queue.h"
 
+#define MIN_LENGTH 1
 
 static void accept_connection(struct rdma_cm_id *id);
 static void *poll_cq(struct RDMA_communicator *comm);
@@ -165,19 +166,27 @@ static void * poll_cq(struct RDMA_communicator *comm)
       post_matched_request(PASSIVE, rrre);
     } else if (conn_recv->opcode == IBV_WC_RDMA_READ) {
       struct rdma_read_request_entry *passive_rrre;
-      debug(printf("RDMA lib: COMM: Sent IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
+      debug(printf("RDMA lib: COMM: Done IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
       conn_send = create_connection(conn_recv->id);
       passive_rrre = conn_recv->passive_rrre;
       sem_post(passive_rrre->is_rdma_completed);
-
-      free_rrre(ACTIVE, conn_recv->active_rrre);
-      free_rrre(PASSIVE, conn_recv->passive_rrre);
-      free_connection(conn_recv);
-      send_ctl_msg (conn_send, MR_INIT_ACK, 0);
+      if (conn_recv->passive_rrre->mr.length == MIN_LENGTH) {
+	free_rrre(PASSIVE, conn_recv->passive_rrre);
+	free_connection(conn_recv);
+      } else {
+	free_rrre(ACTIVE, conn_recv->active_rrre);
+	free_rrre(PASSIVE, conn_recv->passive_rrre);
+	free_connection(conn_recv);
+	send_ctl_msg (conn_send, MR_INIT_ACK, 0);
+      }
       continue;
     } else if (conn_recv->opcode == IBV_WC_SEND) {
-      free_connection(conn_recv);
       debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
+      /* ========
+	Note: free_connection(conn_recv) is not needed, because conn_recv was used for post_sent but the conn_recv is being used.
+      */
+      // free_connection(conn_recv);
+      /* ======== */
       continue;
     } else {
       die("unknow opecode.");
@@ -244,13 +253,19 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
 	  target_rrre->tag == cur_rrre->tag) {
 	(*active_rrre)->conn->active_rrre = *active_rrre;
 	(*active_rrre)->conn->passive_rrre = *passive_rrre;
-	post_RDMA_read ((*active_rrre)->conn, (uint64_t)(*active_rrre)->mr.addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rrre)->mr.addr, (*active_rrre)->mr.length, (*passive_rrre)->mr.lkey) ;
-	lq_remove(target_rrre_q, target_rrre);
+	if ((*passive_rrre)->mr.length == MIN_LENGTH) {
+	  post_RDMA_read ((*active_rrre)->conn, (uint64_t)(*active_rrre)->mr.addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rrre)->mr.addr, MIN_LENGTH, (*passive_rrre)->mr.lkey) ;
+	  if (target_q_id == PASSIVE) {
+	    lq_remove(target_rrre_q, target_rrre);
+	    lq_enq(cur_rrre_q, cur_rrre);
+	  }
+	} else {
+	  post_RDMA_read ((*active_rrre)->conn, (uint64_t)(*active_rrre)->mr.addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rrre)->mr.addr, (*active_rrre)->mr.length, (*passive_rrre)->mr.lkey) ;
+	  lq_remove(target_rrre_q, target_rrre);
+	}
 	lq_fin_it(target_rrre_q);
-	
 	pthread_mutex_unlock(&post_req_lock);
-	  return 1;
-
+	return 1;
       }
     }
 

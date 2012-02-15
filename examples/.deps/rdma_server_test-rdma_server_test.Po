@@ -30,7 +30,8 @@ rdma_server_test-rdma_server_test.o: rdma_server_test.c \
   /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
   /usr/include/signal.h /usr/include/bits/setjmp.h \
   /usr/include/infiniband/sa.h /usr/include/semaphore.h \
-  /usr/include/bits/semaphore.h ../include/rdma_server.h
+  /usr/include/bits/semaphore.h ../include/rdma_server.h \
+  ../include/common.h
 
 /usr/include/stdlib.h:
 
@@ -169,3 +170,5 @@ rdma_server_test-rdma_server_test.o: rdma_server_test.c \
 /usr/include/bits/semaphore.h:
 
 ../include/rdma_server.h:
+
+../include/common.h:

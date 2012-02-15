@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "ibtls.h"
+#include "common.h"
 
 
 int main(int argc, char **argv) {
@@ -10,18 +11,28 @@ int main(int argc, char **argv) {
   char *data;
   uint64_t size;
   int ctl_tag;
+  double ss, ee;
 
-  size = 1000 * 1000 * 1000;
+  size = 1024 * 1024 * 1024;
   data = (char*)valloc(size);
   memset(data, 1, size);
   RDMA_Passive_Init(&comm);
-  
+  int req_num = 2;
+  struct RDMA_request req[req_num];
+  int req_id = 0;
+  RDMA_Irecv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req[req_id]);  
+  req_id = (req_id + 1) % req_num;
   fprintf(stderr, "%p: size=%lu: \n", data, size);
   while (1) {
-    req1 = (struct RDMA_request *)malloc(sizeof(struct RDMA_request));
-
-    RDMA_Recv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);  
-
+    //RDMA_Recv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);  
+    ss = get_dtime();
+    //    RDMA_Recv(data, 1, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);  
+    RDMA_Irecv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req[req_id]);  
+    req_id = (req_id + 1) % req_num;
+    fprintf(stderr, "req_id:%d\n", req_id);
+    RDMA_Wait(&req[req_id]);
+    ee = get_dtime();
+    fprintf(stderr, "Latency: %d\n", ee - ss);
     //    fprintf(stderr, "===============\n");
     //    RDMA_Wait(req1);
     //    fprintf(stderr, "===============\n");
