@@ -38,7 +38,5 @@ rdma_server_test_SOURCES = \
 	$(SRC_DIR)/ibtls.c \
 	$(INCLUDE_DIR)/ibtls.h
 
-
-
 rdma_server_test_CFLAGS = -I$(INCLUDE_DIR)
 rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread

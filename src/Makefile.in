@@ -13,6 +13,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -38,8 +39,34 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-SOURCES =
-DIST_SOURCES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)"
+libLIBRARIES_INSTALL = $(INSTALL_DATA)
+LIBRARIES = $(lib_LIBRARIES)
+AR = ar
+ARFLAGS = cru
+libibtls_a_AR = $(AR) $(ARFLAGS)
+libibtls_a_DEPENDENCIES = @LIBOBJS@
+am_libibtls_a_OBJECTS = libibtls_a-rdma_server.$(OBJEXT) \
+	libibtls_a-rdma_common.$(OBJEXT) libibtls_a-common.$(OBJEXT) \
+	libibtls_a-ibtls.$(OBJEXT)
+libibtls_a_OBJECTS = $(am_libibtls_a_OBJECTS)
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(libibtls_a_SOURCES)
+DIST_SOURCES = $(libibtls_a_SOURCES)
+ETAGS = etags
+CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -77,6 +104,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -123,9 +151,25 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+SRC_DIR = ../src
+INCLUDE_DIR = ../include
+lib_LIBRARIES = libibtls.a
+libibtls_a_SOURCES = \
+        $(SRC_DIR)/rdma_server.c \
+        $(INCLUDE_DIR)/rdma_server.h \
+        $(SRC_DIR)/rdma_common.c \
+        $(INCLUDE_DIR)/rdma_common.h \
+        $(SRC_DIR)/common.c \
+        $(INCLUDE_DIR)/common.h \
+        $(SRC_DIR)/ibtls.c \
+        $(INCLUDE_DIR)/ibtls.h 
+
+libibtls_a_LIBADD = @LIBOBJS@
+libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -155,12 +199,167 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLIBRARIES: $(lib_LIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(libLIBRARIES_INSTALL) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(libLIBRARIES_INSTALL) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
+	@$(POST_INSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    p=$(am__strip_dir) \
+	    echo " $(RANLIB) '$(DESTDIR)$(libdir)/$$p'"; \
+	    $(RANLIB) "$(DESTDIR)$(libdir)/$$p"; \
+	  else :; fi; \
+	done
+
+uninstall-libLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLIBRARIES:
+	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
+libibtls.a: $(libibtls_a_OBJECTS) $(libibtls_a_DEPENDENCIES) 
+	-rm -f libibtls.a
+	$(libibtls_a_AR) libibtls.a $(libibtls_a_OBJECTS) $(libibtls_a_LIBADD)
+	$(RANLIB) libibtls.a
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-ibtls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-rdma_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-rdma_server.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+libibtls_a-rdma_server.o: $(SRC_DIR)/rdma_server.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_server.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_server.Tpo -c -o libibtls_a-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-rdma_server.Tpo $(DEPDIR)/libibtls_a-rdma_server.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_server.c' object='libibtls_a-rdma_server.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+
+libibtls_a-rdma_server.obj: $(SRC_DIR)/rdma_server.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_server.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_server.Tpo -c -o libibtls_a-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-rdma_server.Tpo $(DEPDIR)/libibtls_a-rdma_server.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_server.c' object='libibtls_a-rdma_server.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
+
+libibtls_a-rdma_common.o: $(SRC_DIR)/rdma_common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_common.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_common.Tpo -c -o libibtls_a-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-rdma_common.Tpo $(DEPDIR)/libibtls_a-rdma_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_common.c' object='libibtls_a-rdma_common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+
+libibtls_a-rdma_common.obj: $(SRC_DIR)/rdma_common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_common.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_common.Tpo -c -o libibtls_a-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-rdma_common.Tpo $(DEPDIR)/libibtls_a-rdma_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_common.c' object='libibtls_a-rdma_common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
+
+libibtls_a-common.o: $(SRC_DIR)/common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-common.o -MD -MP -MF $(DEPDIR)/libibtls_a-common.Tpo -c -o libibtls_a-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-common.Tpo $(DEPDIR)/libibtls_a-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/common.c' object='libibtls_a-common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+
+libibtls_a-common.obj: $(SRC_DIR)/common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-common.obj -MD -MP -MF $(DEPDIR)/libibtls_a-common.Tpo -c -o libibtls_a-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-common.Tpo $(DEPDIR)/libibtls_a-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/common.c' object='libibtls_a-common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
+
+libibtls_a-ibtls.o: $(SRC_DIR)/ibtls.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtls.o -MD -MP -MF $(DEPDIR)/libibtls_a-ibtls.Tpo -c -o libibtls_a-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-ibtls.Tpo $(DEPDIR)/libibtls_a-ibtls.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/ibtls.c' object='libibtls_a-ibtls.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+
+libibtls_a-ibtls.obj: $(SRC_DIR)/ibtls.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtls.obj -MD -MP -MF $(DEPDIR)/libibtls_a-ibtls.Tpo -c -o libibtls_a-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libibtls_a-ibtls.Tpo $(DEPDIR)/libibtls_a-ibtls.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/ibtls.c' object='libibtls_a-ibtls.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '{ files[$$0] = 1; nonemtpy = 1; } \
+	      END { if (nonempty) { for (i in files) print i; }; }'`; \
+	mkid -fID $$unique
 tags: TAGS
-TAGS:
 
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
+	      END { if (nonempty) { for (i in files) print i; }; }'`; \
+	if test -z "$(ETAGS_ARGS)$$tags$$unique"; then :; else \
+	  test -n "$$unique" || unique=$$empty_fix; \
+	  $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	    $$tags $$unique; \
+	fi
 ctags: CTAGS
-CTAGS:
+CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
+	      END { if (nonempty) { for (i in files) print i; }; }'`; \
+	test -z "$(CTAGS_ARGS)$$tags$$unique" \
+	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
+	     $$tags $$unique
 
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -190,8 +389,11 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(LIBRARIES)
 installdirs:
+	for dir in "$(DESTDIR)$(libdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -218,11 +420,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
 
 distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic
+distclean-am: clean-am distclean-compile distclean-generic \
+	distclean-tags
 
 dvi: dvi-am
 
@@ -238,7 +442,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am:
+install-exec-am: install-libLIBRARIES
 
 install-html: install-html-am
 
@@ -253,12 +457,13 @@ install-ps: install-ps-am
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
 pdf: pdf-am
 
@@ -268,20 +473,24 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-libLIBRARIES
 
 .MAKE: install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic distclean \
-	distclean-generic distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libLIBRARIES ctags distclean distclean-compile \
+	distclean-generic distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-libLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-libLIBRARIES
 
+#libibtls_a_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

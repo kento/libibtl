@@ -13,7 +13,8 @@
 #include "common.h"
 
 #define NUM 1
-#define ITE 1
+#define ITE 1000
+#define SLP 5
 
 int get_tag(void);
 //char* get_ip_addr (char* interface);
@@ -75,7 +76,7 @@ int main(int argc, char **argv)
     e = get_dtime();
     printf("i=%d\n", j);
     printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) ,  e - s, (size/1000000000.0  )/(e - s));
-
+    sleep(SLP);
   }
   ee = get_dtime();
   sleep(1);

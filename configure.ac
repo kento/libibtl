@@ -10,6 +10,9 @@ AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_RANLIB
+
+AC_PROG_ASDFASDF
 
 # Checks for libraries.
 
@@ -22,4 +25,7 @@ AC_PROG_CC
 AC_CONFIG_FILES([Makefile
                  src/Makefile
 		 examples/Makefile])
+
 AC_OUTPUT
+
+# Others
