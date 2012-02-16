@@ -48,7 +48,6 @@ am_rdma_client_test_OBJECTS =  \
 	rdma_client_test-list_queue.$(OBJEXT) \
 	rdma_client_test-rdma_client.$(OBJEXT) \
 	rdma_client_test-rdma_server.$(OBJEXT) \
-	rdma_client_test-hashtable.$(OBJEXT) \
 	rdma_client_test-rdma_common.$(OBJEXT) \
 	rdma_client_test-common.$(OBJEXT) \
 	rdma_client_test-ibtls.$(OBJEXT)
@@ -62,9 +61,7 @@ am_rdma_server_test_OBJECTS =  \
 	rdma_server_test-list_queue.$(OBJEXT) \
 	rdma_server_test-rdma_server.$(OBJEXT) \
 	rdma_server_test-rdma_client.$(OBJEXT) \
-	rdma_server_test-hashtable.$(OBJEXT) \
 	rdma_server_test-rdma_common.$(OBJEXT) \
-	rdma_server_test-buffer_table.$(OBJEXT) \
 	rdma_server_test-common.$(OBJEXT) \
 	rdma_server_test-ibtls.$(OBJEXT)
 rdma_server_test_OBJECTS = $(am_rdma_server_test_OBJECTS)
@@ -175,8 +172,6 @@ rdma_client_test_SOURCES = \
 	$(INCLUDE_DIR)/rdma_client.h \
 	$(SRC_DIR)/rdma_server.c \
 	$(INCLUDE_DIR)/rdma_server.h \
-	$(SRC_DIR)/hashtable.c \
-	$(INCLUDE_DIR)/hashtable.h \
 	$(SRC_DIR)/rdma_common.c \
 	$(INCLUDE_DIR)/rdma_common.h \
 	$(SRC_DIR)/common.c \
@@ -194,12 +189,8 @@ rdma_server_test_SOURCES = \
 	$(INCLUDE_DIR)/rdma_server.h \
 	$(SRC_DIR)/rdma_client.c \
 	$(INCLUDE_DIR)/rdma_client.h \
-	$(SRC_DIR)/hashtable.c \
-	$(INCLUDE_DIR)/hashtable.h \
 	$(SRC_DIR)/rdma_common.c \
 	$(INCLUDE_DIR)/rdma_common.h \
-	$(SRC_DIR)/buffer_table.c \
-	$(INCLUDE_DIR)/buffer_table.h \
 	$(SRC_DIR)/common.c \
 	$(INCLUDE_DIR)/common.h \
 	$(SRC_DIR)/ibtls.c \
@@ -277,16 +268,13 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/rdma_client_test-common.Po
-include ./$(DEPDIR)/rdma_client_test-hashtable.Po
 include ./$(DEPDIR)/rdma_client_test-ibtls.Po
 include ./$(DEPDIR)/rdma_client_test-list_queue.Po
 include ./$(DEPDIR)/rdma_client_test-rdma_client.Po
 include ./$(DEPDIR)/rdma_client_test-rdma_client_test.Po
 include ./$(DEPDIR)/rdma_client_test-rdma_common.Po
 include ./$(DEPDIR)/rdma_client_test-rdma_server.Po
-include ./$(DEPDIR)/rdma_server_test-buffer_table.Po
 include ./$(DEPDIR)/rdma_server_test-common.Po
-include ./$(DEPDIR)/rdma_server_test-hashtable.Po
 include ./$(DEPDIR)/rdma_server_test-ibtls.Po
 include ./$(DEPDIR)/rdma_server_test-list_queue.Po
 include ./$(DEPDIR)/rdma_server_test-rdma_client.Po
@@ -363,20 +351,6 @@ rdma_client_test-rdma_server.obj: $(SRC_DIR)/rdma_server.c
 #	source='$(SRC_DIR)/rdma_server.c' object='rdma_client_test-rdma_server.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
-
-rdma_client_test-hashtable.o: $(SRC_DIR)/hashtable.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-hashtable.o -MD -MP -MF $(DEPDIR)/rdma_client_test-hashtable.Tpo -c -o rdma_client_test-hashtable.o `test -f '$(SRC_DIR)/hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/hashtable.c
-	mv -f $(DEPDIR)/rdma_client_test-hashtable.Tpo $(DEPDIR)/rdma_client_test-hashtable.Po
-#	source='$(SRC_DIR)/hashtable.c' object='rdma_client_test-hashtable.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-hashtable.o `test -f '$(SRC_DIR)/hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/hashtable.c
-
-rdma_client_test-hashtable.obj: $(SRC_DIR)/hashtable.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-hashtable.obj -MD -MP -MF $(DEPDIR)/rdma_client_test-hashtable.Tpo -c -o rdma_client_test-hashtable.obj `if test -f '$(SRC_DIR)/hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/hashtable.c'; fi`
-	mv -f $(DEPDIR)/rdma_client_test-hashtable.Tpo $(DEPDIR)/rdma_client_test-hashtable.Po
-#	source='$(SRC_DIR)/hashtable.c' object='rdma_client_test-hashtable.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-hashtable.obj `if test -f '$(SRC_DIR)/hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/hashtable.c'; fi`
 
 rdma_client_test-rdma_common.o: $(SRC_DIR)/rdma_common.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-rdma_common.o -MD -MP -MF $(DEPDIR)/rdma_client_test-rdma_common.Tpo -c -o rdma_client_test-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
@@ -476,20 +450,6 @@ rdma_server_test-rdma_client.obj: $(SRC_DIR)/rdma_client.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
 
-rdma_server_test-hashtable.o: $(SRC_DIR)/hashtable.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-hashtable.o -MD -MP -MF $(DEPDIR)/rdma_server_test-hashtable.Tpo -c -o rdma_server_test-hashtable.o `test -f '$(SRC_DIR)/hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/hashtable.c
-	mv -f $(DEPDIR)/rdma_server_test-hashtable.Tpo $(DEPDIR)/rdma_server_test-hashtable.Po
-#	source='$(SRC_DIR)/hashtable.c' object='rdma_server_test-hashtable.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-hashtable.o `test -f '$(SRC_DIR)/hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/hashtable.c
-
-rdma_server_test-hashtable.obj: $(SRC_DIR)/hashtable.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-hashtable.obj -MD -MP -MF $(DEPDIR)/rdma_server_test-hashtable.Tpo -c -o rdma_server_test-hashtable.obj `if test -f '$(SRC_DIR)/hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/hashtable.c'; fi`
-	mv -f $(DEPDIR)/rdma_server_test-hashtable.Tpo $(DEPDIR)/rdma_server_test-hashtable.Po
-#	source='$(SRC_DIR)/hashtable.c' object='rdma_server_test-hashtable.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-hashtable.obj `if test -f '$(SRC_DIR)/hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/hashtable.c'; fi`
-
 rdma_server_test-rdma_common.o: $(SRC_DIR)/rdma_common.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-rdma_common.o -MD -MP -MF $(DEPDIR)/rdma_server_test-rdma_common.Tpo -c -o rdma_server_test-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
 	mv -f $(DEPDIR)/rdma_server_test-rdma_common.Tpo $(DEPDIR)/rdma_server_test-rdma_common.Po
@@ -503,20 +463,6 @@ rdma_server_test-rdma_common.obj: $(SRC_DIR)/rdma_common.c
 #	source='$(SRC_DIR)/rdma_common.c' object='rdma_server_test-rdma_common.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
-
-rdma_server_test-buffer_table.o: $(SRC_DIR)/buffer_table.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-buffer_table.o -MD -MP -MF $(DEPDIR)/rdma_server_test-buffer_table.Tpo -c -o rdma_server_test-buffer_table.o `test -f '$(SRC_DIR)/buffer_table.c' || echo '$(srcdir)/'`$(SRC_DIR)/buffer_table.c
-	mv -f $(DEPDIR)/rdma_server_test-buffer_table.Tpo $(DEPDIR)/rdma_server_test-buffer_table.Po
-#	source='$(SRC_DIR)/buffer_table.c' object='rdma_server_test-buffer_table.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-buffer_table.o `test -f '$(SRC_DIR)/buffer_table.c' || echo '$(srcdir)/'`$(SRC_DIR)/buffer_table.c
-
-rdma_server_test-buffer_table.obj: $(SRC_DIR)/buffer_table.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-buffer_table.obj -MD -MP -MF $(DEPDIR)/rdma_server_test-buffer_table.Tpo -c -o rdma_server_test-buffer_table.obj `if test -f '$(SRC_DIR)/buffer_table.c'; then $(CYGPATH_W) '$(SRC_DIR)/buffer_table.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/buffer_table.c'; fi`
-	mv -f $(DEPDIR)/rdma_server_test-buffer_table.Tpo $(DEPDIR)/rdma_server_test-buffer_table.Po
-#	source='$(SRC_DIR)/buffer_table.c' object='rdma_server_test-buffer_table.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-buffer_table.obj `if test -f '$(SRC_DIR)/buffer_table.c'; then $(CYGPATH_W) '$(SRC_DIR)/buffer_table.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/buffer_table.c'; fi`
 
 rdma_server_test-common.o: $(SRC_DIR)/common.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-common.o -MD -MP -MF $(DEPDIR)/rdma_server_test-common.Tpo -c -o rdma_server_test-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c

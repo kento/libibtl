@@ -11,8 +11,6 @@ rdma_client_test_SOURCES = \
 	$(INCLUDE_DIR)/rdma_client.h \
 	$(SRC_DIR)/rdma_server.c \
 	$(INCLUDE_DIR)/rdma_server.h \
-	$(SRC_DIR)/hashtable.c \
-	$(INCLUDE_DIR)/hashtable.h \
 	$(SRC_DIR)/rdma_common.c \
 	$(INCLUDE_DIR)/rdma_common.h \
 	$(SRC_DIR)/common.c \
@@ -33,12 +31,8 @@ rdma_server_test_SOURCES = \
 	$(INCLUDE_DIR)/rdma_server.h \
 	$(SRC_DIR)/rdma_client.c \
 	$(INCLUDE_DIR)/rdma_client.h \
-	$(SRC_DIR)/hashtable.c \
-	$(INCLUDE_DIR)/hashtable.h \
 	$(SRC_DIR)/rdma_common.c \
 	$(INCLUDE_DIR)/rdma_common.h \
-	$(SRC_DIR)/buffer_table.c \
-	$(INCLUDE_DIR)/buffer_table.h \
 	$(SRC_DIR)/common.c \
 	$(INCLUDE_DIR)/common.h \
 	$(SRC_DIR)/ibtls.c \

@@ -3,8 +3,6 @@
 
 #include "common.h"
 #include "rdma_server.h"
-#include "buffer_table.h"
-#include "hashtable.h"
 #include "list_queue.h"
 
 #define MIN_LENGTH 1
