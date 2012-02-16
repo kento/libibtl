@@ -67,7 +67,7 @@ static void* poll_cq(struct poll_cq_args* args)
   int num_entries;
 
   double s, e;
-
+  double mm,ee,ss, te, ts;
   /*
     args: (+) used (-) use in future
       + args->buf = buf;
@@ -81,7 +81,9 @@ static void* poll_cq(struct poll_cq_args* args)
   struct rdma_read_request_entry rrre;
   struct ibv_mr *passive_mr;
 
+
   comm = args->comm;
+
 
   //TODO: allocation ID
   rrre.id = 1;
@@ -89,20 +91,23 @@ static void* poll_cq(struct poll_cq_args* args)
   rrre.order = 2;
   rrre.tag = args->tag;
   //TODO: change the member name of passive_mr because passive_mr is used in alos active side.
+  ts = get_dtime();
   passive_mr = reg_mr(args->buf, args->size);
   memcpy(&rrre.mr, passive_mr, sizeof(struct ibv_mr));
+
   rrre.passive_mr =  passive_mr;
   rrre.is_rdma_completed = args->is_rdma_completed;
   conn_send = create_connection(comm->cm_id);
 
   //To free resources after the ack.
   conn_send->active_rrre = &rrre;
+  ee = get_dtime();
 
   send_ctl_msg(conn_send, MR_INIT, &rrre);
 
   s = get_dtime();
   while (1) {
-    double mm,ee,ss;
+
     //TODO 1: mr and data is NULL
     ss = get_dtime();
     num_entries = recv_wc(1, &conn_recv);
@@ -114,8 +119,8 @@ static void* poll_cq(struct poll_cq_args* args)
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
       struct rdma_read_request_entry *active_rrre;
-      debug(printf("RDMA lib: SEND: Recv REQ: id=%lu, count=%lu,  slid=%u recv_wc time=%f(%f)\n",   conn_recv->id, conn_recv->count, conn_recv->slid, ee - ss, mm), 2);
-    
+
+      te = get_dtime();    
       active_rrre = conn_recv->active_rrre;
       sem_post(args->is_rdma_completed);
 
@@ -125,6 +130,9 @@ static void* poll_cq(struct poll_cq_args* args)
       conn_recv->passive_rrre = NULL;
       free_connection(conn_recv);
       /*----------------*/
+
+      debug(fprintf(stderr, "RDMA lib: SEND: Recv REQ: id=%lu, count=%lu,  slid=%u recv_wc time=%f(%f) total_time=%f\n",   conn_recv->id, conn_recv->count, conn_recv->slid, ee - ss, mm, te - ts), 2);
+
       return;
     } else if (conn_recv->opcode == IBV_WC_SEND) {
       debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);

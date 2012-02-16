@@ -12,8 +12,8 @@
 #include "ibtls.h"
 #include "common.h"
 
-#define NUM 2
-#define ITE 100
+#define NUM 1
+#define ITE 1
 
 int get_tag(void);
 //char* get_ip_addr (char* interface);
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     printf("i=%d\n", j);
   }
   e = get_dtime();
-  
+  sleep(1);
   printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) * ITE ,  e - s, (size/1000000000.0 * ITE )/(e - s));
   //  sleep(2);
   return 0;

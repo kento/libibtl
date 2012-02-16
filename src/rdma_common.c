@@ -482,7 +482,12 @@ void dereg_mr(struct ibv_mr *mr)
 
 struct ibv_mr* reg_mr (void* addr, uint32_t size) 
 {
-  struct ibv_mr *mr;
+  static struct ibv_mr *mr;
+
+  if (pre_addr == addr && pre_size == size) {
+    return mr;
+  }
+  
   int try = 1000;
   /*TODO: Detect duplicated registrations and skip the region to be registered twice.*/
   do {
@@ -501,7 +506,6 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
   debug(fprintf(stderr, "RDMA lib: COMM: Reg: addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr->addr, mr->length, mr->lkey, mr->rkey), 2);
   pthread_mutex_lock(&regmem_sum_mutex);
   regmem_sum = regmem_sum +  size/1000000;
-
   pthread_mutex_unlock(&regmem_sum_mutex);
   return mr;
 }

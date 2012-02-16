@@ -72,7 +72,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
   lq_init(&rdma_request_pq);
 
   while (1) {
-    double mm, ss, ee;
+    double mm, ss, ee, rss, ree;
     struct rdma_read_request_entry* rrre;
 
     ss = get_dtime();
@@ -93,10 +93,12 @@ static void * poll_cq(struct RDMA_communicator *comm)
       conn_send = create_connection(conn_recv->id);
       free_connection(conn_recv);
       rrre->conn = conn_send;
+      rss = get_dtime();
       post_matched_request(PASSIVE, rrre);
     } else if (conn_recv->opcode == IBV_WC_RDMA_READ) {
+      ree = get_dtime();
       struct rdma_read_request_entry *passive_rrre;
-      debug(printf("RDMA lib: COMM: Done IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
+      debug(printf("RDMA lib: COMM: Done IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f), rdma_time=%f\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm, ree - rss), 2);
       conn_send = create_connection(conn_recv->id);
       passive_rrre = conn_recv->passive_rrre;
       //TODO: find an optimal location for "create_connection()", "sem_post()".
