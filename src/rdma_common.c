@@ -3,15 +3,11 @@
 
 #include "common.h"
 #include "rdma_common.h"
-#include "hashtable.h"
-
-
-
+//#include "hashtable.h"
 
 const int TIMEOUT_IN_MS = 500; /* ms */
 struct ibv_cq *cq = NULL;
 static struct context *s_ctx = NULL;
-//struct connection *conn;
 
 struct ibv_mr **rdma_msg_mr;
 
@@ -22,7 +18,7 @@ static uint32_t mr_number = 0;
 int accepted = 0;
 int connections = 0;
 //struct ibv_mr *peer_mr;
-struct hashtable ht;
+//struct hashtable ht;
 static uint32_t allocated_mr_size = 0;
 
 /*For registerd memory size count*/
@@ -479,7 +475,7 @@ void dereg_mr(struct ibv_mr *mr)
   regmem_sum = regmem_sum - size/1000000;
   //  printf(" ---%lu\n", regmem_sum);
   pthread_mutex_unlock(&regmem_sum_mutex);
-  fprintf(stderr, "RDMA lib: COMM: Dereg: addr=%p, length=%lu\n", addr, size);
+  debug(fprintf(stderr, "RDMA lib: COMM: Dereg: addr=%p, length=%lu\n", addr, size), 2);
   return;
 }
 
@@ -502,7 +498,7 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
       exit(1);
     }
   } while(mr == NULL);
-  fprintf(stderr, "RDMA lib: COMM: Reg: addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr->addr, mr->length, mr->lkey, mr->rkey);
+  debug(fprintf(stderr, "RDMA lib: COMM: Reg: addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr->addr, mr->length, mr->lkey, mr->rkey), 2);
   pthread_mutex_lock(&regmem_sum_mutex);
   regmem_sum = regmem_sum +  size/1000000;
 

@@ -66,7 +66,7 @@
 
 #define TEST_NZ(x) do { if ( (x)) die("error: " #x " failed (returned non-zero)." ); } while (0)
 #define TEST_Z(x)  do { if (!(x)) die("error: " #x " failed (returned zero/null)."); } while (0)
-//#define debug(p,x)  if ((x) >= DEBUG_LEVEL){ printf("%d:", get_pid());p; }
+
 #define debug(p,x)  if ((x) >= DEBUG_LEVEL){ p; }
 
 
@@ -183,6 +183,7 @@ struct rdma_read_request_entry {
     But the siez can be got from ibv_mr mr.
   */
   //uint64_t size;
+
 };
 
 struct RDMA_request {

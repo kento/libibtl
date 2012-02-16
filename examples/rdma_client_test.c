@@ -13,7 +13,7 @@
 #include "common.h"
 
 #define NUM 2
-#define ITE 1
+#define ITE 100
 
 int get_tag(void);
 //char* get_ip_addr (char* interface);
@@ -58,10 +58,8 @@ int main(int argc, char **argv)
 
   
   printf("Initialization: %f\n",e - s);
-  
+  //  sleep(3);  
   s = get_dtime();
-
-
   // RDMA_Sendr_ns(data, size, get_tag(), &comm);
   struct RDMA_request req[NUM];
   
@@ -72,11 +70,12 @@ int main(int argc, char **argv)
     for (i = 0; i < NUM; i++) {
       RDMA_Wait(&req[i]);
     }
+    printf("i=%d\n", j);
   }
   e = get_dtime();
   
   printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) * ITE ,  e - s, (size/1000000000.0 * ITE )/(e - s));
-  sleep(2);
+  //  sleep(2);
   return 0;
   //  RDMA_Active_Finalize(&comm);
 

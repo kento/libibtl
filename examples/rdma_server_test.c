@@ -8,26 +8,30 @@
 int main(int argc, char **argv) {
   struct RDMA_communicator comm;
   struct RDMA_request *req1, *req2;
-  char *data;
+  char *data[2];
   uint64_t size;
   int ctl_tag;
   double ss, ee;
 
   size = 1024 * 1024 * 1024;
-  data = (char*)valloc(size);
-  memset(data, 1, size);
+
+  data[0] = (char*)valloc(size);
+  data[1] = (char*)valloc(size);
+  
+  memset(data[0], 1, size);
+  memset(data[1], 1, size);
   RDMA_Passive_Init(&comm);
   int req_num = 2;
   struct RDMA_request req[req_num];
   int req_id = 0;
-  RDMA_Irecv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req[req_id]);  
+  RDMA_Irecv(data[req_id], size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req[req_id]);  
   req_id = (req_id + 1) % req_num;
   fprintf(stderr, "%p: size=%lu: \n", data, size);
   while (1) {
     //RDMA_Recv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);  
     ss = get_dtime();
     //    RDMA_Recv(data, 1, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);  
-    RDMA_Irecv(data, size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req[req_id]);  
+    RDMA_Irecv(data[req_id], size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req[req_id]);  
     req_id = (req_id + 1) % req_num;
     fprintf(stderr, "req_id:%d\n", req_id);
     RDMA_Wait(&req[req_id]);
@@ -40,23 +44,14 @@ int main(int argc, char **argv) {
     free(req1);
     //    free(req2);
     //    sleep(1);
-  }
-
-  fprintf(stderr, "%p: size=%lu: \n", data, size);
-  
-  while(1);
-
-  while (0) {
-
-    //    RDMA_Recvr(&data, &size, &ctl_tag, &comm);
-    //printf("%d: size=%lu: %s\n", ctl_tag, size, data);
+    int fd = open("/tmp/rdma_test.data", O_WRONLY, 0);
+    write(fd, data, size);
+    close(fd);
     
-    printf("%d: size=%lu: \n", ctl_tag, size);
-    //printf("%s\n", data);
-    //dump(data, size);
   }
 
-  //  RDMA_show_buffer();  
+
+
   return 0;
 }
 
