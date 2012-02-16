@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "rdma_common.h"
+#include "list_queue.h"
 //#include "hashtable.h"
 
 const int TIMEOUT_IN_MS = 500; /* ms */
@@ -17,22 +18,23 @@ static uint32_t mr_number = 0;
 /*Just for passive side valiables*/
 int accepted = 0;
 int connections = 0;
-//struct ibv_mr *peer_mr;
-//struct hashtable ht;
 static uint32_t allocated_mr_size = 0;
 
 /*For registerd memory size count*/
 static uint64_t regmem_sum = 0;
 pthread_mutex_t regmem_sum_mutex = PTHREAD_MUTEX_INITIALIZER;
+static lq mr_q;
+struct regmr {
+  void* addr;
+  uint32_t size;
+  struct ibv_mr *mr;
+  int count;
+};
 
 
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct rdma_read_request_entry *rrre);
-
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event);
 static void build_connection(struct rdma_cm_id *id);
-
-//static struct connection* create_connection(struct connection* conn_old);
-
 static void build_context(struct ibv_context *verbs);
 static void build_params(struct rdma_conn_param *params);
 static void build_qp_attr(struct ibv_qp_init_attr *qp_attr);
@@ -462,6 +464,11 @@ void dereg_mr(struct ibv_mr *mr)
   uint64_t size = mr->length;
   void* addr = mr->addr;
 
+  struct regmr *rmr;
+
+  pthread_mutex_lock(&regmem_sum_mutex);
+
+
   while (ibv_dereg_mr(mr) != 0) {
     fprintf(stderr, "RDMA lib: COMM: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
     exit(1);
@@ -471,7 +478,7 @@ void dereg_mr(struct ibv_mr *mr)
     }
     retry--;
   }
-  pthread_mutex_lock(&regmem_sum_mutex);
+
   regmem_sum = regmem_sum - size/1000000;
   //  printf(" ---%lu\n", regmem_sum);
   pthread_mutex_unlock(&regmem_sum_mutex);
@@ -482,12 +489,11 @@ void dereg_mr(struct ibv_mr *mr)
 
 struct ibv_mr* reg_mr (void* addr, uint32_t size) 
 {
-  static struct ibv_mr *mr;
+  struct ibv_mr *mr;
+  struct regmr *rmr;
+  pthread_mutex_lock(&regmem_sum_mutex);
 
-  if (pre_addr == addr && pre_size == size) {
-    return mr;
-  }
-  
+    
   int try = 1000;
   /*TODO: Detect duplicated registrations and skip the region to be registered twice.*/
   do {
@@ -497,14 +503,19 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
 		    size,
 		    IBV_ACCESS_LOCAL_WRITE
 		    | IBV_ACCESS_REMOTE_READ);
-    try--;
-    if (try < 0) {
-      fprintf(stderr, "RDMA lib: COMM: ERROR: Memory region registration failed (regmem_sum= %lu[MB])@ %s:%d\n",  regmem_sum, __FILE__, __LINE__);
-      exit(1);
+
+    if (mr == NULL) {
+      fprintf(stderr, "RDMA lib: COMM: WARN: Memory region registration trial left %d (regmem_sum= %lu[MB])@ %s:%d\n", try,  regmem_sum, __FILE__, __LINE__);
+      try--;
+      if (try < 0) {
+	fprintf(stderr, "RDMA lib: COMM: ERROR: Memory region registration failed (regmem_sum= %lu[MB])@ %s:%d\n",  regmem_sum, __FILE__, __LINE__);
+	exit(1);
+      }
     }
   } while(mr == NULL);
+
+
   debug(fprintf(stderr, "RDMA lib: COMM: Reg: addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr->addr, mr->length, mr->lkey, mr->rkey), 2);
-  pthread_mutex_lock(&regmem_sum_mutex);
   regmem_sum = regmem_sum +  size/1000000;
   pthread_mutex_unlock(&regmem_sum_mutex);
   return mr;

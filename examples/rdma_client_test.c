@@ -26,6 +26,7 @@ int main(int argc, char **argv)
   //  int flag1, flag2;
   int flag1;
   double s,e;
+  double ss,ee;
   if (argc < 2) {
     printf("./rdma_client_test <host> <send size(Bytes)>\n");
     exit(1);
@@ -59,22 +60,26 @@ int main(int argc, char **argv)
   
   printf("Initialization: %f\n",e - s);
   //  sleep(3);  
-  s = get_dtime();
+  ss = get_dtime();
   // RDMA_Sendr_ns(data, size, get_tag(), &comm);
   struct RDMA_request req[NUM];
   
   for (j = 0; j < ITE; j++) {
+    s = get_dtime();
     for (i = 0; i < NUM; i++) {
       RDMA_Isend(data + i * (size/NUM), size/NUM, NULL, 0, 2, &comm, &req[i]);
     }
     for (i = 0; i < NUM; i++) {
       RDMA_Wait(&req[i]);
     }
+    e = get_dtime();
     printf("i=%d\n", j);
+    printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) ,  e - s, (size/1000000000.0  )/(e - s));
+
   }
-  e = get_dtime();
+  ee = get_dtime();
   sleep(1);
-  printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) * ITE ,  e - s, (size/1000000000.0 * ITE )/(e - s));
+  printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) * ITE ,  ee - ss, (size/1000000000.0 * ITE )/(ee -  ss));
   //  sleep(2);
   return 0;
   //  RDMA_Active_Finalize(&comm);

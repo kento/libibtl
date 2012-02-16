@@ -91,10 +91,10 @@ static void* poll_cq(struct poll_cq_args* args)
   rrre.order = 2;
   rrre.tag = args->tag;
   //TODO: change the member name of passive_mr because passive_mr is used in alos active side.
-  ts = get_dtime();
+
   passive_mr = reg_mr(args->buf, args->size);
   memcpy(&rrre.mr, passive_mr, sizeof(struct ibv_mr));
-
+  ts = get_dtime();
   rrre.passive_mr =  passive_mr;
   rrre.is_rdma_completed = args->is_rdma_completed;
   conn_send = create_connection(comm->cm_id);
