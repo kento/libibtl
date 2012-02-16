@@ -18,10 +18,9 @@ rdma_client_test_SOURCES = \
 	$(SRC_DIR)/ibtls.c \
 	$(INCLUDE_DIR)/ibtls.h 
 
-
-
 rdma_client_test_CFLAGS = -I$(INCLUDE_DIR)
 rdma_client_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+
 
 rdma_server_test_SOURCES = \
 	rdma_server_test.c \
@@ -40,3 +39,20 @@ rdma_server_test_SOURCES = \
 
 rdma_server_test_CFLAGS = -I$(INCLUDE_DIR)
 rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+
+examplesdir = $(exec_prefix)/examples
+
+dist_examples_DATA = \
+	rdma_client_test.c \
+	rdma_server_test.c
+
+EXTRA_DIST = makefile.example
+
+# Use -hook insted of -local b/c we need to do this AFTER the main install data rule.
+install-data-hook:
+	$(INSTALL_DATA) makefile.example $(DESTDIR)$(examplesdir)/makefile
+
+uninstall-local:
+	-rm -f $(DESTDIR)$(examplesdir)/makefile
+
+

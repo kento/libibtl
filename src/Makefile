@@ -15,6 +15,8 @@
 
 
 
+
+
 pkgdatadir = $(datadir)/main
 pkglibdir = $(libdir)/main
 pkgincludedir = $(includedir)/main
@@ -30,8 +32,11 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+build_triplet = x86_64-suse-linux-gnu
+host_triplet = x86_64-suse-linux-gnu
 subdir = src
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -45,31 +50,52 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(libdir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libdir)" \
+	"$(DESTDIR)$(includedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
-AR = ar
 ARFLAGS = cru
 libibtls_a_AR = $(AR) $(ARFLAGS)
 libibtls_a_DEPENDENCIES = 
-am_libibtls_a_OBJECTS = libibtls_a-rdma_server.$(OBJEXT) \
+am_libibtls_a_OBJECTS = libibtls_a-list_queue.$(OBJEXT) \
+	libibtls_a-rdma_client.$(OBJEXT) \
+	libibtls_a-rdma_server.$(OBJEXT) \
 	libibtls_a-rdma_common.$(OBJEXT) libibtls_a-common.$(OBJEXT) \
 	libibtls_a-ibtls.$(OBJEXT)
 libibtls_a_OBJECTS = $(am_libibtls_a_OBJECTS)
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libibtls_la_DEPENDENCIES = 
+am_libibtls_la_OBJECTS = libibtls_la-list_queue.lo \
+	libibtls_la-rdma_client.lo libibtls_la-rdma_server.lo \
+	libibtls_la-rdma_common.lo libibtls_la-common.lo \
+	libibtls_la-ibtls.lo
+libibtls_la_OBJECTS = $(am_libibtls_la_OBJECTS)
+libibtls_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libibtls_la_CFLAGS) \
+	$(CFLAGS) $(libibtls_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libibtls_a_SOURCES)
-DIST_SOURCES = $(libibtls_a_SOURCES)
+LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(libibtls_a_SOURCES) $(libibtls_la_SOURCES)
+DIST_SOURCES = $(libibtls_a_SOURCES) $(libibtls_la_SOURCES)
+includeHEADERS_INSTALL = $(INSTALL_HEADER)
+HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} /home/usr2/11D37048/lib/libibtl/missing --run aclocal-1.10
 AMTAR = ${SHELL} /home/usr2/11D37048/lib/libibtl/missing --run tar
+AR = ar
 AUTOCONF = ${SHELL} /home/usr2/11D37048/lib/libibtl/missing --run autoconf
 AUTOHEADER = ${SHELL} /home/usr2/11D37048/lib/libibtl/missing --run autoheader
 AUTOMAKE = ${SHELL} /home/usr2/11D37048/lib/libibtl/missing --run automake-1.10
@@ -77,26 +103,41 @@ AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2
+CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
+DSYMUTIL = 
+DUMPBIN = 
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
+EGREP = /usr/bin/grep -E
 EXEEXT = 
+FGREP = /usr/bin/grep -F
+GREP = /usr/bin/grep
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
+LD = /usr/x86_64-suse-linux/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
+LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIPO = 
+LN_S = ln -s
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/usr2/11D37048/lib/libibtl/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
+NM = /usr/bin/nm -B
+NMEDIT = 
+OBJDUMP = objdump
 OBJEXT = o
+OTOOL = 
+OTOOL64 = 
 PACKAGE = main
 PACKAGE_BUGREPORT = kent@matsulab.is.titech.ac.jp
 PACKAGE_NAME = main
@@ -105,29 +146,39 @@ PACKAGE_TARNAME = main
 PACKAGE_VERSION = 0.0.1
 PATH_SEPARATOR = :
 RANLIB = ranlib
+SED = /usr/bin/sed
 SET_MAKE = 
 SHELL = /bin/sh
-STRIP = 
+STRIP = strip
 VERSION = 0.0.1
 abs_builddir = /home/usr2/11D37048/lib/libibtl/src
 abs_srcdir = /home/usr2/11D37048/lib/libibtl/src
 abs_top_builddir = /home/usr2/11D37048/lib/libibtl
 abs_top_srcdir = /home/usr2/11D37048/lib/libibtl
 ac_ct_CC = gcc
+ac_ct_DUMPBIN = 
 am__include = include
 am__leading_dot = .
 am__quote = 
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
 bindir = ${exec_prefix}/bin
+build = x86_64-suse-linux-gnu
 build_alias = 
+build_cpu = x86_64
+build_os = linux-gnu
+build_vendor = suse
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
+host = x86_64-suse-linux-gnu
 host_alias = 
+host_cpu = x86_64
+host_os = linux-gnu
+host_vendor = suse
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
@@ -136,11 +187,12 @@ libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
+lt_ECHO = echo
 mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /usr/local
+prefix = /home/usr2/11D37048/usr/tools/libibtls
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -153,8 +205,20 @@ top_builddir = ..
 top_srcdir = ..
 SRC_DIR = ../src
 INCLUDE_DIR = ../include
+include_HEADERS = \
+	$(INCLUDE_DIR)/ibtls.h \
+	$(INCLUDE_DIR)/rdma_server.h \
+	$(INCLUDE_DIR)/rdma_client.h \
+	$(INCLUDE_DIR)/*
+
+
+# To build and install static library .a
 lib_LIBRARIES = libibtls.a
 libibtls_a_SOURCES = \
+        $(SRC_DIR)/list_queue.c \
+        $(INCLUDE_DIR)/list_queue.h \
+        $(SRC_DIR)/rdma_client.c \
+        $(INCLUDE_DIR)/rdma_client.h \
         $(SRC_DIR)/rdma_server.c \
         $(INCLUDE_DIR)/rdma_server.h \
         $(SRC_DIR)/rdma_common.c \
@@ -166,10 +230,31 @@ libibtls_a_SOURCES = \
 
 libibtls_a_LIBADD = 
 libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
+#libibtls_a_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+
+# To build and install static library .la generated by libtool
+lib_LTLIBRARIES = libibtls.la
+libibtls_la_SOURCES = \
+        $(SRC_DIR)/list_queue.c \
+        $(INCLUDE_DIR)/list_queue.h \
+        $(SRC_DIR)/rdma_client.c \
+        $(INCLUDE_DIR)/rdma_client.h \
+        $(SRC_DIR)/rdma_server.c \
+        $(INCLUDE_DIR)/rdma_server.h \
+        $(SRC_DIR)/rdma_common.c \
+        $(INCLUDE_DIR)/rdma_common.h \
+        $(SRC_DIR)/common.c \
+        $(INCLUDE_DIR)/common.h \
+        $(SRC_DIR)/ibtls.c \
+        $(INCLUDE_DIR)/ibtls.h 
+
+libibtls_la_LIBADD = 
+libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
+libibtls_la_LDFLAGS = -version-info 0:0:0 -release 0
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -232,6 +317,35 @@ libibtls.a: $(libibtls_a_OBJECTS) $(libibtls_a_DEPENDENCIES)
 	-rm -f libibtls.a
 	$(libibtls_a_AR) libibtls.a $(libibtls_a_OBJECTS) $(libibtls_a_LIBADD)
 	$(RANLIB) libibtls.a
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libibtls.la: $(libibtls_la_OBJECTS) $(libibtls_la_DEPENDENCIES) 
+	$(libibtls_la_LINK) -rpath $(libdir) $(libibtls_la_OBJECTS) $(libibtls_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -241,8 +355,16 @@ distclean-compile:
 
 include ./$(DEPDIR)/libibtls_a-common.Po
 include ./$(DEPDIR)/libibtls_a-ibtls.Po
+include ./$(DEPDIR)/libibtls_a-list_queue.Po
+include ./$(DEPDIR)/libibtls_a-rdma_client.Po
 include ./$(DEPDIR)/libibtls_a-rdma_common.Po
 include ./$(DEPDIR)/libibtls_a-rdma_server.Po
+include ./$(DEPDIR)/libibtls_la-common.Plo
+include ./$(DEPDIR)/libibtls_la-ibtls.Plo
+include ./$(DEPDIR)/libibtls_la-list_queue.Plo
+include ./$(DEPDIR)/libibtls_la-rdma_client.Plo
+include ./$(DEPDIR)/libibtls_la-rdma_common.Plo
+include ./$(DEPDIR)/libibtls_la-rdma_server.Plo
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -257,6 +379,41 @@ include ./$(DEPDIR)/libibtls_a-rdma_server.Po
 #	source='$<' object='$@' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+#	source='$<' object='$@' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LTCOMPILE) -c -o $@ $<
+
+libibtls_a-list_queue.o: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-list_queue.o -MD -MP -MF $(DEPDIR)/libibtls_a-list_queue.Tpo -c -o libibtls_a-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+	mv -f $(DEPDIR)/libibtls_a-list_queue.Tpo $(DEPDIR)/libibtls_a-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='libibtls_a-list_queue.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+
+libibtls_a-list_queue.obj: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-list_queue.obj -MD -MP -MF $(DEPDIR)/libibtls_a-list_queue.Tpo -c -o libibtls_a-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+	mv -f $(DEPDIR)/libibtls_a-list_queue.Tpo $(DEPDIR)/libibtls_a-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='libibtls_a-list_queue.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+
+libibtls_a-rdma_client.o: $(SRC_DIR)/rdma_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_client.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_client.Tpo -c -o libibtls_a-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+	mv -f $(DEPDIR)/libibtls_a-rdma_client.Tpo $(DEPDIR)/libibtls_a-rdma_client.Po
+#	source='$(SRC_DIR)/rdma_client.c' object='libibtls_a-rdma_client.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+
+libibtls_a-rdma_client.obj: $(SRC_DIR)/rdma_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_client.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_client.Tpo -c -o libibtls_a-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
+	mv -f $(DEPDIR)/libibtls_a-rdma_client.Tpo $(DEPDIR)/libibtls_a-rdma_client.Po
+#	source='$(SRC_DIR)/rdma_client.c' object='libibtls_a-rdma_client.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
 
 libibtls_a-rdma_server.o: $(SRC_DIR)/rdma_server.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_server.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_server.Tpo -c -o libibtls_a-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
@@ -313,6 +470,71 @@ libibtls_a-ibtls.obj: $(SRC_DIR)/ibtls.c
 #	source='$(SRC_DIR)/ibtls.c' object='libibtls_a-ibtls.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+
+libibtls_la-list_queue.lo: $(SRC_DIR)/list_queue.c
+	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-list_queue.lo -MD -MP -MF $(DEPDIR)/libibtls_la-list_queue.Tpo -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+	mv -f $(DEPDIR)/libibtls_la-list_queue.Tpo $(DEPDIR)/libibtls_la-list_queue.Plo
+#	source='$(SRC_DIR)/list_queue.c' object='libibtls_la-list_queue.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+
+libibtls_la-rdma_client.lo: $(SRC_DIR)/rdma_client.c
+	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_client.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_client.Tpo -c -o libibtls_la-rdma_client.lo `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+	mv -f $(DEPDIR)/libibtls_la-rdma_client.Tpo $(DEPDIR)/libibtls_la-rdma_client.Plo
+#	source='$(SRC_DIR)/rdma_client.c' object='libibtls_la-rdma_client.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_client.lo `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+
+libibtls_la-rdma_server.lo: $(SRC_DIR)/rdma_server.c
+	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_server.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_server.Tpo -c -o libibtls_la-rdma_server.lo `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+	mv -f $(DEPDIR)/libibtls_la-rdma_server.Tpo $(DEPDIR)/libibtls_la-rdma_server.Plo
+#	source='$(SRC_DIR)/rdma_server.c' object='libibtls_la-rdma_server.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_server.lo `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+
+libibtls_la-rdma_common.lo: $(SRC_DIR)/rdma_common.c
+	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_common.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_common.Tpo -c -o libibtls_la-rdma_common.lo `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+	mv -f $(DEPDIR)/libibtls_la-rdma_common.Tpo $(DEPDIR)/libibtls_la-rdma_common.Plo
+#	source='$(SRC_DIR)/rdma_common.c' object='libibtls_la-rdma_common.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_common.lo `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+
+libibtls_la-common.lo: $(SRC_DIR)/common.c
+	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-common.lo -MD -MP -MF $(DEPDIR)/libibtls_la-common.Tpo -c -o libibtls_la-common.lo `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+	mv -f $(DEPDIR)/libibtls_la-common.Tpo $(DEPDIR)/libibtls_la-common.Plo
+#	source='$(SRC_DIR)/common.c' object='libibtls_la-common.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-common.lo `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+
+libibtls_la-ibtls.lo: $(SRC_DIR)/ibtls.c
+	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibtls.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibtls.Tpo -c -o libibtls_la-ibtls.lo `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+	mv -f $(DEPDIR)/libibtls_la-ibtls.Tpo $(DEPDIR)/libibtls_la-ibtls.Plo
+#	source='$(SRC_DIR)/ibtls.c' object='libibtls_la-ibtls.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-ibtls.lo `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(includeHEADERS_INSTALL) '$$d$$p' '$(DESTDIR)$(includedir)/$$f'"; \
+	  $(includeHEADERS_INSTALL) "$$d$$p" "$(DESTDIR)$(includedir)/$$f"; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(includedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(includedir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -389,9 +611,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -420,7 +642,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -438,11 +661,11 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS
 
 install-dvi: install-dvi-am
 
-install-exec-am: install-libLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -463,7 +686,8 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -473,24 +697,28 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLIBRARIES ctags distclean distclean-compile \
-	distclean-generic distclean-tags distdir dvi dvi-am html \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-libLIBRARIES
+	install-exec-am install-html install-html-am \
+	install-includeHEADERS install-info install-info-am \
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
-#libibtls_a_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

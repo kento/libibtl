@@ -175,6 +175,7 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
     exit(1);
   }
   lq_init_it(target_rrre_q);
+
   while ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
     //    fprintf(stderr,"id: %lu-%lu, tag: %lu-%lu\n", target_rrre->id, cur_rrre->id, target_rrre->tag, cur_rrre->tag);
     //TODO: write more sophisticated code !!
