@@ -31,6 +31,14 @@ struct regmr {
   int count;
 };
 
+/*For rdma_alloc and rdma_free*/
+static lq rdma_alloc_q;
+struct alloc_entry {
+  void *addr;
+  size_t size;
+  struct ibv_mr *mr;
+};
+
 
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct rdma_read_request_entry *rrre);
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event);
@@ -441,6 +449,40 @@ int rdma_wait(struct RDMA_request *request)
   return 1;
 }
 
+void* rdma_alloc (size_t size) 
+{
+  void* ptr;
+  struct ibv_mr *mr;
+  struct alloc_entry *ae;
+  ptr = valloc(size);
+  mr = reg_mr(ptr, size);
+  ae = (struct alloc_entry*)malloc(sizeof(struct alloc_entry));
+  ae->addr = ptr;
+  ae->mr   = mr;
+  ae->size = size;
+  lq_enq(&rdma_alloc_q, ae);
+  return ptr;
+}
+
+void rdma_free (void *ptr)
+{
+  struct alloc_entry *ae;
+
+  lq_init_it(&rdma_alloc_q);
+  while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
+    if (ae->addr == ptr) {
+      dereg_mr(ae->addr);
+      free(ae->addr);
+      lq_remove(&rdma_alloc_q, ae);
+      free(ae);
+      lq_fin_it(&rdma_alloc_q);
+      return;
+    }
+  }
+  lq_fin_it(&rdma_alloc_q);
+
+}
+
 int free_connection(struct connection* conn) 
 {
   if (conn->active_rrre != NULL) {free(conn->active_rrre);}
@@ -465,6 +507,17 @@ void dereg_mr(struct ibv_mr *mr)
   void* addr = mr->addr;
 
   struct regmr *rmr;
+  struct alloc_entry *ae;
+
+  lq_init_it(&rdma_alloc_q);
+  while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
+    if (ae->mr == mr) {
+      lq_fin_it(&rdma_alloc_q);
+      return;
+    }
+  }
+  lq_fin_it(&rdma_alloc_q);
+
 
   pthread_mutex_lock(&regmem_sum_mutex);
 
@@ -487,10 +540,23 @@ void dereg_mr(struct ibv_mr *mr)
 }
 
 
+
+
 struct ibv_mr* reg_mr (void* addr, uint32_t size) 
 {
   struct ibv_mr *mr;
   struct regmr *rmr;
+  struct alloc_entry *ae;
+
+  lq_init_it(&rdma_alloc_q);
+  while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
+    if (ae->addr == addr && ae->size >= size) {
+      lq_fin_it(&rdma_alloc_q);
+      return ae->mr;
+    }
+  }
+  lq_fin_it(&rdma_alloc_q);
+
   pthread_mutex_lock(&regmem_sum_mutex);
 
     

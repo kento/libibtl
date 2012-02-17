@@ -53,7 +53,7 @@
 #endif
 
 #ifndef DEBUG_LEVEL
-#define DEBUG_LEVEL (2)
+#define DEBUG_LEVEL (4)
 #endif
 
 #ifndef DEBUG_RDMA
@@ -236,6 +236,8 @@ int post_recv_ctl_msg(struct connection *conn);
 
 
 int rdma_wait(struct RDMA_request *request);
+void rdma_free (void *ptr);
+void* rdma_alloc (size_t size);
 #endif //_RDMA_COMMON
 
 

@@ -14,7 +14,7 @@
 
 #define NUM 1
 #define ITE 1000
-#define SLP 5
+#define SLP 0
 
 int get_tag(void);
 //char* get_ip_addr (char* interface);
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 
   /* ===== */
   //  data = (char*)malloc(size);
-  data = (char*)valloc(size);
+  data = (char*)RDMA_Alloc(size);
 
   int i, j;
   char * a;

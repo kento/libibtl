@@ -1,6 +1,16 @@
 #include "ibtls.h"
 
 
+void* RDMA_Alloc (size_t size)
+{
+  return rdma_alloc(size);
+}
+
+void RDMA_Free(void* ptr)
+{
+  rdma_free(ptr);
+  return;
+}
 
 int RDMA_Send(void *buf, int size, void* datatype, int dest, int tag, struct RDMA_communicator *rdma_com)
 {
