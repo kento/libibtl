@@ -25,6 +25,7 @@ void lq_enq (lq *q, void *data)
     q->tail->next = d;
     q->tail = d;
   }
+  //  debug(fprintf(stderr, "RDMA lib: COMM: Qued: %p\n", data),2);
   pthread_mutex_unlock(&(q->mut));
 }
 
@@ -80,6 +81,7 @@ void lq_remove(lq* q, void* d) {
     if (q->head == NULL) {
       q->tail = NULL;
     }
+    //    debug(fprintf(stderr, "RDMA lib: COMM: Rmvd: %p\n", d), 2);
     return ;
   }
 

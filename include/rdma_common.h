@@ -9,8 +9,6 @@
 #include <rdma/rdma_cma.h>
 #include <semaphore.h>
 
-
-
 #ifndef RDMA_PORT
 #define RDMA_PORT 10150
 #endif
@@ -166,7 +164,7 @@ struct rdma_read_request_entry {
   uint64_t tag;
 
   /*
-    A registered active side memory region(mr) which is allowed to be read with RDMA from remote (passive side)
+    A registered active side memory region(mr) which is allowed to be read with RDMA from remote (Passive side use)
     mr.addr and mr.rkey to be used for the purpose. 
   */
   struct ibv_mr mr;
@@ -174,9 +172,16 @@ struct rdma_read_request_entry {
   struct ibv_mr *passive_mr;
 
   /*
-    The lock is used to know if a RDMA request is completed with minimal CPU usage.
+    The lock is used to know if a RDMA request is completed with minimal CPU usage. (Both use)
    */
   sem_t *is_rdma_completed;
+
+  /*
+   To check if an active side rrre(rdma read request entry) needs to be remove form the queue.
+   silent: 0 => dequeued and ack, 
+   silent: 1 => not dequeued and no ack.
+   */
+  int silent;
 
   /*
     Size of the registered active side memory region(mr).

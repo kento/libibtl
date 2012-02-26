@@ -251,7 +251,6 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, u
   struct rdma_conn_param cm_params;
   char port[8];
   int i;//,j;                                                                                                                                                        
-
   sprintf(port, "%d", RDMA_PORT);
 
   if(getaddrinfo(param->host, port, NULL, &addr)){
@@ -302,12 +301,12 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, u
     exit(1);
   }
 
-  rdma_msg_mr = (struct ibv_mr **) malloc(sizeof(struct ibv_mr*) * mr_num);
-  mr_number = mr_num;
-  for (i = 0; i < mr_num; i++){ 
-    rdma_msg_mr[i] = NULL;
-  }
-  //  conn = comm->cm_id->context;
+   rdma_msg_mr = (struct ibv_mr **) malloc(sizeof(struct ibv_mr*) * mr_num);
+   mr_number = mr_num;
+   for (i = 0; i < mr_num; i++){ 
+     rdma_msg_mr[i] = NULL;
+   }
+   conn = comm->cm_id->context;
 
   return 0;
 }
@@ -446,6 +445,7 @@ struct connection* create_connection(struct rdma_cm_id *id)
 int rdma_wait(struct RDMA_request *request)
 {
   sem_wait(&(request->is_rdma_completed));
+  sem_destroy(&(request->is_rdma_completed));
   return 1;
 }
 
@@ -488,7 +488,6 @@ int free_connection(struct connection* conn)
   if (conn->active_rrre != NULL) {free(conn->active_rrre);}
   if (conn->passive_rrre != NULL) {free(conn->passive_rrre);}
 
-
   dereg_mr(conn->send_mr);
   dereg_mr(conn->recv_mr);
 
@@ -518,10 +517,7 @@ void dereg_mr(struct ibv_mr *mr)
   }
   lq_fin_it(&rdma_alloc_q);
 
-
   pthread_mutex_lock(&regmem_sum_mutex);
-
-
   while (ibv_dereg_mr(mr) != 0) {
     fprintf(stderr, "RDMA lib: COMM: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
     exit(1);

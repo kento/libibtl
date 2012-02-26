@@ -14,7 +14,7 @@
 
 #define NUM 1
 #define ITE 1000
-#define SLP 0
+#define SLP 1
 
 int get_tag(void);
 //char* get_ip_addr (char* interface);
