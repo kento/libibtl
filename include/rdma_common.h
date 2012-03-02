@@ -9,45 +9,16 @@
 #include <rdma/rdma_cma.h>
 #include <semaphore.h>
 
+#ifndef RDMA_DIR
+#define RDMA_DIR "/work0/t2g-ppc-internal/11D37048/ibtl"
+#endif
+
+#ifndef RDMA_NDPOOL_DIR
+#define RDMA_NDPOOL_DIR "/work0/t2g-ppc-internal/11D37048/ibtl/ndpool"
+#endif
+
 #ifndef RDMA_PORT
 #define RDMA_PORT 10150
-#endif
-
-#ifndef RDMA_BUF_NUM_C
-#define RDMA_BUF_NUM_C (2)
-#endif
-
-#ifndef RDMA_CLIENT_NUM_S
-#define RDMA_CLIENT_NUM_S (1)
-#endif
-
-#ifndef MAX_RDMA_BUF_SIZE_C
-#define MAX_RDMA_BUF_SIZE_C ( 1 * 1024 * 1024 * 1024)
-#endif
-
-#ifndef RDMA_READ_UNIT_SIZE_S
-#define RDMA_READ_UNIT_SIZE_S ( 1 * 1024 * 1024 * 1024)
-#endif
-
-//-------------
-
-//#ifndef MAX_RDMA_LOCKED_MEMORY_C
-//#define MAX_RDMA_LOCKED_MEMORY_C (1*1000*1000)
-//#endif
-
-//#ifndef MAX_RDMA_LOCKED_MEMORY_S
-//#define MAX_RDMA_LOCKED_MEMORY_S (100*1000)
-//#endif
-//-------------
-
-
-#ifndef RDMA_BUF_SIZE_C
-#define RDMA_BUF_SIZE_C ((MAX_RDMA_BUF_SIZE_C)/(RDMA_CLIENT_NUM_S))
-#endif
-
-
-#ifndef HASH_TABLE_LEN
-#define HASH_TABLE_LEN RDMA_CLIENT_NUM_S
 #endif
 
 #ifndef DEBUG_LEVEL
@@ -66,7 +37,6 @@
 #define TEST_Z(x)  do { if (!(x)) die("error: " #x " failed (returned zero/null)."); } while (0)
 
 #define debug(p,x)  if ((x) >= DEBUG_LEVEL){ p; }
-
 
 enum ctl_msg_type {
   MR_INIT,
@@ -110,13 +80,11 @@ struct context {
   struct ibv_pd *pd;
   struct ibv_cq *cq;
   struct ibv_comp_channel *comp_channel;
-
   pthread_t cq_poller_thread;
 };
 
 struct connection {
   uint64_t count;
-
 
   struct rdma_cm_id *id;
   struct ibv_qp *qp;
@@ -133,7 +101,6 @@ struct connection {
   struct rdma_read_request_entry *active_rrre;
   struct rdma_read_request_entry *passive_rrre;
 };
-
 
 
 /*
@@ -199,50 +166,33 @@ struct RDMA_request {
 
 
 void die(const char *reason);
+
 const char *rdma_err_status_str(enum ibv_wc_status status);
 const char *event_type_str(enum rdma_cm_event_type event);
 const char *ibv_wc_opcode_str(enum ibv_wc_opcode opcode);
-//int send_control_msg (struct connection *conn, struct control_msg *cmsg);
-//void post_receives(struct connection *conn);
-
 
 struct connection* create_connection(struct rdma_cm_id *id);
 int free_connection(struct connection* conn);
 int send_ctl_msg (struct connection* conn, enum ctl_msg_type cmt, struct rdma_read_request_entry *entry);
-//int recv_ctl_msg(enum ctl_msg_type *cmt, uint64_t *data);
 int recv_ctl_msg(enum ctl_msg_type *cmt, uint64_t *data, struct connection** conn);
-int recv_wc (int num_entries, struct connection** conn);
-
 int finalize_ctl_msg (uint32_t *cmt, uint64_t *data);
 
-void register_rdma_msg_mr(struct connection* conn, void* addr, uint32_t size);
+int recv_wc (int num_entries, struct connection** conn);
 
 void dereg_mr(struct ibv_mr *mr);
 struct ibv_mr* reg_mr(void* addr, uint32_t size);
 
-
-int init_ctl_msg(uint32_t **cmt, uint64_t **data);
-
 /*For accitve side*/
-int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, uint32_t mr_num);
-
-
-
+int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param);
 
 /*For passive side*/
-int init_rdma_buffs(uint32_t num_client);
-int alloc_rdma_buffs(uint16_t id, uint64_t size);
-int rdma_read(struct connection* conn, uint16_t id, uint64_t offset, uint64_t mr_size, int signal);
-int get_rdma_buff(uint16_t id, char** addr, uint64_t *size);
-
 void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/);
 int wait_accept();
 int post_recv_ctl_msg(struct connection *conn);
 
-
 int rdma_wait(struct RDMA_request *request);
 void rdma_free (void *ptr);
 void* rdma_alloc (size_t size);
-#endif //_RDMA_COMMON
+#endif //of _RDMA_COMMON
 
 

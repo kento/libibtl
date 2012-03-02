@@ -58,6 +58,7 @@ ARFLAGS = cru
 libibtls_a_AR = $(AR) $(ARFLAGS)
 libibtls_a_DEPENDENCIES = 
 am_libibtls_a_OBJECTS = libibtls_a-list_queue.$(OBJEXT) \
+	libibtls_a-rdma_ppool.$(OBJEXT) \
 	libibtls_a-rdma_client.$(OBJEXT) \
 	libibtls_a-rdma_server.$(OBJEXT) \
 	libibtls_a-rdma_common.$(OBJEXT) libibtls_a-common.$(OBJEXT) \
@@ -67,9 +68,9 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libibtls_la_DEPENDENCIES = 
 am_libibtls_la_OBJECTS = libibtls_la-list_queue.lo \
-	libibtls_la-rdma_client.lo libibtls_la-rdma_server.lo \
-	libibtls_la-rdma_common.lo libibtls_la-common.lo \
-	libibtls_la-ibtls.lo
+	libibtls_la-rdma_ppool.lo libibtls_la-rdma_client.lo \
+	libibtls_la-rdma_server.lo libibtls_la-rdma_common.lo \
+	libibtls_la-common.lo libibtls_la-ibtls.lo
 libibtls_la_OBJECTS = $(am_libibtls_la_OBJECTS)
 libibtls_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libibtls_la_CFLAGS) \
@@ -192,7 +193,7 @@ mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /home/usr2/11D37048/usr/tools/libibtls
+prefix = /usr/local
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -206,6 +207,9 @@ top_srcdir = ..
 SRC_DIR = ../src
 INCLUDE_DIR = ../include
 include_HEADERS = \
+	$(INCLUDE_DIR)/ibtls.h \
+	$(INCLUDE_DIR)/rdma_server.h \
+	$(INCLUDE_DIR)/rdma_client.h \
 	$(INCLUDE_DIR)/*
 
 
@@ -216,6 +220,8 @@ lib_LIBRARIES = libibtls.a
 libibtls_a_SOURCES = \
         $(SRC_DIR)/list_queue.c \
         $(INCLUDE_DIR)/list_queue.h \
+        $(SRC_DIR)/rdma_ppool.c \
+        $(INCLUDE_DIR)/rdma_ppool.h \
         $(SRC_DIR)/rdma_client.c \
         $(INCLUDE_DIR)/rdma_client.h \
         $(SRC_DIR)/rdma_server.c \
@@ -238,6 +244,8 @@ lib_LTLIBRARIES = libibtls.la
 libibtls_la_SOURCES = \
         $(SRC_DIR)/list_queue.c \
         $(INCLUDE_DIR)/list_queue.h \
+        $(SRC_DIR)/rdma_ppool.c \
+        $(INCLUDE_DIR)/rdma_ppool.h \
         $(SRC_DIR)/rdma_client.c \
         $(INCLUDE_DIR)/rdma_client.h \
         $(SRC_DIR)/rdma_server.c \
@@ -251,7 +259,7 @@ libibtls_la_SOURCES = \
 
 libibtls_la_LIBADD = 
 libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
-libibtls_la_LDFLAGS = -version-info 0:0:0 -release 0
+libibtls_la_LDFLAGS = -lrdmacm -lpthread -libverbs -version-info 1:0:0 -release 1
 all: all-am
 
 .SUFFIXES:
@@ -359,12 +367,14 @@ include ./$(DEPDIR)/libibtls_a-ibtls.Po
 include ./$(DEPDIR)/libibtls_a-list_queue.Po
 include ./$(DEPDIR)/libibtls_a-rdma_client.Po
 include ./$(DEPDIR)/libibtls_a-rdma_common.Po
+include ./$(DEPDIR)/libibtls_a-rdma_ppool.Po
 include ./$(DEPDIR)/libibtls_a-rdma_server.Po
 include ./$(DEPDIR)/libibtls_la-common.Plo
 include ./$(DEPDIR)/libibtls_la-ibtls.Plo
 include ./$(DEPDIR)/libibtls_la-list_queue.Plo
 include ./$(DEPDIR)/libibtls_la-rdma_client.Plo
 include ./$(DEPDIR)/libibtls_la-rdma_common.Plo
+include ./$(DEPDIR)/libibtls_la-rdma_ppool.Plo
 include ./$(DEPDIR)/libibtls_la-rdma_server.Plo
 
 .c.o:
@@ -401,6 +411,20 @@ libibtls_a-list_queue.obj: $(SRC_DIR)/list_queue.c
 #	source='$(SRC_DIR)/list_queue.c' object='libibtls_a-list_queue.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+
+libibtls_a-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_ppool.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_ppool.Tpo -c -o libibtls_a-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+	mv -f $(DEPDIR)/libibtls_a-rdma_ppool.Tpo $(DEPDIR)/libibtls_a-rdma_ppool.Po
+#	source='$(SRC_DIR)/rdma_ppool.c' object='libibtls_a-rdma_ppool.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+
+libibtls_a-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_ppool.Tpo -c -o libibtls_a-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+	mv -f $(DEPDIR)/libibtls_a-rdma_ppool.Tpo $(DEPDIR)/libibtls_a-rdma_ppool.Po
+#	source='$(SRC_DIR)/rdma_ppool.c' object='libibtls_a-rdma_ppool.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
 
 libibtls_a-rdma_client.o: $(SRC_DIR)/rdma_client.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_client.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_client.Tpo -c -o libibtls_a-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
@@ -478,6 +502,13 @@ libibtls_la-list_queue.lo: $(SRC_DIR)/list_queue.c
 #	source='$(SRC_DIR)/list_queue.c' object='libibtls_la-list_queue.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+
+libibtls_la-rdma_ppool.lo: $(SRC_DIR)/rdma_ppool.c
+	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_ppool.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_ppool.Tpo -c -o libibtls_la-rdma_ppool.lo `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+	mv -f $(DEPDIR)/libibtls_la-rdma_ppool.Tpo $(DEPDIR)/libibtls_la-rdma_ppool.Plo
+#	source='$(SRC_DIR)/rdma_ppool.c' object='libibtls_la-rdma_ppool.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_ppool.lo `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
 
 libibtls_la-rdma_client.lo: $(SRC_DIR)/rdma_client.c
 	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_client.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_client.Tpo -c -o libibtls_la-rdma_client.lo `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c

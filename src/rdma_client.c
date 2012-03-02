@@ -4,7 +4,6 @@
 #include "arpa/inet.h"
 #include "time.h"
 
-
 struct poll_cq_args{
   void *buf;
   int size;
@@ -53,7 +52,8 @@ void rdma_isend_r(void *buf, int size, void* datatype, int dest, int tag, struct
 int RDMA_Active_Init(struct RDMA_communicator *comm, struct RDMA_param *param)
 {
   set_envs();
-  rdma_active_init(comm, param, RDMA_BUF_NUM_C);
+
+  rdma_active_init(comm, param);
   return 0;
 }
 
@@ -81,9 +81,7 @@ static void* poll_cq(struct poll_cq_args* args)
   struct rdma_read_request_entry rrre;
   struct ibv_mr *passive_mr;
 
-
   comm = args->comm;
-
 
   //TODO: allocation ID
   rrre.id = 1;
@@ -150,7 +148,3 @@ int RDMA_Active_Finalize(struct RDMA_communicator *comm)
   rdma_active_finalize(comm);
   return 0;
 }
-
-
-
-

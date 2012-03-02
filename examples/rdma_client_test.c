@@ -28,16 +28,19 @@ int main(int argc, char **argv)
   int flag1;
   double s,e;
   double ss,ee;
+
+  /*
   if (argc < 2) {
     printf("./rdma_client_test <host> <send size(Bytes)>\n");
     exit(1);
   }
   host = argv[1];
   size = atoi(argv[2]);
+  */
   
   struct  RDMA_communicator comm;
   struct  RDMA_param param;
-  param.host = host;
+  //  param.host = host;
 
   s = get_dtime();
   RDMA_Active_Init(&comm, &param);

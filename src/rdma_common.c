@@ -1,16 +1,25 @@
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/utsname.h>
+
+#include <netinet/in.h>
+#include <net/if.h>
+#include <arpa/inet.h>
+
 
 #include "common.h"
 #include "rdma_common.h"
 #include "list_queue.h"
+#include "rdma_ppool.h"
+
 //#include "hashtable.h"
+
 
 const int TIMEOUT_IN_MS = 500; /* ms */
 struct ibv_cq *cq = NULL;
 static struct context *s_ctx = NULL;
 
-struct ibv_mr **rdma_msg_mr;
+
 
 /*For active side*/
 static uint32_t mr_number = 0;
@@ -153,14 +162,14 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   //  struct rdma_cm_id *listener = NULL;                                                                                                                             
   //  struct rdma_event_channel *ec = NULL;                                                                                                                           
   uint16_t port = 0;
-  struct sockaddr_in * local_addr;
+  struct sockaddr_in *local_addr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
 
   comm = (struct RDMA_communicator *) arg;
 
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_port   = htons(RDMA_PORT);
-  //inet_aton("10.1.6.177", &(addr.sin_addr.s_addr));
+  inet_aton(get_ip_addr("ib0"), &(addr.sin_addr.s_addr));
 
   if (!(comm->ec = rdma_create_event_channel())) {
     fprintf(stderr, "RDMA lib: ERROR: RDMA event channel creation failed @ %s:%d\n", __FILE__, __LINE__);
@@ -177,8 +186,6 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
     exit(1);
   }
 
-  /**/
-
 
   /* TODO: Determine appropriate backlog value */
   /*       backlog=10 is arbitrary */
@@ -188,9 +195,10 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   };
 
   port = ntohs(rdma_get_src_port(comm->cm_id));
-  //  local_addr = (struct sockaddr_in*)rdma_get_local_addr(comm->cm_id);
-  //  debug(printf("listening on port %s:%d ...\n", inet_ntoa(local_addr->sin_addr), port), 2);
-  debug(printf("listening on port %d ...\n", port), 1);
+  local_addr = (struct sockaddr_in*)rdma_get_local_addr(comm->cm_id);
+  join_passive_pool(inet_ntoa(local_addr->sin_addr), port);
+  //fprintf(stderr, "listening on port %d, addr:%s ...\n", port,  inet_ntoa(local_addr->sin_addr));
+
 
   while (1) {
     int rc =0;
@@ -222,6 +230,7 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   return 0;
 }
 
+
 static void accept_connection(struct rdma_cm_id *id)
 {
   struct rdma_conn_param   conn_param;
@@ -242,16 +251,17 @@ int wait_accept()
   return 0;
 }
 
-
-int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, uint32_t mr_num)
+int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
 {
   struct addrinfo *addr;
-  //  struct rdma_cm_id *cm_id= NULL;
- //  struct rdma_event_channel *ec = NULL;
   struct rdma_conn_param cm_params;
   char port[8];
+  struct psockaddr psaddr;
   int i;//,j;                                                                                                                                                        
   sprintf(port, "%d", RDMA_PORT);
+
+  find_passive_host(&psaddr, 0);
+  exit(1);
 
   if(getaddrinfo(param->host, port, NULL, &addr)){
     fprintf(stderr, "RDMA lib: SEND: ERROR: getaddrinfo failed @ %s:%d\n", __FILE__, __LINE__);
@@ -284,6 +294,7 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, u
     fprintf(stderr, "RDMA lib: SEND: ERROR: rdma route resolve failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
+
   if (wait_for_event(comm->ec, RDMA_CM_EVENT_ROUTE_RESOLVED)) {
     fprintf(stderr, "RDMA lib: SEND: ERROR: event wait failed: port = %s @ %s:%d\n", port, __FILE__, __LINE__);
     exit(1);
@@ -300,14 +311,6 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param, u
     fprintf(stderr, "RDMA lib: SEND: ERROR: event wait failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
-
-   rdma_msg_mr = (struct ibv_mr **) malloc(sizeof(struct ibv_mr*) * mr_num);
-   mr_number = mr_num;
-   for (i = 0; i < mr_num; i++){ 
-     rdma_msg_mr[i] = NULL;
-   }
-   conn = comm->cm_id->context;
-
   return 0;
 }
 
@@ -320,10 +323,13 @@ int rdma_active_finalize(struct RDMA_communicator *comm)
 }
 
 
-
-
-/*************************************************************************                                                                                             * Wait for the rdma_cm event specified.                                                                                                                               * If another event comes in return an error.                                                                                                                      
- */
+/**
+ *
+ * Wait for the rdma_cm event specified.
+ * If another event comes in return an error.
+ *
+ **
+*/
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event)
 {
   struct rdma_cm_event *event;
@@ -398,8 +404,11 @@ static void build_connection(struct rdma_cm_id *id)
   struct connection *conn, *clone;
   struct ibv_qp_init_attr qp_attr;
 
+
   build_context(id->verbs);/*build_context() runs only once internally*/
   build_qp_attr(&qp_attr);
+
+
 
   TEST_NZ(rdma_create_qp(id, s_ctx->pd, &qp_attr));
 

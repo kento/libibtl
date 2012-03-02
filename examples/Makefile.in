@@ -49,6 +49,7 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(examplesdir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = rdma_client_latency-list_queue.$(OBJEXT) \
+	rdma_client_latency-rdma_ppool.$(OBJEXT) \
 	rdma_client_latency-rdma_client.$(OBJEXT) \
 	rdma_client_latency-rdma_server.$(OBJEXT) \
 	rdma_client_latency-rdma_common.$(OBJEXT) \
@@ -65,6 +66,7 @@ rdma_client_latency_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(rdma_client_latency_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am__objects_2 = rdma_client_test-list_queue.$(OBJEXT) \
+	rdma_client_test-rdma_ppool.$(OBJEXT) \
 	rdma_client_test-rdma_client.$(OBJEXT) \
 	rdma_client_test-rdma_server.$(OBJEXT) \
 	rdma_client_test-rdma_common.$(OBJEXT) \
@@ -78,6 +80,7 @@ rdma_client_test_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(rdma_client_test_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am__objects_3 = rdma_server_latency-list_queue.$(OBJEXT) \
+	rdma_server_latency-rdma_ppool.$(OBJEXT) \
 	rdma_server_latency-rdma_client.$(OBJEXT) \
 	rdma_server_latency-rdma_server.$(OBJEXT) \
 	rdma_server_latency-rdma_common.$(OBJEXT) \
@@ -93,6 +96,7 @@ rdma_server_latency_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(rdma_server_latency_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am__objects_4 = rdma_server_test-list_queue.$(OBJEXT) \
+	rdma_server_test-rdma_ppool.$(OBJEXT) \
 	rdma_server_test-rdma_client.$(OBJEXT) \
 	rdma_server_test-rdma_server.$(OBJEXT) \
 	rdma_server_test-rdma_common.$(OBJEXT) \
@@ -245,7 +249,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SRC_DIR = ../src
 INCLUDE_DIR = ../include
-TARGET = $(SRC_DIR)/list_queue.c	$(INCLUDE_DIR)/list_queue.h $(SRC_DIR)/rdma_client.c $(INCLUDE_DIR)/rdma_client.h $(SRC_DIR)/rdma_server.c $(INCLUDE_DIR)/rdma_server.h $(SRC_DIR)/rdma_common.c $(INCLUDE_DIR)/rdma_common.h $(SRC_DIR)/common.c $(INCLUDE_DIR)/common.h $(SRC_DIR)/ibtls.c $(INCLUDE_DIR)/ibtls.h 
+TARGET = $(SRC_DIR)/list_queue.c	$(INCLUDE_DIR)/list_queue.h $(SRC_DIR)/rdma_ppool.c $(INCLUDE_DIR)/rdma_ppool.h $(SRC_DIR)/rdma_client.c $(INCLUDE_DIR)/rdma_client.h $(SRC_DIR)/rdma_server.c $(INCLUDE_DIR)/rdma_server.h $(SRC_DIR)/rdma_common.c $(INCLUDE_DIR)/rdma_common.h $(SRC_DIR)/common.c $(INCLUDE_DIR)/common.h $(SRC_DIR)/ibtls.c $(INCLUDE_DIR)/ibtls.h 
 rdma_client_test_SOURCES = rdma_client_test.c $(TARGET)
 rdma_client_test_CFLAGS = -I$(INCLUDE_DIR)
 rdma_client_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
@@ -354,6 +358,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_latency-rdma_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_latency-rdma_client_latency.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_latency-rdma_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_latency-rdma_ppool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_latency-rdma_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_test-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_test-ibtls.Po@am__quote@
@@ -361,12 +366,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_test-rdma_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_test-rdma_client_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_test-rdma_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_test-rdma_ppool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_client_test-rdma_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-ibtls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-list_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-rdma_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-rdma_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-rdma_ppool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-rdma_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_latency-rdma_server_latency.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_test-common.Po@am__quote@
@@ -374,6 +381,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_test-list_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_test-rdma_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_test-rdma_common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_test-rdma_ppool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_test-rdma_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rdma_server_test-rdma_server_test.Po@am__quote@
 
@@ -425,6 +433,20 @@ rdma_client_latency-list_queue.obj: $(SRC_DIR)/list_queue.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/list_queue.c' object='rdma_client_latency-list_queue.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_latency_CFLAGS) $(CFLAGS) -c -o rdma_client_latency-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+
+rdma_client_latency-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_latency_CFLAGS) $(CFLAGS) -MT rdma_client_latency-rdma_ppool.o -MD -MP -MF $(DEPDIR)/rdma_client_latency-rdma_ppool.Tpo -c -o rdma_client_latency-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_client_latency-rdma_ppool.Tpo $(DEPDIR)/rdma_client_latency-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_client_latency-rdma_ppool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_latency_CFLAGS) $(CFLAGS) -c -o rdma_client_latency-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+
+rdma_client_latency-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_latency_CFLAGS) $(CFLAGS) -MT rdma_client_latency-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/rdma_client_latency-rdma_ppool.Tpo -c -o rdma_client_latency-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_client_latency-rdma_ppool.Tpo $(DEPDIR)/rdma_client_latency-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_client_latency-rdma_ppool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_latency_CFLAGS) $(CFLAGS) -c -o rdma_client_latency-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
 
 rdma_client_latency-rdma_client.o: $(SRC_DIR)/rdma_client.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_latency_CFLAGS) $(CFLAGS) -MT rdma_client_latency-rdma_client.o -MD -MP -MF $(DEPDIR)/rdma_client_latency-rdma_client.Tpo -c -o rdma_client_latency-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
@@ -524,6 +546,20 @@ rdma_client_test-list_queue.obj: $(SRC_DIR)/list_queue.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
 
+rdma_client_test-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-rdma_ppool.o -MD -MP -MF $(DEPDIR)/rdma_client_test-rdma_ppool.Tpo -c -o rdma_client_test-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_client_test-rdma_ppool.Tpo $(DEPDIR)/rdma_client_test-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_client_test-rdma_ppool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+
+rdma_client_test-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/rdma_client_test-rdma_ppool.Tpo -c -o rdma_client_test-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_client_test-rdma_ppool.Tpo $(DEPDIR)/rdma_client_test-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_client_test-rdma_ppool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -c -o rdma_client_test-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+
 rdma_client_test-rdma_client.o: $(SRC_DIR)/rdma_client.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_test_CFLAGS) $(CFLAGS) -MT rdma_client_test-rdma_client.o -MD -MP -MF $(DEPDIR)/rdma_client_test-rdma_client.Tpo -c -o rdma_client_test-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_client_test-rdma_client.Tpo $(DEPDIR)/rdma_client_test-rdma_client.Po
@@ -622,6 +658,20 @@ rdma_server_latency-list_queue.obj: $(SRC_DIR)/list_queue.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_latency_CFLAGS) $(CFLAGS) -c -o rdma_server_latency-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
 
+rdma_server_latency-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_latency_CFLAGS) $(CFLAGS) -MT rdma_server_latency-rdma_ppool.o -MD -MP -MF $(DEPDIR)/rdma_server_latency-rdma_ppool.Tpo -c -o rdma_server_latency-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_server_latency-rdma_ppool.Tpo $(DEPDIR)/rdma_server_latency-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_latency-rdma_ppool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_latency_CFLAGS) $(CFLAGS) -c -o rdma_server_latency-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+
+rdma_server_latency-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_latency_CFLAGS) $(CFLAGS) -MT rdma_server_latency-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/rdma_server_latency-rdma_ppool.Tpo -c -o rdma_server_latency-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_server_latency-rdma_ppool.Tpo $(DEPDIR)/rdma_server_latency-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_latency-rdma_ppool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_latency_CFLAGS) $(CFLAGS) -c -o rdma_server_latency-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+
 rdma_server_latency-rdma_client.o: $(SRC_DIR)/rdma_client.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_latency_CFLAGS) $(CFLAGS) -MT rdma_server_latency-rdma_client.o -MD -MP -MF $(DEPDIR)/rdma_server_latency-rdma_client.Tpo -c -o rdma_server_latency-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_server_latency-rdma_client.Tpo $(DEPDIR)/rdma_server_latency-rdma_client.Po
@@ -719,6 +769,20 @@ rdma_server_test-list_queue.obj: $(SRC_DIR)/list_queue.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/list_queue.c' object='rdma_server_test-list_queue.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+
+rdma_server_test-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-rdma_ppool.o -MD -MP -MF $(DEPDIR)/rdma_server_test-rdma_ppool.Tpo -c -o rdma_server_test-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_server_test-rdma_ppool.Tpo $(DEPDIR)/rdma_server_test-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_test-rdma_ppool.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+
+rdma_server_test-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/rdma_server_test-rdma_ppool.Tpo -c -o rdma_server_test-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/rdma_server_test-rdma_ppool.Tpo $(DEPDIR)/rdma_server_test-rdma_ppool.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_test-rdma_ppool.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -c -o rdma_server_test-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
 
 rdma_server_test-rdma_client.o: $(SRC_DIR)/rdma_client.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-rdma_client.o -MD -MP -MF $(DEPDIR)/rdma_server_test-rdma_client.Tpo -c -o rdma_server_test-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c

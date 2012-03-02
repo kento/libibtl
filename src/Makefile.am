@@ -2,6 +2,9 @@ SRC_DIR=../src
 INCLUDE_DIR=../include
 
 include_HEADERS = \
+	$(INCLUDE_DIR)/ibtls.h \
+	$(INCLUDE_DIR)/rdma_server.h \
+	$(INCLUDE_DIR)/rdma_client.h \
 	$(INCLUDE_DIR)/*
 
 # =======================================
@@ -12,6 +15,8 @@ lib_LIBRARIES = libibtls.a
 libibtls_a_SOURCES = \
         $(SRC_DIR)/list_queue.c \
         $(INCLUDE_DIR)/list_queue.h \
+        $(SRC_DIR)/rdma_ppool.c \
+        $(INCLUDE_DIR)/rdma_ppool.h \
         $(SRC_DIR)/rdma_client.c \
         $(INCLUDE_DIR)/rdma_client.h \
         $(SRC_DIR)/rdma_server.c \
@@ -34,6 +39,8 @@ lib_LTLIBRARIES	= libibtls.la
 libibtls_la_SOURCES = \
         $(SRC_DIR)/list_queue.c \
         $(INCLUDE_DIR)/list_queue.h \
+        $(SRC_DIR)/rdma_ppool.c \
+        $(INCLUDE_DIR)/rdma_ppool.h \
         $(SRC_DIR)/rdma_client.c \
         $(INCLUDE_DIR)/rdma_client.h \
         $(SRC_DIR)/rdma_server.c \
@@ -47,4 +54,4 @@ libibtls_la_SOURCES = \
 
 libibtls_la_LIBADD = @LIBOBJS@
 libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
-libibtls_la_LDFLAGS = -version-info 0:0:0 -release 0
+libibtls_la_LDFLAGS =  -lrdmacm -lpthread -libverbs -version-info 1:0:0 -release 1
