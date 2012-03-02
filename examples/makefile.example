@@ -1,0 +1,21 @@
+
+
+SRC_DIR=../src
+INCLUDE_DIR=../include
+LIB_DIR=../lib
+bin =  rdma_client_test rdma_server_test
+
+all: $(bin)
+
+rdma_client_test: rdma_client_test.c
+		  gcc -o rdma_client_test rdma_client_test.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+rdma_server_test: rdma_server_test.c
+		  gcc -o rdma_server_test rdma_server_test.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+clean:
+	rm -r $(bin)
