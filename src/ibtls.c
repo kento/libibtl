@@ -58,7 +58,7 @@ double RDMA_Latency(int source, struct RDMA_communicator *rdma_com)
 {
   double latency;
   latency = rdma_latency_r(source, rdma_com);
-  //  fprintf(stderr, "%.10f", latency);
+  // fprintf(stderr, "%.10f", latency);
   return latency;
 }
 

@@ -14,7 +14,8 @@
 #endif
 
 #ifndef RDMA_NDPOOL_DIR
-#define RDMA_NDPOOL_DIR "/work0/t2g-ppc-internal/11D37048/ibtl/ndpool"
+//#define RDMA_NDPOOL_DIR "/work0/t2g-ppc-internal/11D37048/ibtl/ndpool"
+#define RDMA_NDPOOL_DIR "/home/usr2/11D37048/ibtl/ndpool"
 #endif
 
 #ifndef RDMA_PORT

@@ -35,8 +35,9 @@ int main(int argc, char **argv)
     exit(1);
   }
   host = argv[1];
-  size = atoi(argv[2]);
   */
+  size = atoi(argv[1]);
+  
   
   struct  RDMA_communicator comm;
   struct  RDMA_param param;

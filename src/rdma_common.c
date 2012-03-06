@@ -57,7 +57,6 @@ static void build_params(struct rdma_conn_param *params);
 static void build_qp_attr(struct ibv_qp_init_attr *qp_attr);
 static void register_memory(struct connection *conn);
 
-
 /*Just for a pasive side*/
 static void accept_connection(struct rdma_cm_id *id);
 static int wait_msg_sent(void);
@@ -168,7 +167,7 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
 
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
-  addr.sin_port   = htons(RDMA_PORT);
+  //  addr.sin_port   = htons(RDMA_PORT);
   inet_aton(get_ip_addr("ib0"), &(addr.sin_addr.s_addr));
 
   if (!(comm->ec = rdma_create_event_channel())) {
@@ -255,15 +254,27 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
 {
   struct addrinfo *addr;
   struct rdma_conn_param cm_params;
-  char port[8];
+  char port[16];
   struct psockaddr psaddr;
   int i;//,j;                                                                                                                                                        
   sprintf(port, "%d", RDMA_PORT);
-
   find_passive_host(&psaddr, 0);
-  exit(1);
 
+  {
+    char host[16];
+    gethostname(host, sizeof(host));
+    fprintf(stderr, "%s:%p IP: %s, PORT:%d\n",host, &host, psaddr.addr, psaddr.port);
+  }
+  //  sleep(100);
+
+  param->host = psaddr.addr;
+  sprintf(port, "%d", psaddr.port);
+
+  //  param->host = "10.1.6.179";
+
+  //  fprintf(stderr, "%s, %s\n", param->host, port);
   if(getaddrinfo(param->host, port, NULL, &addr)){
+    //  if(getaddrinfo(psaddr.addr, port, NULL, &addr)){
     fprintf(stderr, "RDMA lib: SEND: ERROR: getaddrinfo failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
@@ -277,10 +288,13 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
     fprintf(stderr, "RDMA lib: SEND: ERROR: rdma id create failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
+
+
   if (rdma_resolve_addr(comm->cm_id, NULL, addr->ai_addr, TIMEOUT_IN_MS)) {
     fprintf(stderr, "RDMA lib: SEND: ERROR: rdma address resolve failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
+
 
   if (wait_for_event(comm->ec, RDMA_CM_EVENT_ADDR_RESOLVED)) {
     fprintf(stderr, "RDMA lib: SEND: ERROR: event wait failed: RDMA_CMEVENT_ADDR_RESOLVED: port = %s @ %s:%d\n", port, __FILE__, __LINE__);
@@ -311,6 +325,7 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
     fprintf(stderr, "RDMA lib: SEND: ERROR: event wait failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
+
   return 0;
 }
 
