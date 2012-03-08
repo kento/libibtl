@@ -1,4 +1,9 @@
-bin_PROGRAMS = rdma_server_test rdma_client_test rdma_client_latency rdma_server_latency
+bin_PROGRAMS = rdma_server_test \
+	       rdma_client_test \
+	       rdma_client_latency \
+	       rdma_server_latency \
+	       rdma_client_silent \
+	       rdma_server_silent
 
 SRC_DIR=../src
 INCLUDE_DIR=../include
@@ -21,6 +26,14 @@ rdma_server_latency_SOURCES = rdma_server_latency.c $(TARGET)
 rdma_server_latency_CFLAGS = -I$(INCLUDE_DIR)
 rdma_server_latency_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 
+rdma_client_silent_SOURCES =  rdma_client_silent.c $(TARGET)
+rdma_client_silent_CFLAGS = -I$(INCLUDE_DIR)
+rdma_client_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+
+rdma_server_silent_SOURCES = rdma_server_silent.c $(TARGET)
+rdma_server_silent_CFLAGS = -I$(INCLUDE_DIR)
+rdma_server_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+
 # ================
 # For installation
 # ================
@@ -29,9 +42,11 @@ examplesdir = $(exec_prefix)/examples
 
 dist_examples_DATA = \
 	rdma_client_test.c \
-	rdma_server_test.c
-	rdma_client_latency.c
-	rdma_server_latency.c
+	rdma_server_test.c \
+	rdma_client_silent.c \
+	rdma_server_silent.c \
+	rdma_client_latency.c \
+	rdma_server_latency.c 
 
 EXTRA_DIST = makefile.example
 

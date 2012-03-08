@@ -47,6 +47,15 @@ int RDMA_Irecv(void *buf, int size, void* datatype, int source, int tag, struct 
   return 1;
 }
 
+int RDMA_Irecv_silent(void *buf, int size, void* datatype, int source, int tag, struct RDMA_communicator *rdma_com, struct RDMA_request *request)
+{
+  rdma_irecv_r_silent(buf, size, datatype, source, tag, rdma_com, request);
+  return 1;
+}
+
+
+	
+
 int RDMA_Wait(struct RDMA_request *request)
 {
   int recv_size = 0;

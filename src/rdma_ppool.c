@@ -218,9 +218,9 @@ int find_passive_host_rd(struct psockaddr *psa)
   char min_host[32];
   char min_source_ip_dir[512];
   int status = 0;
-  fprintf(stderr, "inout\n");
+  //  fprintf(stderr, "inout\n");
   lock = lock_ndpool();
-  fprintf(stderr, "out\n");
+  //  fprintf(stderr, "out\n");
   get_top_dir(top_dir_path);
   lq_init(&ndp_q);
   recursive_dir_search(&ndp_q, top_dir_path, 2);
