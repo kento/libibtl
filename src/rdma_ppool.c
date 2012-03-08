@@ -66,9 +66,11 @@ void find_passive_host(struct psockaddr *psa, int mode)
   int lock ;
   int status = -1;
 
+
   while (find_passive_host_rd(psa) == -1) {
     usleep(1000);
   }
+
 
   /*
   lock = lock_ndpool();
@@ -216,8 +218,9 @@ int find_passive_host_rd(struct psockaddr *psa)
   char min_host[32];
   char min_source_ip_dir[512];
   int status = 0;
-  
+  fprintf(stderr, "inout\n");
   lock = lock_ndpool();
+  fprintf(stderr, "out\n");
   get_top_dir(top_dir_path);
   lq_init(&ndp_q);
   recursive_dir_search(&ndp_q, top_dir_path, 2);
@@ -435,7 +438,7 @@ static int lock_file(char* path, int operation)
       return -1;
     }
   } else {
-    fprintf(stderr, "open file error\n");
+    fprintf(stderr, "open file error: %s\n", path);
     exit(1);
   }
 }
@@ -499,7 +502,7 @@ static void update_port_file(char *addr, int port)
     fsync(fd);
     sleep(1);
   } else {
-    fprintf(stderr, "failed to open %s \n", port_file_path);
+    fprintf(stderr, "failed to open port file %s \n", port_file_path);
   }
 }
 
@@ -598,7 +601,7 @@ static void make_source_ip_dir(char *src_ip)
   char src_ip_dir[512];
   char command[512];
   get_source_ip_dir(src_ip_dir, src_ip);
-  sprintf(command, "rm -rf %s\n", src_ip_dir);
+  sprintf(command, "rm -rf %s/ahost\n", src_ip_dir);
   system(command);
   make_dir(src_ip_dir); 
 }

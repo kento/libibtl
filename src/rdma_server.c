@@ -126,7 +126,8 @@ static void * poll_cq(struct RDMA_communicator *comm)
     } else if (conn_recv->opcode == IBV_WC_SEND) {
       debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
       /* ========
-	Note: free_connection(conn_recv) is not needed, because conn_recv was used for post_sent but the conn_recv is being used.
+	Note: free_connection(conn_recv) is not needed, 
+	      because conn_recv was used for post_sent but the conn_recv is being used for post_recv for the XSnext msg.
       */
       // free_connection(conn_recv);
       /* ======== */

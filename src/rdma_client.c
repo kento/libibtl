@@ -120,14 +120,25 @@ static void* poll_cq(struct poll_cq_args* args)
 
       te = get_dtime();    
       active_rrre = conn_recv->active_rrre;
-      sem_post(args->is_rdma_completed);
+
+      /*I dont know the best loation of sem_post()*/
+
+      /*Option: 1 => error when using nbcr_finilize()*/
+      //sem_post(args->is_rdma_completed);
 
       /*TODO: more sophisticated free*/
       dereg_mr(conn_recv->active_rrre->passive_mr);
+
+      /*Option: 2 => error when using nbcr_finilize()*/
+      // sem_post(args->is_rdma_completed);
+
       conn_recv->active_rrre = NULL;
       conn_recv->passive_rrre = NULL;
       free_connection(conn_recv);
       /*----------------*/
+
+      /*Option: 3*/
+      sem_post(args->is_rdma_completed);
 
       debug(fprintf(stderr, "RDMA lib: SEND: Recv REQ: id=%lu, count=%lu,  slid=%u recv_wc time=%f(%f) total_time=%f\n",   conn_recv->id, conn_recv->count, conn_recv->slid, ee - ss, mm, te - ts), 2);
 

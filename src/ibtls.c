@@ -54,6 +54,13 @@ int RDMA_Wait(struct RDMA_request *request)
   return recv_size;
 }
 
+int RDMA_Trywait(struct RDMA_request *request)
+{
+  int status = 0;
+  status =  rdma_trywait(request);
+  return status;
+}
+
 double RDMA_Latency(int source, struct RDMA_communicator *rdma_com)
 {
   double latency;

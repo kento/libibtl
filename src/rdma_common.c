@@ -473,13 +473,29 @@ int rdma_wait(struct RDMA_request *request)
   return 1;
 }
 
+int rdma_trywait(struct RDMA_request *request)
+{
+  int status;
+  status = sem_trywait(&(request->is_rdma_completed));
+  if (status == 0) {
+    sem_destroy(&(request->is_rdma_completed));
+    return 1;
+  }
+  return 0;
+}
+
+
 void* rdma_alloc (size_t size) 
 {
   void* ptr;
   struct ibv_mr *mr;
   struct alloc_entry *ae;
-  ptr = valloc(size);
+  if(!(ptr = valloc(size))) {
+    fprintf(stderr, "rdma_alloc failed %s:%d", __FILE__, __LINE__);
+    exit(1);
+  }
   mr = reg_mr(ptr, size);
+  //  fprintf(stderr, "%p\n", mr);
   ae = (struct alloc_entry*)malloc(sizeof(struct alloc_entry));
   ae->addr = ptr;
   ae->mr   = mr;
@@ -495,16 +511,16 @@ void rdma_free (void *ptr)
   lq_init_it(&rdma_alloc_q);
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
     if (ae->addr == ptr) {
-      dereg_mr(ae->addr);
-      free(ae->addr);
       lq_remove(&rdma_alloc_q, ae);
-      free(ae);
       lq_fin_it(&rdma_alloc_q);
+      dereg_mr(ae->mr);
+      free(ae->addr);
+      free(ae);
       return;
     }
   }
   lq_fin_it(&rdma_alloc_q);
-
+  return;
 }
 
 int free_connection(struct connection* conn) 
@@ -542,11 +558,11 @@ void dereg_mr(struct ibv_mr *mr)
   lq_fin_it(&rdma_alloc_q);
 
   pthread_mutex_lock(&regmem_sum_mutex);
+  //  fprintf(stderr, "dereg: %p\n", mr);
   while (ibv_dereg_mr(mr) != 0) {
-    fprintf(stderr, "RDMA lib: COMM: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
-    exit(1);
+    //    fprintf(stderr, "RDMA lib: COMM: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
     if (retry < 0) {
-      fprintf(stderr, "RDMA lib: COMM: ERROR: memory region deregistration failed @ %s:%d\n",  __FILE__, __LINE__);
+      fprintf(stderr, "RDMA lib: COMM: ERROR: memory region deregistration failed mr:%p @ %s:%d\n", mr,  __FILE__, __LINE__);
       exit(1);
     }
     retry--;
