@@ -586,15 +586,22 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
 
   lq_init_it(&rdma_alloc_q);
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
+    if (ae->addr <= addr && addr + size <= ae-> addr + ae->size) {
+      lq_fin_it(&rdma_alloc_q);
+      return ae->mr;
+    }
+    /*
     if (ae->addr == addr && ae->size >= size) {
       lq_fin_it(&rdma_alloc_q);
       return ae->mr;
     }
+    */
   }
   lq_fin_it(&rdma_alloc_q);
 
   pthread_mutex_lock(&regmem_sum_mutex);
 
+  //  fprintf(stderr, "testeakdjfl;\n");
     
   int try = 1000;
   /*TODO: Detect duplicated registrations and skip the region to be registered twice.*/
@@ -634,7 +641,6 @@ int recv_wc (int num_entries, struct connection** conn)
 
   while(1) {
     if (cq != NULL) {
-
       while ((length = ibv_poll_cq(cq, num_entries, &wc))){
 	/*Check if a request was successed*/
 	if (wc.status != IBV_WC_SUCCESS) {
@@ -652,11 +658,12 @@ int recv_wc (int num_entries, struct connection** conn)
 	return length;
       }
     }
-
+    fprintf(stderr, "aaaaa: %d\n", length);
     if (ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx)) {
       fprintf(stderr, "RDMA lib: SEND: ERROR: get cq event  failed @ %s:%d\n", __FILE__, __LINE__);
       exit(1);
     }
+    fprintf(stderr, "bbbbb\n");
     
     ibv_ack_cq_events(cq, 1);
     
@@ -711,7 +718,7 @@ static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, str
   sges.lkey = (uint32_t)conn->send_mr->lkey;
   //  fprintf(stderr, "%p, %p\n", conn_old->id->qp, conn->id->qp);
   TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
-  debug(printf("RDMA lib: COMM: Post %s: id=%lu,  post_count=%lu, imm_data=%d, local_addr=%p, length=%u, lkey=%p\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, conn->count, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
+  debug(printf("RDMA lib: COMM: Post %s: id=%lu,  post_count=%lu, imm_data=%d, local_addr=%p, length=%u, lkey=%p\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, conn->count, wrs.imm_data, sges.addr, sges.length, sges.lkey), 20);
   return 0;
 }
 

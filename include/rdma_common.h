@@ -150,6 +150,8 @@ struct rdma_read_request_entry {
    silent: 1 => not dequeued and no ack.
    */
   int silent;
+  uint64_t offset;
+  uint64_t length;
 
   /*
     Size of the registered active side memory region(mr).

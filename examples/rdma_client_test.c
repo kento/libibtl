@@ -12,7 +12,7 @@
 #include "ibtls.h"
 #include "common.h"
 
-#define NUM 1
+#define NUM 2
 #define ITE 1000
 #define SLP 1
 
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
   for (j = 0; j < ITE; j++) {
     s = get_dtime();
     for (i = 0; i < NUM; i++) {
-      RDMA_Isend(data + i * (size/NUM), size/NUM, NULL, 0, 2, &comm, &req[i]);
+      RDMA_Isend(data + i * (size/NUM), size/NUM, NULL, 0, i, &comm, &req[i]);
     }
     for (i = 0; i < NUM; i++) {
       RDMA_Wait(&req[i]);

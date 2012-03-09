@@ -500,7 +500,7 @@ static void update_port_file(char *addr, int port)
     sprintf(port_str,"%d", port);
     write(fd, port_str, strlen(port_str));
     fsync(fd);
-    sleep(1);
+    //    sleep(1);
   } else {
     fprintf(stderr, "failed to open port file %s \n", port_file_path);
   }

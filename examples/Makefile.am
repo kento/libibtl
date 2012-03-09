@@ -3,7 +3,8 @@ bin_PROGRAMS = rdma_server_test \
 	       rdma_client_latency \
 	       rdma_server_latency \
 	       rdma_client_silent \
-	       rdma_server_silent
+	       rdma_server_silent \
+	       rdma_server_silent_overlap
 
 SRC_DIR=../src
 INCLUDE_DIR=../include
@@ -34,6 +35,10 @@ rdma_server_silent_SOURCES = rdma_server_silent.c $(TARGET)
 rdma_server_silent_CFLAGS = -I$(INCLUDE_DIR)
 rdma_server_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 
+rdma_server_silent_overlap_SOURCES = rdma_server_silent_overlap.c $(TARGET)
+rdma_server_silent_overlap_CFLAGS = -I$(INCLUDE_DIR)
+rdma_server_silent_overlap_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+
 # ================
 # For installation
 # ================
@@ -46,7 +51,8 @@ dist_examples_DATA = \
 	rdma_client_silent.c \
 	rdma_server_silent.c \
 	rdma_client_latency.c \
-	rdma_server_latency.c 
+	rdma_server_latency.c \
+	rdma_server_silent_overlap.c
 
 EXTRA_DIST = makefile.example
 

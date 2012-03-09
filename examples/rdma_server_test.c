@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
   int req_num = 2;
   struct RDMA_request req[req_num];
   int req_id = 0;
+  sleep(10);
   RDMA_Irecv(data[req_id], size, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req[req_id]);  
   req_id = (req_id + 1) % req_num;
   fprintf(stderr, "%p: size=%lu: \n", data, size);
