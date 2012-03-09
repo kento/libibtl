@@ -36,7 +36,8 @@ host_triplet = x86_64-suse-linux-gnu
 bin_PROGRAMS = rdma_server_test$(EXEEXT) rdma_client_test$(EXEEXT) \
 	rdma_client_latency$(EXEEXT) rdma_server_latency$(EXEEXT) \
 	rdma_client_silent$(EXEEXT) rdma_server_silent$(EXEEXT) \
-	rdma_server_silent_overlap$(EXEEXT)
+	rdma_server_silent_overlap$(EXEEXT) \
+	rdma_client_offset$(EXEEXT) rdma_server_offset$(EXEEXT)
 subdir = examples
 DIST_COMMON = README $(dist_examples_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -67,7 +68,23 @@ rdma_client_latency_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(rdma_client_latency_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_2 = rdma_client_silent-list_queue.$(OBJEXT) \
+am__objects_2 = rdma_client_offset-list_queue.$(OBJEXT) \
+	rdma_client_offset-rdma_ppool.$(OBJEXT) \
+	rdma_client_offset-rdma_client.$(OBJEXT) \
+	rdma_client_offset-rdma_server.$(OBJEXT) \
+	rdma_client_offset-rdma_common.$(OBJEXT) \
+	rdma_client_offset-common.$(OBJEXT) \
+	rdma_client_offset-ibtls.$(OBJEXT)
+am_rdma_client_offset_OBJECTS =  \
+	rdma_client_offset-rdma_client_offset.$(OBJEXT) \
+	$(am__objects_2)
+rdma_client_offset_OBJECTS = $(am_rdma_client_offset_OBJECTS)
+rdma_client_offset_DEPENDENCIES = $(am__DEPENDENCIES_1)
+rdma_client_offset_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(rdma_client_offset_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am__objects_3 = rdma_client_silent-list_queue.$(OBJEXT) \
 	rdma_client_silent-rdma_ppool.$(OBJEXT) \
 	rdma_client_silent-rdma_client.$(OBJEXT) \
 	rdma_client_silent-rdma_server.$(OBJEXT) \
@@ -76,14 +93,14 @@ am__objects_2 = rdma_client_silent-list_queue.$(OBJEXT) \
 	rdma_client_silent-ibtls.$(OBJEXT)
 am_rdma_client_silent_OBJECTS =  \
 	rdma_client_silent-rdma_client_silent.$(OBJEXT) \
-	$(am__objects_2)
+	$(am__objects_3)
 rdma_client_silent_OBJECTS = $(am_rdma_client_silent_OBJECTS)
 rdma_client_silent_DEPENDENCIES = $(am__DEPENDENCIES_1)
 rdma_client_silent_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(rdma_client_silent_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_3 = rdma_client_test-list_queue.$(OBJEXT) \
+am__objects_4 = rdma_client_test-list_queue.$(OBJEXT) \
 	rdma_client_test-rdma_ppool.$(OBJEXT) \
 	rdma_client_test-rdma_client.$(OBJEXT) \
 	rdma_client_test-rdma_server.$(OBJEXT) \
@@ -91,13 +108,13 @@ am__objects_3 = rdma_client_test-list_queue.$(OBJEXT) \
 	rdma_client_test-common.$(OBJEXT) \
 	rdma_client_test-ibtls.$(OBJEXT)
 am_rdma_client_test_OBJECTS =  \
-	rdma_client_test-rdma_client_test.$(OBJEXT) $(am__objects_3)
+	rdma_client_test-rdma_client_test.$(OBJEXT) $(am__objects_4)
 rdma_client_test_OBJECTS = $(am_rdma_client_test_OBJECTS)
 rdma_client_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
 rdma_client_test_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(rdma_client_test_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_4 = rdma_server_latency-list_queue.$(OBJEXT) \
+am__objects_5 = rdma_server_latency-list_queue.$(OBJEXT) \
 	rdma_server_latency-rdma_ppool.$(OBJEXT) \
 	rdma_server_latency-rdma_client.$(OBJEXT) \
 	rdma_server_latency-rdma_server.$(OBJEXT) \
@@ -106,14 +123,30 @@ am__objects_4 = rdma_server_latency-list_queue.$(OBJEXT) \
 	rdma_server_latency-ibtls.$(OBJEXT)
 am_rdma_server_latency_OBJECTS =  \
 	rdma_server_latency-rdma_server_latency.$(OBJEXT) \
-	$(am__objects_4)
+	$(am__objects_5)
 rdma_server_latency_OBJECTS = $(am_rdma_server_latency_OBJECTS)
 rdma_server_latency_DEPENDENCIES = $(am__DEPENDENCIES_1)
 rdma_server_latency_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(rdma_server_latency_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_5 = rdma_server_silent-list_queue.$(OBJEXT) \
+am__objects_6 = rdma_server_offset-list_queue.$(OBJEXT) \
+	rdma_server_offset-rdma_ppool.$(OBJEXT) \
+	rdma_server_offset-rdma_client.$(OBJEXT) \
+	rdma_server_offset-rdma_server.$(OBJEXT) \
+	rdma_server_offset-rdma_common.$(OBJEXT) \
+	rdma_server_offset-common.$(OBJEXT) \
+	rdma_server_offset-ibtls.$(OBJEXT)
+am_rdma_server_offset_OBJECTS =  \
+	rdma_server_offset-rdma_server_offset.$(OBJEXT) \
+	$(am__objects_6)
+rdma_server_offset_OBJECTS = $(am_rdma_server_offset_OBJECTS)
+rdma_server_offset_DEPENDENCIES = $(am__DEPENDENCIES_1)
+rdma_server_offset_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(rdma_server_offset_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am__objects_7 = rdma_server_silent-list_queue.$(OBJEXT) \
 	rdma_server_silent-rdma_ppool.$(OBJEXT) \
 	rdma_server_silent-rdma_client.$(OBJEXT) \
 	rdma_server_silent-rdma_server.$(OBJEXT) \
@@ -122,14 +155,14 @@ am__objects_5 = rdma_server_silent-list_queue.$(OBJEXT) \
 	rdma_server_silent-ibtls.$(OBJEXT)
 am_rdma_server_silent_OBJECTS =  \
 	rdma_server_silent-rdma_server_silent.$(OBJEXT) \
-	$(am__objects_5)
+	$(am__objects_7)
 rdma_server_silent_OBJECTS = $(am_rdma_server_silent_OBJECTS)
 rdma_server_silent_DEPENDENCIES = $(am__DEPENDENCIES_1)
 rdma_server_silent_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(rdma_server_silent_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_6 = rdma_server_silent_overlap-list_queue.$(OBJEXT) \
+am__objects_8 = rdma_server_silent_overlap-list_queue.$(OBJEXT) \
 	rdma_server_silent_overlap-rdma_ppool.$(OBJEXT) \
 	rdma_server_silent_overlap-rdma_client.$(OBJEXT) \
 	rdma_server_silent_overlap-rdma_server.$(OBJEXT) \
@@ -137,7 +170,7 @@ am__objects_6 = rdma_server_silent_overlap-list_queue.$(OBJEXT) \
 	rdma_server_silent_overlap-common.$(OBJEXT) \
 	rdma_server_silent_overlap-ibtls.$(OBJEXT)
 am_rdma_server_silent_overlap_OBJECTS = rdma_server_silent_overlap-rdma_server_silent_overlap.$(OBJEXT) \
-	$(am__objects_6)
+	$(am__objects_8)
 rdma_server_silent_overlap_OBJECTS =  \
 	$(am_rdma_server_silent_overlap_OBJECTS)
 rdma_server_silent_overlap_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -145,7 +178,7 @@ rdma_server_silent_overlap_LINK = $(LIBTOOL) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_7 = rdma_server_test-list_queue.$(OBJEXT) \
+am__objects_9 = rdma_server_test-list_queue.$(OBJEXT) \
 	rdma_server_test-rdma_ppool.$(OBJEXT) \
 	rdma_server_test-rdma_client.$(OBJEXT) \
 	rdma_server_test-rdma_server.$(OBJEXT) \
@@ -153,7 +186,7 @@ am__objects_7 = rdma_server_test-list_queue.$(OBJEXT) \
 	rdma_server_test-common.$(OBJEXT) \
 	rdma_server_test-ibtls.$(OBJEXT)
 am_rdma_server_test_OBJECTS =  \
-	rdma_server_test-rdma_server_test.$(OBJEXT) $(am__objects_7)
+	rdma_server_test-rdma_server_test.$(OBJEXT) $(am__objects_9)
 rdma_server_test_OBJECTS = $(am_rdma_server_test_OBJECTS)
 rdma_server_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
 rdma_server_test_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -171,14 +204,16 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(rdma_client_latency_SOURCES) $(rdma_client_silent_SOURCES) \
-	$(rdma_client_test_SOURCES) $(rdma_server_latency_SOURCES) \
+SOURCES = $(rdma_client_latency_SOURCES) $(rdma_client_offset_SOURCES) \
+	$(rdma_client_silent_SOURCES) $(rdma_client_test_SOURCES) \
+	$(rdma_server_latency_SOURCES) $(rdma_server_offset_SOURCES) \
 	$(rdma_server_silent_SOURCES) \
 	$(rdma_server_silent_overlap_SOURCES) \
 	$(rdma_server_test_SOURCES)
 DIST_SOURCES = $(rdma_client_latency_SOURCES) \
-	$(rdma_client_silent_SOURCES) $(rdma_client_test_SOURCES) \
-	$(rdma_server_latency_SOURCES) $(rdma_server_silent_SOURCES) \
+	$(rdma_client_offset_SOURCES) $(rdma_client_silent_SOURCES) \
+	$(rdma_client_test_SOURCES) $(rdma_server_latency_SOURCES) \
+	$(rdma_server_offset_SOURCES) $(rdma_server_silent_SOURCES) \
 	$(rdma_server_silent_overlap_SOURCES) \
 	$(rdma_server_test_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -326,6 +361,12 @@ rdma_server_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 rdma_server_silent_overlap_SOURCES = rdma_server_silent_overlap.c $(TARGET)
 rdma_server_silent_overlap_CFLAGS = -I$(INCLUDE_DIR)
 rdma_server_silent_overlap_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+rdma_client_offset_SOURCES = rdma_client_offset.c $(TARGET)
+rdma_client_offset_CFLAGS = -I$(INCLUDE_DIR)
+rdma_client_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+rdma_server_offset_SOURCES = rdma_server_offset.c $(TARGET)
+rdma_server_offset_CFLAGS = -I$(INCLUDE_DIR)
+rdma_server_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 
 # ================
 # For installation
@@ -334,6 +375,8 @@ examplesdir = $(exec_prefix)/examples
 dist_examples_DATA = \
 	rdma_client_test.c \
 	rdma_server_test.c \
+	rdma_client_offset.c \
+	rdma_server_offset.c \
 	rdma_client_silent.c \
 	rdma_server_silent.c \
 	rdma_client_latency.c \
@@ -405,6 +448,9 @@ clean-binPROGRAMS:
 rdma_client_latency$(EXEEXT): $(rdma_client_latency_OBJECTS) $(rdma_client_latency_DEPENDENCIES) 
 	@rm -f rdma_client_latency$(EXEEXT)
 	$(rdma_client_latency_LINK) $(rdma_client_latency_OBJECTS) $(rdma_client_latency_LDADD) $(LIBS)
+rdma_client_offset$(EXEEXT): $(rdma_client_offset_OBJECTS) $(rdma_client_offset_DEPENDENCIES) 
+	@rm -f rdma_client_offset$(EXEEXT)
+	$(rdma_client_offset_LINK) $(rdma_client_offset_OBJECTS) $(rdma_client_offset_LDADD) $(LIBS)
 rdma_client_silent$(EXEEXT): $(rdma_client_silent_OBJECTS) $(rdma_client_silent_DEPENDENCIES) 
 	@rm -f rdma_client_silent$(EXEEXT)
 	$(rdma_client_silent_LINK) $(rdma_client_silent_OBJECTS) $(rdma_client_silent_LDADD) $(LIBS)
@@ -414,6 +460,9 @@ rdma_client_test$(EXEEXT): $(rdma_client_test_OBJECTS) $(rdma_client_test_DEPEND
 rdma_server_latency$(EXEEXT): $(rdma_server_latency_OBJECTS) $(rdma_server_latency_DEPENDENCIES) 
 	@rm -f rdma_server_latency$(EXEEXT)
 	$(rdma_server_latency_LINK) $(rdma_server_latency_OBJECTS) $(rdma_server_latency_LDADD) $(LIBS)
+rdma_server_offset$(EXEEXT): $(rdma_server_offset_OBJECTS) $(rdma_server_offset_DEPENDENCIES) 
+	@rm -f rdma_server_offset$(EXEEXT)
+	$(rdma_server_offset_LINK) $(rdma_server_offset_OBJECTS) $(rdma_server_offset_LDADD) $(LIBS)
 rdma_server_silent$(EXEEXT): $(rdma_server_silent_OBJECTS) $(rdma_server_silent_DEPENDENCIES) 
 	@rm -f rdma_server_silent$(EXEEXT)
 	$(rdma_server_silent_LINK) $(rdma_server_silent_OBJECTS) $(rdma_server_silent_LDADD) $(LIBS)
@@ -438,6 +487,14 @@ include ./$(DEPDIR)/rdma_client_latency-rdma_client_latency.Po
 include ./$(DEPDIR)/rdma_client_latency-rdma_common.Po
 include ./$(DEPDIR)/rdma_client_latency-rdma_ppool.Po
 include ./$(DEPDIR)/rdma_client_latency-rdma_server.Po
+include ./$(DEPDIR)/rdma_client_offset-common.Po
+include ./$(DEPDIR)/rdma_client_offset-ibtls.Po
+include ./$(DEPDIR)/rdma_client_offset-list_queue.Po
+include ./$(DEPDIR)/rdma_client_offset-rdma_client.Po
+include ./$(DEPDIR)/rdma_client_offset-rdma_client_offset.Po
+include ./$(DEPDIR)/rdma_client_offset-rdma_common.Po
+include ./$(DEPDIR)/rdma_client_offset-rdma_ppool.Po
+include ./$(DEPDIR)/rdma_client_offset-rdma_server.Po
 include ./$(DEPDIR)/rdma_client_silent-common.Po
 include ./$(DEPDIR)/rdma_client_silent-ibtls.Po
 include ./$(DEPDIR)/rdma_client_silent-list_queue.Po
@@ -462,6 +519,14 @@ include ./$(DEPDIR)/rdma_server_latency-rdma_common.Po
 include ./$(DEPDIR)/rdma_server_latency-rdma_ppool.Po
 include ./$(DEPDIR)/rdma_server_latency-rdma_server.Po
 include ./$(DEPDIR)/rdma_server_latency-rdma_server_latency.Po
+include ./$(DEPDIR)/rdma_server_offset-common.Po
+include ./$(DEPDIR)/rdma_server_offset-ibtls.Po
+include ./$(DEPDIR)/rdma_server_offset-list_queue.Po
+include ./$(DEPDIR)/rdma_server_offset-rdma_client.Po
+include ./$(DEPDIR)/rdma_server_offset-rdma_common.Po
+include ./$(DEPDIR)/rdma_server_offset-rdma_ppool.Po
+include ./$(DEPDIR)/rdma_server_offset-rdma_server.Po
+include ./$(DEPDIR)/rdma_server_offset-rdma_server_offset.Po
 include ./$(DEPDIR)/rdma_server_silent-common.Po
 include ./$(DEPDIR)/rdma_server_silent-ibtls.Po
 include ./$(DEPDIR)/rdma_server_silent-list_queue.Po
@@ -619,6 +684,118 @@ rdma_client_latency-ibtls.obj: $(SRC_DIR)/ibtls.c
 #	source='$(SRC_DIR)/ibtls.c' object='rdma_client_latency-ibtls.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_latency_CFLAGS) $(CFLAGS) -c -o rdma_client_latency-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+
+rdma_client_offset-rdma_client_offset.o: rdma_client_offset.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_client_offset.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_client_offset.Tpo -c -o rdma_client_offset-rdma_client_offset.o `test -f 'rdma_client_offset.c' || echo '$(srcdir)/'`rdma_client_offset.c
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_client_offset.Tpo $(DEPDIR)/rdma_client_offset-rdma_client_offset.Po
+#	source='rdma_client_offset.c' object='rdma_client_offset-rdma_client_offset.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_client_offset.o `test -f 'rdma_client_offset.c' || echo '$(srcdir)/'`rdma_client_offset.c
+
+rdma_client_offset-rdma_client_offset.obj: rdma_client_offset.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_client_offset.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_client_offset.Tpo -c -o rdma_client_offset-rdma_client_offset.obj `if test -f 'rdma_client_offset.c'; then $(CYGPATH_W) 'rdma_client_offset.c'; else $(CYGPATH_W) '$(srcdir)/rdma_client_offset.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_client_offset.Tpo $(DEPDIR)/rdma_client_offset-rdma_client_offset.Po
+#	source='rdma_client_offset.c' object='rdma_client_offset-rdma_client_offset.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_client_offset.obj `if test -f 'rdma_client_offset.c'; then $(CYGPATH_W) 'rdma_client_offset.c'; else $(CYGPATH_W) '$(srcdir)/rdma_client_offset.c'; fi`
+
+rdma_client_offset-list_queue.o: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-list_queue.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-list_queue.Tpo -c -o rdma_client_offset-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+	mv -f $(DEPDIR)/rdma_client_offset-list_queue.Tpo $(DEPDIR)/rdma_client_offset-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='rdma_client_offset-list_queue.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+
+rdma_client_offset-list_queue.obj: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-list_queue.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-list_queue.Tpo -c -o rdma_client_offset-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-list_queue.Tpo $(DEPDIR)/rdma_client_offset-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='rdma_client_offset-list_queue.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+
+rdma_client_offset-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_ppool.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_ppool.Tpo -c -o rdma_client_offset-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_ppool.Tpo $(DEPDIR)/rdma_client_offset-rdma_ppool.Po
+#	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_client_offset-rdma_ppool.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+
+rdma_client_offset-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_ppool.Tpo -c -o rdma_client_offset-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_ppool.Tpo $(DEPDIR)/rdma_client_offset-rdma_ppool.Po
+#	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_client_offset-rdma_ppool.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+
+rdma_client_offset-rdma_client.o: $(SRC_DIR)/rdma_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_client.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_client.Tpo -c -o rdma_client_offset-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_client.Tpo $(DEPDIR)/rdma_client_offset-rdma_client.Po
+#	source='$(SRC_DIR)/rdma_client.c' object='rdma_client_offset-rdma_client.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+
+rdma_client_offset-rdma_client.obj: $(SRC_DIR)/rdma_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_client.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_client.Tpo -c -o rdma_client_offset-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_client.Tpo $(DEPDIR)/rdma_client_offset-rdma_client.Po
+#	source='$(SRC_DIR)/rdma_client.c' object='rdma_client_offset-rdma_client.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
+
+rdma_client_offset-rdma_server.o: $(SRC_DIR)/rdma_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_server.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_server.Tpo -c -o rdma_client_offset-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_server.Tpo $(DEPDIR)/rdma_client_offset-rdma_server.Po
+#	source='$(SRC_DIR)/rdma_server.c' object='rdma_client_offset-rdma_server.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+
+rdma_client_offset-rdma_server.obj: $(SRC_DIR)/rdma_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_server.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_server.Tpo -c -o rdma_client_offset-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_server.Tpo $(DEPDIR)/rdma_client_offset-rdma_server.Po
+#	source='$(SRC_DIR)/rdma_server.c' object='rdma_client_offset-rdma_server.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
+
+rdma_client_offset-rdma_common.o: $(SRC_DIR)/rdma_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_common.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_common.Tpo -c -o rdma_client_offset-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_common.Tpo $(DEPDIR)/rdma_client_offset-rdma_common.Po
+#	source='$(SRC_DIR)/rdma_common.c' object='rdma_client_offset-rdma_common.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+
+rdma_client_offset-rdma_common.obj: $(SRC_DIR)/rdma_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-rdma_common.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-rdma_common.Tpo -c -o rdma_client_offset-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-rdma_common.Tpo $(DEPDIR)/rdma_client_offset-rdma_common.Po
+#	source='$(SRC_DIR)/rdma_common.c' object='rdma_client_offset-rdma_common.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
+
+rdma_client_offset-common.o: $(SRC_DIR)/common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-common.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-common.Tpo -c -o rdma_client_offset-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+	mv -f $(DEPDIR)/rdma_client_offset-common.Tpo $(DEPDIR)/rdma_client_offset-common.Po
+#	source='$(SRC_DIR)/common.c' object='rdma_client_offset-common.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+
+rdma_client_offset-common.obj: $(SRC_DIR)/common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-common.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-common.Tpo -c -o rdma_client_offset-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-common.Tpo $(DEPDIR)/rdma_client_offset-common.Po
+#	source='$(SRC_DIR)/common.c' object='rdma_client_offset-common.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
+
+rdma_client_offset-ibtls.o: $(SRC_DIR)/ibtls.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-ibtls.o -MD -MP -MF $(DEPDIR)/rdma_client_offset-ibtls.Tpo -c -o rdma_client_offset-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+	mv -f $(DEPDIR)/rdma_client_offset-ibtls.Tpo $(DEPDIR)/rdma_client_offset-ibtls.Po
+#	source='$(SRC_DIR)/ibtls.c' object='rdma_client_offset-ibtls.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+
+rdma_client_offset-ibtls.obj: $(SRC_DIR)/ibtls.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -MT rdma_client_offset-ibtls.obj -MD -MP -MF $(DEPDIR)/rdma_client_offset-ibtls.Tpo -c -o rdma_client_offset-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+	mv -f $(DEPDIR)/rdma_client_offset-ibtls.Tpo $(DEPDIR)/rdma_client_offset-ibtls.Po
+#	source='$(SRC_DIR)/ibtls.c' object='rdma_client_offset-ibtls.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_offset_CFLAGS) $(CFLAGS) -c -o rdma_client_offset-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
 
 rdma_client_silent-rdma_client_silent.o: rdma_client_silent.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_client_silent_CFLAGS) $(CFLAGS) -MT rdma_client_silent-rdma_client_silent.o -MD -MP -MF $(DEPDIR)/rdma_client_silent-rdma_client_silent.Tpo -c -o rdma_client_silent-rdma_client_silent.o `test -f 'rdma_client_silent.c' || echo '$(srcdir)/'`rdma_client_silent.c
@@ -955,6 +1132,118 @@ rdma_server_latency-ibtls.obj: $(SRC_DIR)/ibtls.c
 #	source='$(SRC_DIR)/ibtls.c' object='rdma_server_latency-ibtls.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_latency_CFLAGS) $(CFLAGS) -c -o rdma_server_latency-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+
+rdma_server_offset-rdma_server_offset.o: rdma_server_offset.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_server_offset.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_server_offset.Tpo -c -o rdma_server_offset-rdma_server_offset.o `test -f 'rdma_server_offset.c' || echo '$(srcdir)/'`rdma_server_offset.c
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_server_offset.Tpo $(DEPDIR)/rdma_server_offset-rdma_server_offset.Po
+#	source='rdma_server_offset.c' object='rdma_server_offset-rdma_server_offset.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_server_offset.o `test -f 'rdma_server_offset.c' || echo '$(srcdir)/'`rdma_server_offset.c
+
+rdma_server_offset-rdma_server_offset.obj: rdma_server_offset.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_server_offset.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_server_offset.Tpo -c -o rdma_server_offset-rdma_server_offset.obj `if test -f 'rdma_server_offset.c'; then $(CYGPATH_W) 'rdma_server_offset.c'; else $(CYGPATH_W) '$(srcdir)/rdma_server_offset.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_server_offset.Tpo $(DEPDIR)/rdma_server_offset-rdma_server_offset.Po
+#	source='rdma_server_offset.c' object='rdma_server_offset-rdma_server_offset.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_server_offset.obj `if test -f 'rdma_server_offset.c'; then $(CYGPATH_W) 'rdma_server_offset.c'; else $(CYGPATH_W) '$(srcdir)/rdma_server_offset.c'; fi`
+
+rdma_server_offset-list_queue.o: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-list_queue.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-list_queue.Tpo -c -o rdma_server_offset-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+	mv -f $(DEPDIR)/rdma_server_offset-list_queue.Tpo $(DEPDIR)/rdma_server_offset-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='rdma_server_offset-list_queue.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
+
+rdma_server_offset-list_queue.obj: $(SRC_DIR)/list_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-list_queue.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-list_queue.Tpo -c -o rdma_server_offset-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-list_queue.Tpo $(DEPDIR)/rdma_server_offset-list_queue.Po
+#	source='$(SRC_DIR)/list_queue.c' object='rdma_server_offset-list_queue.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
+
+rdma_server_offset-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_ppool.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_ppool.Tpo -c -o rdma_server_offset-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_ppool.Tpo $(DEPDIR)/rdma_server_offset-rdma_ppool.Po
+#	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_offset-rdma_ppool.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+
+rdma_server_offset-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_ppool.Tpo -c -o rdma_server_offset-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_ppool.Tpo $(DEPDIR)/rdma_server_offset-rdma_ppool.Po
+#	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_offset-rdma_ppool.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+
+rdma_server_offset-rdma_client.o: $(SRC_DIR)/rdma_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_client.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_client.Tpo -c -o rdma_server_offset-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_client.Tpo $(DEPDIR)/rdma_server_offset-rdma_client.Po
+#	source='$(SRC_DIR)/rdma_client.c' object='rdma_server_offset-rdma_client.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+
+rdma_server_offset-rdma_client.obj: $(SRC_DIR)/rdma_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_client.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_client.Tpo -c -o rdma_server_offset-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_client.Tpo $(DEPDIR)/rdma_server_offset-rdma_client.Po
+#	source='$(SRC_DIR)/rdma_client.c' object='rdma_server_offset-rdma_client.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
+
+rdma_server_offset-rdma_server.o: $(SRC_DIR)/rdma_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_server.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_server.Tpo -c -o rdma_server_offset-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_server.Tpo $(DEPDIR)/rdma_server_offset-rdma_server.Po
+#	source='$(SRC_DIR)/rdma_server.c' object='rdma_server_offset-rdma_server.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+
+rdma_server_offset-rdma_server.obj: $(SRC_DIR)/rdma_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_server.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_server.Tpo -c -o rdma_server_offset-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_server.Tpo $(DEPDIR)/rdma_server_offset-rdma_server.Po
+#	source='$(SRC_DIR)/rdma_server.c' object='rdma_server_offset-rdma_server.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
+
+rdma_server_offset-rdma_common.o: $(SRC_DIR)/rdma_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_common.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_common.Tpo -c -o rdma_server_offset-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_common.Tpo $(DEPDIR)/rdma_server_offset-rdma_common.Po
+#	source='$(SRC_DIR)/rdma_common.c' object='rdma_server_offset-rdma_common.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+
+rdma_server_offset-rdma_common.obj: $(SRC_DIR)/rdma_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-rdma_common.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-rdma_common.Tpo -c -o rdma_server_offset-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-rdma_common.Tpo $(DEPDIR)/rdma_server_offset-rdma_common.Po
+#	source='$(SRC_DIR)/rdma_common.c' object='rdma_server_offset-rdma_common.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
+
+rdma_server_offset-common.o: $(SRC_DIR)/common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-common.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-common.Tpo -c -o rdma_server_offset-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+	mv -f $(DEPDIR)/rdma_server_offset-common.Tpo $(DEPDIR)/rdma_server_offset-common.Po
+#	source='$(SRC_DIR)/common.c' object='rdma_server_offset-common.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+
+rdma_server_offset-common.obj: $(SRC_DIR)/common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-common.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-common.Tpo -c -o rdma_server_offset-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-common.Tpo $(DEPDIR)/rdma_server_offset-common.Po
+#	source='$(SRC_DIR)/common.c' object='rdma_server_offset-common.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
+
+rdma_server_offset-ibtls.o: $(SRC_DIR)/ibtls.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-ibtls.o -MD -MP -MF $(DEPDIR)/rdma_server_offset-ibtls.Tpo -c -o rdma_server_offset-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+	mv -f $(DEPDIR)/rdma_server_offset-ibtls.Tpo $(DEPDIR)/rdma_server_offset-ibtls.Po
+#	source='$(SRC_DIR)/ibtls.c' object='rdma_server_offset-ibtls.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+
+rdma_server_offset-ibtls.obj: $(SRC_DIR)/ibtls.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -MT rdma_server_offset-ibtls.obj -MD -MP -MF $(DEPDIR)/rdma_server_offset-ibtls.Tpo -c -o rdma_server_offset-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+	mv -f $(DEPDIR)/rdma_server_offset-ibtls.Tpo $(DEPDIR)/rdma_server_offset-ibtls.Po
+#	source='$(SRC_DIR)/ibtls.c' object='rdma_server_offset-ibtls.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_offset_CFLAGS) $(CFLAGS) -c -o rdma_server_offset-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
 
 rdma_server_silent-rdma_server_silent.o: rdma_server_silent.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_CFLAGS) $(CFLAGS) -MT rdma_server_silent-rdma_server_silent.o -MD -MP -MF $(DEPDIR)/rdma_server_silent-rdma_server_silent.Tpo -c -o rdma_server_silent-rdma_server_silent.o `test -f 'rdma_server_silent.c' || echo '$(srcdir)/'`rdma_server_silent.c

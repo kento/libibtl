@@ -658,12 +658,12 @@ int recv_wc (int num_entries, struct connection** conn)
 	return length;
       }
     }
-    fprintf(stderr, "aaaaa: %d\n", length);
+    //    fprintf(stderr, "aaaaa: %d\n", length);
     if (ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx)) {
       fprintf(stderr, "RDMA lib: SEND: ERROR: get cq event  failed @ %s:%d\n", __FILE__, __LINE__);
       exit(1);
     }
-    fprintf(stderr, "bbbbb\n");
+    //    fprintf(stderr, "bbbbb\n");
     
     ibv_ack_cq_events(cq, 1);
     
@@ -718,7 +718,7 @@ static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, str
   sges.lkey = (uint32_t)conn->send_mr->lkey;
   //  fprintf(stderr, "%p, %p\n", conn_old->id->qp, conn->id->qp);
   TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
-  debug(printf("RDMA lib: COMM: Post %s: id=%lu,  post_count=%lu, imm_data=%d, local_addr=%p, length=%u, lkey=%p\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, conn->count, wrs.imm_data, sges.addr, sges.length, sges.lkey), 20);
+  debug(printf("RDMA lib: COMM: Post %s: id=%lu,  post_count=%lu, imm_data=%d, local_addr=%p, length=%u, lkey=%p\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, conn->count, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
   return 0;
 }
 
