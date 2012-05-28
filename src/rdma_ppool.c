@@ -465,8 +465,29 @@ static DIR* open_dir(char *dir_path)
   return dir;
 }
 
+void void join_passive_pool(char *addr, int port) 
+{
+  char *ndpool_dir;
+  int lock;
 
-void join_passive_pool(char *addr, int port)
+  make_top_dir();
+  make_node_dir();
+  make_source_ip_dir(addr);
+  make_active_host_dir(addr);
+
+  make_lock_file(addr);
+  make_active_lock_file(addr);
+
+  lock_iface(addr);
+
+  make_port_file(addr);
+  //  lock = lock_ndpool();
+  update_port_file(addr, port);
+  //  unlock_ndpool(lock);
+  fprintf(stderr, "%s:%d Joined !\n", addr, port);
+}
+
+void join_passive_pool_bi(char *addr, int port)
 { 
   char *ndpool_dir;
   int lock;
