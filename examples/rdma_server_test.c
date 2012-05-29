@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   int ctl_tag;
   double ss, ee;
 
-  size = 1024 * 1024 * 1024;
+  size = 200 * 1024 * 1024  + 1;
 
   data[0] = (char*)valloc(size);
   data[1] = (char*)valloc(size);

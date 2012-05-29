@@ -12,7 +12,7 @@
 #include "ibtls.h"
 #include "common.h"
 
-#define NUM 2
+#define NUM 1
 #define ITE 1000
 #define SLP 1
 
@@ -36,12 +36,14 @@ int main(int argc, char **argv)
   }
   host = argv[1];
   */
+
   size = atoi(argv[1]);
   
   
   struct  RDMA_communicator comm;
   struct  RDMA_param param;
-  //  param.host = host;
+  param.host = host;
+  //  param.mode = 0;
 
   s = get_dtime();
   RDMA_Active_Init(&comm, &param);
@@ -74,6 +76,7 @@ int main(int argc, char **argv)
     for (i = 0; i < NUM; i++) {
       RDMA_Isend(data + i * (size/NUM), size/NUM, NULL, 0, i, &comm, &req[i]);
     }
+    printf("testest\n");
     for (i = 0; i < NUM; i++) {
       RDMA_Wait(&req[i]);
     }

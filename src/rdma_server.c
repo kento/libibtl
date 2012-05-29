@@ -291,6 +291,10 @@ int rdma_irecv_r_silent (void *buf, int size, void* datatype, int source, int ta
   return rdma_irecv_r_opt (buf, size, datatype, source, tag, rdma_com, request, 1);
 }
 
+int rdma_irecv_r_offset (void *buf, int offset, int size, void* datatype, int source, int tag, struct RDMA_communicator *rdma_com, struct RDMA_request *request)
+{  return rdma_irecv_r_opt_offset (buf, offset, size, datatype, source, tag, rdma_com, request, 0);}
+
+
 int rdma_irecv_r_silent_offset (void *buf, int offset, int size, void* datatype, int source, int tag, struct RDMA_communicator *rdma_com, struct RDMA_request *request) 
 {
   return rdma_irecv_r_opt_offset (buf, offset, size, datatype, source, tag, rdma_com, request, 1);
