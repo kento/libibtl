@@ -61,6 +61,7 @@ static void register_memory(struct connection *conn);
 static void accept_connection(struct rdma_cm_id *id);
 static int wait_msg_sent(void);
 
+
 void die(const char *reason)
 {
   fprintf(stderr, "%s\n", reason);
@@ -164,6 +165,7 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   struct sockaddr_in *local_addr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
 
   comm = (struct RDMA_communicator *) arg;
+  pthread_mutex_init(&(comm->post_mutex), NULL);
 
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;

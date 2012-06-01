@@ -5,7 +5,7 @@
 //#include <unistd.h>
 //#include <sys/file.h>
 //#include <sys/types.h>
-//#include <errno.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <dirent.h>
 //#include <unistd.h>
@@ -16,6 +16,7 @@
 #include "list_queue.h"
 
 #define AHOST_FNAME "/ahosts"
+#define COUNT_FNAME "/count"
 #define LIFE_FNAME "/life"
 
 static int make_dir(char * dir);
@@ -33,15 +34,21 @@ static void make_file(char *path);
 static void make_lock_file(char *src_ip);
 static void make_port_file(char *addr);
 static void make_active_lock_file(char *src_ip);
+static void make_count_file(char* src_ip);
+
 
 static void get_lock_file_path(char *lock_file_path, char* src_ip);
 static void get_port_file_path(char* port_file_path, char* addr);
 static void get_active_lock_file_path(char *lock_file_path);
+static void get_count_file_path(char *lock_file_path, char* src_ip);
 
 static void lock_iface(char* src_ip);
 static void update_port_file(char *addr, int port);
+static void update_count_file(char *addr);
 
+static int increment_connected_active(char *source_ip_dir);
 static int count_connected_active(char *source_ip_dir);
+
 
 
 static DIR* open_dir(char *dir);
@@ -67,9 +74,19 @@ void find_passive_host(struct psockaddr *psa, int mode)
   int status = -1;
 
 
-  while (find_passive_host_rd(psa) == -1) {
-    usleep(1000);
+  //  while (find_passive_host_rd(psa) == -1) {
+  switch (mode) {
+  case 0:
+    /*Dynamic*/
+    while (choose_passive_host(psa) == -1) {
+      usleep(1000);
+    }
+    break;
+  case 1:
+    /*Static*/
+    return;
   }
+
 
 
   /*
@@ -205,6 +222,55 @@ static int is_dir(char * dir_path)
     closedir(dir);
     return 1;
   }
+}
+
+int choose_passive_host (struct psockaddr *psa)
+{
+  char top_dir_path[512];
+  lq ndp_q;
+  int lock;
+  char *source_ip_dir;
+  int min_count = -1;
+  int temp_count = 0;
+  char min_host[32];
+  char min_source_ip_dir[512];
+  int status = 0;
+  //  fprintf(stderr, "inout\n");
+  lock = lock_ndpool();
+  //  fprintf(stderr, "out\n");
+  get_top_dir(top_dir_path);
+  lq_init(&ndp_q);
+  recursive_dir_search(&ndp_q, top_dir_path, 2);
+
+  lq_init_it(&ndp_q);
+  while ((source_ip_dir = (char *)lq_next(&ndp_q)) != NULL) {
+    if (is_running(source_ip_dir) == 0)  continue;
+    temp_count = count_connected_active(source_ip_dir);
+    if (status == 0 && (min_count == -1 || min_count > temp_count)) {
+      min_count = temp_count;
+      sprintf(min_source_ip_dir, "%s", source_ip_dir);
+      sprintf(min_host, "%s", get_dir_name(source_ip_dir));      
+    }
+    //      free(source_ip_dir);
+  }
+  lq_fin_it(&ndp_q);
+
+
+  lq_init_it(&ndp_q);
+  while ((source_ip_dir = (char *)lq_next(&ndp_q)) != NULL) {
+      free(source_ip_dir);
+  }
+  lq_fin_it(&ndp_q);
+  
+  if (!(min_count == -1)) {
+    sprintf(psa->addr, "%s", min_host);
+    psa->port = get_port_number(min_source_ip_dir);
+
+    //    make_connect_lock_file(min_source_ip_dir); 
+    increment_connected_active(min_source_ip_dir);
+  }
+  unlock_ndpool(lock);
+  return min_count;
 }
 
 int find_passive_host_rd(struct psockaddr *psa)
@@ -385,6 +451,52 @@ static int test_lock(char * path)
   }
 }
 
+static int increment_connected_active(char *source_ip_dir)
+{
+  int count = 0;
+  char count_path[512];
+  char count_c[32];
+  int ws;
+  int fd;
+
+
+  sprintf(count_path, "%s%s", source_ip_dir, COUNT_FNAME);
+  fd = open(count_path, O_RDWR);
+  read(fd, count_c, sizeof(count_c));
+  count = atoi(count_c);
+  count++;
+
+  sprintf(count_c, "%d", count);
+  lseek(fd, 0, SEEK_SET);
+  if ((ws = write(fd, count_c, strlen(count_c))) == -1) {
+    fprintf(stderr, "Count file write failed: errono: %d (EBADF: %d, ENOSPC: %d)\n", errno, EBADF, ENOSPC);
+    exit(1);
+  }
+  fsync(fd);
+  close(fd);
+  count = count_connected_active(source_ip_dir);
+  fprintf(stderr, "%d\n", count);
+
+  return count;
+}
+
+
+static int count_connected_active(char *source_ip_dir)
+{
+  int count = 0;
+  char count_path[512];
+  char count_c[32];
+  int fd;
+
+  sprintf(count_path, "%s%s", source_ip_dir, COUNT_FNAME);
+  fd = open(count_path, O_RDONLY);
+  read(fd, count_c, sizeof(count_c));
+  //  fprintf(stderr, "-> %d\n", atoi(count_c));
+  close(fd);
+  return atoi(count_c);
+}
+
+/*
 static int count_connected_active(char *source_ip_dir)
 {
   int scanf_num;
@@ -409,9 +521,10 @@ static int count_connected_active(char *source_ip_dir)
     free(namelist[i]);
   }
   free(namelist);
-  /*Count the actual number of active hosts*/
+  //Count the actual number of active hosts
   return count;
 }
+*/
 
 
 static int lock_ndpool() 
@@ -465,25 +578,26 @@ static DIR* open_dir(char *dir_path)
   return dir;
 }
 
-void join_passive_pool(char *addr, int port)
-{ 
-  char *ndpool_dir;
-  int lock;
+void join_passive_pool(char *addr, int port) 
+{
+  make_top_dir(); // /home/usr2/11D37048/ibtl/ndpool
+  make_node_dir(); // /home/usr2/11D37048/ibtl/ndpool/t2a006178
+  make_source_ip_dir(addr); // /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178
+  //  make_active_host_dir(addr); // /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/ahosts
 
-  make_top_dir();
-  make_node_dir();
-  make_source_ip_dir(addr);
-  make_active_host_dir(addr);
+  make_lock_file(addr); //  /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/life
+  make_active_lock_file(addr); //  /home/usr2/11D37048/ibtl/ndpool/active
+  make_count_file(addr);
 
-  make_lock_file(addr);
-  make_active_lock_file(addr);
+  lock_iface(addr); // lock /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/life
 
-  lock_iface(addr);
-
-  make_port_file(addr);
+  make_port_file(addr);  //  /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/port
   //  lock = lock_ndpool();
-  update_port_file(addr, port);
+  update_port_file(addr, port); // update  /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/port
   //  unlock_ndpool(lock);
+
+  update_count_file(addr); // update  /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/count
+
   fprintf(stderr, "%s:%d Joined !\n", addr, port);
 }
 
@@ -502,6 +616,24 @@ static void update_port_file(char *addr, int port)
     //    sleep(1);
   } else {
     fprintf(stderr, "failed to open port file %s \n", port_file_path);
+  }
+}
+
+static void update_count_file(char *addr)
+{
+  char count_file_path[512];
+  char count_str[8];
+  int fd;
+
+  get_count_file_path(count_file_path, addr);
+
+  if ((fd = open(count_file_path, O_WRONLY)) != -1) {
+    sprintf(count_str,"%d", 0);
+    write(fd, count_str, strlen(count_str));
+    fsync(fd);
+    //    sleep(1);
+  } else {
+    fprintf(stderr, "failed to open count file %s \n", count_file_path);
   }
 }
 
@@ -565,6 +697,24 @@ static void get_lock_file_path(char *lock_file_path, char* src_ip)
   strcat(path, "/life");
   strcpy(lock_file_path, path);
 }
+
+
+static void make_count_file(char* src_ip)
+{
+  char lock_file_path[512];
+  get_count_file_path(lock_file_path, src_ip);
+  make_file(lock_file_path);
+}
+
+static void get_count_file_path(char *lock_file_path, char* src_ip)
+{
+  char path[512];
+  get_source_ip_dir(path, src_ip);
+  strcat(path, "/count");
+  strcpy(lock_file_path, path);
+}
+
+
 
 static void make_file(char *path)
 {

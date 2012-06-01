@@ -36,6 +36,9 @@ void rdma_isend_r(void *buf, int size, void* datatype, int dest, int tag, struct
   sem_init(&(request->is_rdma_completed), 0, 0);
   args->is_rdma_completed  = &(request->is_rdma_completed);
 
+  /*Wait untile previous send post request is finished and "rdma_isend_r" call is completed*/
+  pthread_mutex_lock(&(rdma_com->post_mutex));
+
   if (pthread_create(&thread, NULL,(void *)poll_cq, args)) {
     fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__);
     exit(1);
@@ -103,6 +106,11 @@ static void* poll_cq(struct poll_cq_args* args)
   ee = get_dtime();
 
   send_ctl_msg(conn_send, MR_INIT, &rrre);
+
+  /* Now we posted the request, a next asynchronous send function can be called
+   * We can safely unlock the post_mutex.
+   */
+  pthread_mutex_unlock(&(comm->post_mutex));
 
   s = get_dtime();
   while (1) {

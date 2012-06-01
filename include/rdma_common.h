@@ -70,6 +70,8 @@ struct RDMA_message {
 struct RDMA_communicator {
   struct rdma_event_channel *ec;
   struct rdma_cm_id *cm_id;
+  /*To make sure to post send/recv request in order for an asynchronous communication*/
+  pthread_mutex_t post_mutex;
 };
 
 struct RDMA_param {
