@@ -47,7 +47,7 @@ void rdma_isend_r(void *buf, int size, void* datatype, int dest, int tag, struct
   if (pthread_detach(thread)) {
     fprintf(stderr, "RDMA lib: SEND: ERROR: pthread detach failed @ %s:%d", __FILE__, __LINE__);
     exit(1);
-    }
+  }
 
   return;
 }
