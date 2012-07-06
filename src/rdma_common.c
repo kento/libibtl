@@ -268,6 +268,7 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
     fprintf(stderr, "%s:%p IP: %s, PORT:%d\n",host, &host, psaddr.addr, psaddr.port);
   }
   //  sleep(100);
+  pthread_mutex_init(&(comm->post_mutex), NULL);
 
   param->host = psaddr.addr;
   sprintf(port, "%d", psaddr.port);
@@ -383,8 +384,6 @@ static void build_context(struct ibv_context *verbs)
   //  TEST_Z(s_ctx->cq = ibv_create_cq(s_ctx->ctx, 100, NULL, s_ctx->comp_channel, 0)); /* cqe=10 is arbitrary/ comp_vector:0 */
   TEST_Z(s_ctx->cq = ibv_create_cq(s_ctx->ctx, 1000, NULL, s_ctx->comp_channel, 0)); /* cqe=10 is arbitrary up to 131071 (36 nodes =>200 cq) */
   TEST_NZ(ibv_req_notify_cq(s_ctx->cq, 0));
-
-
 
   //  TEST_NZ(pthread_create(&s_ctx->cq_poller_thread, NULL, poll_cq, NULL));
 }

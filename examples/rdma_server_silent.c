@@ -31,13 +31,16 @@ int main(int argc, char **argv) {
       ss = get_dtime();    
       //    fprintf(stderr, "RDMA irecv\n");
       //    RDMA_Irecv(data, s, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req);  
+      //      fprintf(stderr, "1\n");
       RDMA_Irecv_silent(data, s, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req);  
+      //      fprintf(stderr, "2\n");
       //    fprintf(stderr, "wait\n");
       RDMA_Wait(&req);
+      //      fprintf(stderr, "3\n");
       ee = get_dtime();
-      //    fprintf(stderr, "Size: %d [bytes], Latency: %f, Throughput: %f [Gbytes/sec]\n", s, ee- ss, (s/1000000000.0)/(ee - ss));
+      fprintf(stderr, "Size: %d [bytes], Latency: %f, Throughput: %f [Gbytes/sec]\n", s, ee- ss, (s/1000000000.0)/(ee - ss));
       //      fprintf(stderr, "%d %f %f\n", s, ee- ss, (s/1000000000.0)/(ee - ss));
-      //    sleep(1);
+      sleep(1);
     }
   }
 

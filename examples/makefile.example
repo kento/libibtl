@@ -3,7 +3,11 @@
 SRC_DIR=../src
 INCLUDE_DIR=../include
 LIB_DIR=../lib
-bin =  rdma_client_test rdma_server_test
+bin =  rdma_client_test rdma_server_test \
+       rdma_client_offset rdma_server_offset \
+       rdma_client_silent rdma_server_silent \
+       rdma_client_latency rdma_server_latency \
+                           rdma_server_silent_overlap
 
 all: $(bin)
 
@@ -14,6 +18,43 @@ rdma_client_test: rdma_client_test.c
 
 rdma_server_test: rdma_server_test.c
 		  gcc -o rdma_server_test rdma_server_test.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+rdma_client_offset: rdma_client_offset.c
+		  gcc -o rdma_client_offset rdma_client_offset.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+rdma_server_offset: rdma_server_offset.c
+		  gcc -o rdma_server_offset rdma_server_offset.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+rdma_client_silent: rdma_client_silent.c
+		  gcc -o rdma_client_silent rdma_client_silent.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+rdma_server_silent: rdma_server_silent.c
+		  gcc -o rdma_server_silent rdma_server_silent.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+rdma_client_latency: rdma_client_latency.c
+		  gcc -o rdma_client_latency rdma_client_latency.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+rdma_server_latency: rdma_server_latency.c
+		  gcc -o rdma_server_latency rdma_server_latency.c \
+		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
+		  -I$(INCLUDE_DIR)
+
+
+
+rdma_server_silent_overlap: rdma_server_silent_overlap.c
+		  gcc -o rdma_server_silent_overlap rdma_server_silent_overlap.c \
 		  ${LDFLAGS} -L$(LIB_DIR) -lrdmacm -lpthread -libtls \
 		  -I$(INCLUDE_DIR)
 

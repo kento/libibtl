@@ -91,7 +91,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
       debug(printf("RDMA lib: COMM: Recv REQ: id=%lu, wc.slid=%u recv_wc time=%f(%f)\n",  conn_recv->id, conn_recv->slid, ee - ss, mm), 1);
       rrre = (struct rdma_read_request_entry*)malloc(sizeof(struct rdma_read_request_entry));
       memcpy(rrre, conn_recv->recv_msg, sizeof(struct rdma_read_request_entry));      
-      debug(printf("RDMA lib: RECV: qp= %lu, id=%lu, order=%lu, tag=%lu, addr=%p, length=%lu, rkey=%lu, wc.slid=%u recv_wc time=%f(%f)\n", conn_recv->id->qp, rrre->id, rrre->order, rrre->tag, rrre->mr.addr, rrre->mr.length, rrre->mr.rkey, conn_recv->id, conn_recv->slid, ee - ss, mm), 1);
+      debug(printf("RDMA lib: RECV: qp= %lu, id=%lu, order=%lu, tag=%lu, addr=%p, length=%lu, rkey=%p(%lu), wc.slid=%u recv_wc time=%f(%f)\n", conn_recv->id->qp, rrre->id, rrre->order, rrre->tag, rrre->mr.addr, rrre->mr.length, rrre->mr.rkey, rrre->mr.rkey, conn_recv->id, conn_recv->slid, ee - ss, mm), 1);
       conn_send = create_connection(conn_recv->id);
       free_connection(conn_recv);
       rrre->conn = conn_send;
@@ -195,6 +195,7 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
     fprintf(stderr, "Wrong Q id \n");
     exit(1);
   }
+
 
   lq_init_it(target_rrre_q);
   //  fprintf(stderr, "lq_init_it \n");
@@ -346,7 +347,7 @@ static int rdma_irecv_r_opt (void *buf, int size, void* datatype, int source, in
   rrre->order = 0;
   rrre->tag = tag;
   rrre->silent = silent;
-  rrre->offset = -1;
+  rrre->offset = 0;
   rrre->length = size;
 
   
@@ -405,7 +406,7 @@ static void post_RDMA_read (struct connection* conn, uint64_t remote_addr, uint3
     sge.lkey = lkey;
 
     debug(printf("RDMA lib: Preparing RDMA transfer: Done\n"), 1);
-    debug(fprintf(stderr, "RDMA lib: RECV: Prpd RDMA_READ: qp=%lu, id=%lu(%d), remote_addr=%p(%lu), rkey=%u, sge.addr=%lu, sge.length=%u,  sge.lkey=%lu\n", conn->qp, conn->count, (uintptr_t)conn, wr.wr.rdma.remote_addr, wr.wr.rdma.remote_addr, wr.wr.rdma.rkey, sge.addr, sge.length, sge.lkey), 1);   
+    debug(fprintf(stderr, "RDMA lib: RECV: Prpd RDMA_READ: qp=%lu, id=%lu(%d), remote_addr=%p(%lu), rkey=%p(%u), sge.addr=%p(%lu), sge.length=%u,  sge.lkey=%p(%lu)\n", conn->qp, conn->count, (uintptr_t)conn, wr.wr.rdma.remote_addr, wr.wr.rdma.remote_addr, wr.wr.rdma.rkey, wr.wr.rdma.rkey, sge.addr, sge.addr, sge.length, sge.lkey, sge.lkey), 1);   
     if ((ibv_post_send(conn->qp, &wr, &bad_wr))) {
       fprintf(stderr, "RDMA lib: ERROR: post send failed @ %s:%d\n", __FILE__, __LINE__);
       exit(1);

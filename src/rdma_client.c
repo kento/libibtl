@@ -48,7 +48,7 @@ void rdma_isend_r(void *buf, int size, void* datatype, int dest, int tag, struct
     fprintf(stderr, "RDMA lib: SEND: ERROR: pthread detach failed @ %s:%d", __FILE__, __LINE__);
     exit(1);
   }
-
+  
   return;
 }
 
@@ -107,8 +107,8 @@ static void* poll_cq(struct poll_cq_args* args)
 
   send_ctl_msg(conn_send, MR_INIT, &rrre);
 
-  /* Now we posted the request, a next asynchronous send function can be called
-   * We can safely unlock the post_mutex.
+  /* Now we have posted the request, a next asynchronous send function can be called
+   * We can safely unlock the post_mutex here.
    */
   pthread_mutex_unlock(&(comm->post_mutex));
 
