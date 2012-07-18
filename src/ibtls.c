@@ -89,3 +89,9 @@ double RDMA_Latency(int source, struct RDMA_communicator *rdma_com)
   return latency;
 }
 
+int RDMA_Test_tag(int tag, struct RDMA_communicator *rdma_com)
+{
+  int result = 0;
+  result = rdma_test_tag(tag, rdma_com);
+  return result;
+}
