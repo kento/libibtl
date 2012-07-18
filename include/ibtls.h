@@ -15,3 +15,4 @@ int RDMA_Irecv_silent(void *buf, int size, void* datatype, int source, int tag, 
 double RDMA_Latency(int source, struct RDMA_communicator *rdma_com);
 
 int RDMA_Wait(struct RDMA_request *request);
+int RDMA_Iprobe(int source, int tag, struct RDMA_communicator *rdma_com);

@@ -371,6 +371,32 @@ static int rdma_irecv_r_opt (void *buf, int size, void* datatype, int source, in
   return 1;
 }
 
+int rdma_iprobe(int source, int tag, struct RDMA_communicator *rdma_com)
+{
+  struct rdma_read_request_entry* target_rrre;
+  struct rdma_read_request_entry  prove_rrre;
+  lq *target_rrre_q;
+  int result = 0;
+
+
+  target_rrre_q = &rdma_request_aq;
+  prove_rrre.id  = source;
+  prove_rrre.tag = tag;
+
+  pthread_mutex_lock(&post_req_lock);
+  lq_init_it(target_rrre_q);
+  while ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
+    if (matched_requests(target_rrre, &prove_rrre)) {
+      result = 1;
+      break;
+    }
+  }
+  lq_fin_it(target_rrre_q);
+  pthread_mutex_unlock(&post_req_lock);      
+  return result;
+}
+
+
 /*
  Note: post RDMA request to the quere pair
    INPUT

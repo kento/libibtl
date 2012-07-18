@@ -19,3 +19,4 @@ int rdma_irecv_r_silent_offset (void *buf, int offset, int size, void* datatype,
 long double rdma_latency_r (int source, struct RDMA_communicator *rdma_com);
 //int rdma_wait(struct RDMA_request *request);
 //int rdma_irecv_r (void *buf, int size, void* datatype, int source, int tag, RDMA_communicator rdma_com, RDMA_request *request);
+int rdma_iprobe(int source, int tag, struct RDMA_communicator *rdma_com);
