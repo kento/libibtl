@@ -30,7 +30,12 @@ rdma_client_offset-rdma_client.o: ../src/rdma_client.c \
   /usr/include/sched.h /usr/include/bits/sched.h /usr/include/signal.h \
   /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
   /usr/include/semaphore.h /usr/include/bits/semaphore.h \
-  /usr/include/assert.h /usr/include/arpa/inet.h
+  /usr/include/assert.h /usr/include/arpa/inet.h /usr/include/sys/ioctl.h \
+  /usr/include/bits/ioctls.h /usr/include/asm/ioctls.h \
+  /usr/include/asm-generic/ioctls.h /usr/include/linux/ioctl.h \
+  /usr/include/asm/ioctl.h /usr/include/asm-generic/ioctl.h \
+  /usr/include/bits/ioctl-types.h /usr/include/sys/ttydefaults.h \
+  /usr/include/net/if.h
 
 ../include/common.h:
 
@@ -167,3 +172,23 @@ rdma_client_offset-rdma_client.o: ../src/rdma_client.c \
 /usr/include/assert.h:
 
 /usr/include/arpa/inet.h:
+
+/usr/include/sys/ioctl.h:
+
+/usr/include/bits/ioctls.h:
+
+/usr/include/asm/ioctls.h:
+
+/usr/include/asm-generic/ioctls.h:
+
+/usr/include/linux/ioctl.h:
+
+/usr/include/asm/ioctl.h:
+
+/usr/include/asm-generic/ioctl.h:
+
+/usr/include/bits/ioctl-types.h:
+
+/usr/include/sys/ttydefaults.h:
+
+/usr/include/net/if.h:

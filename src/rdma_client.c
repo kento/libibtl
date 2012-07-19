@@ -4,6 +4,11 @@
 #include "arpa/inet.h"
 #include "time.h"
 
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <net/if.h>
+
 struct poll_cq_args{
   void *buf;
   int size;
@@ -17,6 +22,7 @@ struct poll_cq_args{
 
 static void* poll_cq(struct poll_cq_args* args);
 static void set_envs (void);
+static int get_id(void);
 
 static void set_envs () {
   /*Letf empty for future requirement*/
@@ -48,7 +54,6 @@ void rdma_isend_r(void *buf, int size, void* datatype, int dest, int tag, struct
     fprintf(stderr, "RDMA lib: SEND: ERROR: pthread detach failed @ %s:%d", __FILE__, __LINE__);
     exit(1);
   }
-  
   return;
 }
 
@@ -88,7 +93,7 @@ static void* poll_cq(struct poll_cq_args* args)
   comm = args->comm;
 
   //TODO: allocation ID
-  rrre.id = 1;
+  rrre.id = get_id();
   //TODO: allocate order
   rrre.order = 2;
   rrre.tag = args->tag;
@@ -119,7 +124,7 @@ static void* poll_cq(struct poll_cq_args* args)
     num_entries = recv_wc(1, &conn_recv);
     mm = ss - ee;
     ee = get_dtime();
-    debug(printf("RDMA lib: SEND: recv_wc time = %f(%f) (%s)\n", ee - ss, mm, ibv_wc_opcode_str(conn_recv->opcode)),10);
+    debug(printf("RDMA lib: SEND: recv_wc time = %f(%f) (%s)\n", ee - ss, mm, ibv_wc_opcode_str(conn_recv->opcode)),1);
     /*Check which request was successed*/
     if (conn_recv->opcode == IBV_WC_RECV) {
       struct rdma_read_request_entry *active_rrre;
@@ -150,7 +155,7 @@ static void* poll_cq(struct poll_cq_args* args)
 
       return;
     } else if (conn_recv->opcode == IBV_WC_SEND) {
-      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 20);
+      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
       continue;
     } else {
       die("unknow opecode.");
@@ -159,6 +164,28 @@ static void* poll_cq(struct poll_cq_args* args)
   }
   return NULL;
 }
+
+static int get_id(void)
+{
+  char *ip;
+  int fd;
+  struct ifreq ifr;
+  int id = 0;
+  int octet;
+  fd = socket(AF_INET, SOCK_STREAM, 0);
+  ifr.ifr_addr.sa_family = AF_INET;
+  strncpy(ifr.ifr_name, "ib0", IFNAMSIZ-1);
+  ioctl(fd, SIOCGIFADDR, &ifr);
+  //  printf("%s\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));                                                            
+  ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+  close(fd);
+  strtok(ip, ".");  strtok(NULL, ".");
+  id = 1000 * atoi(strtok(NULL, "."));
+  id += atoi(strtok(NULL, "."));
+  //  fprintf(stderr, "id: %d\n", id);                                                                                                       
+  return id;
+}
+
 
 int RDMA_Active_Finalize(struct RDMA_communicator *comm)
 {

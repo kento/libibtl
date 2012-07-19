@@ -48,7 +48,6 @@ struct alloc_entry {
   struct ibv_mr *mr;
 };
 
-
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct rdma_read_request_entry *rrre);
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event);
 static void build_connection(struct rdma_cm_id *id);

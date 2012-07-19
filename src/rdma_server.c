@@ -196,8 +196,10 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
     exit(1);
   }
 
-
+  //  fprintf(stderr, "1.lock-lock\n");
   lq_init_it(target_rrre_q);
+  //  fprintf(stderr, "2.lock-lock\n");
+
   //  fprintf(stderr, "lq_init_it \n");
   while ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
     //    fprintf(stderr, "lq_next \n");
@@ -256,6 +258,7 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
 static int matched_requests (struct rdma_read_request_entry *req1, struct rdma_read_request_entry *req2)
 {
   //TODO: write more sophisticated code !!
+  //  fprintf(stderr, "== %d %d ==\n", req1->id, req2->id);
   if (req1->id == RDMA_ANY_SOURCE || 
       req2->id == RDMA_ANY_SOURCE || 
       req1->id == req2->id) {
@@ -383,7 +386,7 @@ int rdma_iprobe(int source, int tag, struct RDMA_communicator *rdma_com)
   prove_rrre.id  = source;
   prove_rrre.tag = tag;
 
-  pthread_mutex_lock(&post_req_lock);
+  //  pthread_mutex_lock(&post_req_lock);
   lq_init_it(target_rrre_q);
   while ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
     if (matched_requests(target_rrre, &prove_rrre)) {
@@ -392,8 +395,31 @@ int rdma_iprobe(int source, int tag, struct RDMA_communicator *rdma_com)
     }
   }
   lq_fin_it(target_rrre_q);
-  pthread_mutex_unlock(&post_req_lock);      
+  //  pthread_mutex_unlock(&post_req_lock);      
   return result;
+}
+
+int rdma_reqid(struct RDMA_communicator *rdma_com, int index)
+{
+  struct rdma_read_request_entry* target_rrre;
+  struct rdma_read_request_entry  prove_rrre;
+  lq *target_rrre_q;
+  int result = 0;
+
+  target_rrre_q = &rdma_request_aq;
+  //  pthread_mutex_lock(&post_req_lock);
+  //  fprintf(stderr, "1.lock-lock\n");
+  lq_init_it(target_rrre_q);
+  //  fprintf(stderr, "2.lock-lock\n");
+  if ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
+    result = target_rrre->id;
+  } else {
+    result = -1;
+  }
+  lq_fin_it(target_rrre_q);
+  //  pthread_mutex_unlock(&post_req_lock);      
+  return result;
+  
 }
 
 

@@ -95,3 +95,11 @@ int RDMA_Iprobe(int source, int tag, struct RDMA_communicator *rdma_com)
   result = rdma_iprobe(source, tag, rdma_com);
   return result;
 }
+
+int RDMA_Reqid(struct RDMA_communicator *rdma_com, int index)
+{
+  int result = 0;
+  result = rdma_reqid(rdma_com, index);
+  return result;
+}
+  
