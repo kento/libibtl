@@ -70,11 +70,11 @@ void* lq_next(lq* q) {
 }
 
 
-
+/*!! This function is note thread safe !!*/
 void lq_remove(lq* q, void* d) {
   lq_d* cur_d = q->head;
   lq_d* old_d;
-
+  //  pthread_mutex_lock(&(q->mut));
   if (cur_d->data == d){
     //    printf("%p = %p\n", cur_d, d);
     q->head = cur_d->next;
@@ -82,6 +82,7 @@ void lq_remove(lq* q, void* d) {
       q->tail = NULL;
     }
     //    debug(fprintf(stderr, "RDMA lib: COMM: Rmvd: %p\n", d), 2);
+    //    pthread_mutex_unlock(&(q->mut));
     return ;
   }
 
@@ -91,13 +92,18 @@ void lq_remove(lq* q, void* d) {
     if (cur_d->data == d) {
       //      printf("%p = %p\n", cur_d, d);
       old_d->next = cur_d->next;
+      if (q->tail == cur_d) {
+        q->tail = old_d;
+      }
       free(cur_d);
+      pthread_mutex_unlock(&(q->mut));
       return;
     }
     //    printf("%p != %p\n", cur_d, d);
     old_d = cur_d;
     cur_d = cur_d->next;
   }
+  pthread_mutex_unlock(&(q->mut));
   return;
 }
 

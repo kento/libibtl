@@ -16,4 +16,4 @@ double RDMA_Latency(int source, struct RDMA_communicator *rdma_com);
 
 int RDMA_Wait(struct RDMA_request *request);
 int RDMA_Iprobe(int source, int tag, struct RDMA_communicator *rdma_com);
-int RDMA_Reqid(struct RDMA_communicator *rdma_com, int index);
+int RDMA_Reqid(struct RDMA_communicator *rdma_com, int tag);

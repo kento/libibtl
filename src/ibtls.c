@@ -96,10 +96,11 @@ int RDMA_Iprobe(int source, int tag, struct RDMA_communicator *rdma_com)
   return result;
 }
 
-int RDMA_Reqid(struct RDMA_communicator *rdma_com, int index)
+//TODO: int RDMA_Reqid(struct RDMA_communicator *rdma_com, int source, int tag)
+int RDMA_Reqid(struct RDMA_communicator *rdma_com, int tag)
 {
   int result = 0;
-  result = rdma_reqid(rdma_com, index);
+  result = rdma_reqid(rdma_com, tag);
   return result;
 }
   

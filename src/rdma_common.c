@@ -63,7 +63,7 @@ static int wait_msg_sent(void);
 
 void die(const char *reason)
 {
-  fprintf(stderr, "%s\n", reason);
+  fprintf(stderr, "%s in %s:%s:%d\n", reason, __FILE__, __func__, __LINE__);
   exit(EXIT_FAILURE);
 }
 
@@ -414,7 +414,8 @@ static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
 }
 
 
-static void build_connection(struct rdma_cm_id *id)
+static void
+ build_connection(struct rdma_cm_id *id)
 {
   struct connection *conn, *clone;
   struct ibv_qp_init_attr qp_attr;
@@ -507,16 +508,29 @@ void* rdma_alloc (size_t size)
 void rdma_free (void *ptr)
 {
   struct alloc_entry *ae;
-
+  //  fprintf(stderr, "free\n");
   lq_init_it(&rdma_alloc_q);
+  //  fprintf(stderr, "0.free\n");
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
+    //    fprintf(stderr, "1.free\n");
     if (ae->addr == ptr) {
+      //      fprintf(stderr, "2.free\n");
+      /** dereg_mr() does not deregistrate a mr, which is queued in "rdma_alloc_q".
+       *  So call lq_remove() before calling dereg_mr() to be able to 
+       * deregistrate the mr. */
       lq_remove(&rdma_alloc_q, ae);
+      //      fprintf(stderr, "3.free\n");
       lq_fin_it(&rdma_alloc_q);
+      //      fprintf(stderr, "4.free %p\n", ae->mr);
+      //      sleep(3);
+      //      fprintf(stderr, "4-1.free %p\n", ae->mr);
       dereg_mr(ae->mr);
+      //      fprintf(stderr, "5.free\n");
       free(ae->addr);
+      //      fprintf(stderr, "6.free\n");
       free(ae);
-      return;
+      //      fprintf(stderr, "7.free\n");
+      break;
     }
   }
   lq_fin_it(&rdma_alloc_q);
@@ -542,21 +556,30 @@ int free_connection(struct connection* conn)
 void dereg_mr(struct ibv_mr *mr) 
 {
   int retry = 100;
-  uint64_t size = mr->length;
-  void* addr = mr->addr;
+  uint64_t size;
+  void* addr;
+
+  TEST_Z(mr);
+
+  size = mr->length;
+  addr = mr->addr;
+  TEST_Z(addr);
 
   struct regmr *rmr;
   struct alloc_entry *ae;
 
+  //  fprintf(stderr, "1.de\n");
   lq_init_it(&rdma_alloc_q);
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
+    TEST_Z(ae);
+    //    fprintf(stderr, "2.kento. %p %p\n", ae->mr, mr);
     if (ae->mr == mr) {
       lq_fin_it(&rdma_alloc_q);
       return;
     }
   }
   lq_fin_it(&rdma_alloc_q);
-
+  //  fprintf(stderr, "2.dereg: mr:%p %d %p\n", mr, mr->length, mr->addr);
   pthread_mutex_lock(&regmem_sum_mutex);
   //  fprintf(stderr, "dereg: %p\n", mr);
   while (ibv_dereg_mr(mr) != 0) {
@@ -567,11 +590,12 @@ void dereg_mr(struct ibv_mr *mr)
     }
     retry--;
   }
-
+  //  fprintf(stderr, "3.de\n");
   regmem_sum = regmem_sum - size/1000000;
   //  printf(" ---%lu\n", regmem_sum);
   pthread_mutex_unlock(&regmem_sum_mutex);
   debug(fprintf(stderr, "RDMA lib: COMM: Dereg: addr=%p, length=%lu\n", addr, size), 2);
+  //  fprintf(stderr, "4.de\n");
   return;
 }
 
@@ -583,11 +607,36 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
   struct ibv_mr *mr;
   struct regmr *rmr;
   struct alloc_entry *ae;
+  //====
+  /*
+  int i;
+  uint64_t alloc_sz=0;
+  
+  for (i = 1 * 1024 * 1024 * 1024 ; ;) {
+    addr = malloc(i);
+    do {
+      mr = ibv_reg_mr(
+		      s_ctx->pd,
+		      addr,
+		      i,
+		      IBV_ACCESS_LOCAL_WRITE
+		      | IBV_ACCESS_REMOTE_READ);
+      
+      if (mr == NULL) {
+	fprintf(stderr, "RDMA lib: COMM: ERROR: Memory region registration failed (regmem_sum= %lu[MB])@ %s:%d\n",  regmem_sum, __FILE__, __LINE__);
+	exit(1);
+      }
+    } while(mr == NULL);
+    regmem_sum = regmem_sum +  i/1000000;
+    fprintf(stderr, "%lu\n", regmem_sum);
+    }*/
+  //====
 
   lq_init_it(&rdma_alloc_q);
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
     if (ae->addr <= addr && addr + size <= ae-> addr + ae->size) {
       lq_fin_it(&rdma_alloc_q);
+      //      fprintf(stderr, "1.kento. %p\n", ae->mr);
       return ae->mr;
     }
     /*
@@ -614,7 +663,7 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
 		    | IBV_ACCESS_REMOTE_READ);
 
     if (mr == NULL) {
-      fprintf(stderr, "RDMA lib: COMM: WARN: Memory region registration trial left %d (regmem_sum= %lu[MB])@ %s:%d\n", try,  regmem_sum, __FILE__, __LINE__);
+      //      fprintf(stderr, "RDMA lib: COMM: WARN: Memory region registration trial left %d (regmem_sum= %lu[MB])@ %s:%d\n", try,  regmem_sum, __FILE__, __LINE__);
       try--;
       if (try < 0) {
 	fprintf(stderr, "RDMA lib: COMM: ERROR: Memory region registration failed (regmem_sum= %lu[MB])@ %s:%d\n",  regmem_sum, __FILE__, __LINE__);
@@ -624,7 +673,7 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
   } while(mr == NULL);
 
 
-  debug(fprintf(stderr, "RDMA lib: COMM: Reg: addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr->addr, mr->length, mr->lkey, mr->rkey), 2);
+  debug(fprintf(stderr, "RDMA lib: COMM: Reg(%p): addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr,  mr->addr, mr->length, mr->lkey, mr->rkey), 1);
   regmem_sum = regmem_sum +  size/1000000;
   pthread_mutex_unlock(&regmem_sum_mutex);
   return mr;
