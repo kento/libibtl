@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <net/if.h>
 
+
 struct poll_cq_args{
   void *buf;
   int size;
@@ -18,6 +19,8 @@ struct poll_cq_args{
   struct RDMA_communicator *comm;
   sem_t *is_rdma_completed;
 };
+
+double gs, ge;
 
 
 static void* poll_cq(struct poll_cq_args* args);
@@ -111,8 +114,8 @@ static void* poll_cq(struct poll_cq_args* args)
   ee = get_dtime();
 
   send_ctl_msg(conn_send, MR_INIT, &rrre);
-
-  /* Now we have posted the request, a next asynchronous send function can be called
+  gs = get_dtime();
+  /* Now we havested the request, a next asynchronous send function can be called
    * We can safely unlock the post_mutex here.
    */
   pthread_mutex_unlock(&(comm->post_mutex));
@@ -155,7 +158,7 @@ static void* poll_cq(struct poll_cq_args* args)
 
       return;
     } else if (conn_recv->opcode == IBV_WC_SEND) {
-      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
+      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - gs, mm), 10);
       continue;
     } else {
       die("unknow opecode.");
