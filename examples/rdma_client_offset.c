@@ -17,14 +17,12 @@
 #define SLP 1
 
 int get_tag(void);
-//char* get_ip_addr (char* interface);
 
 int main(int argc, char **argv)
 {
   char* host;
   char* data;
   uint64_t size;
-  //  int flag1, flag2;
   int flag1;
   double s,e;
   double ss,ee;
@@ -47,7 +45,6 @@ int main(int argc, char **argv)
   e = get_dtime();
 
   /* ===== */
-  //  data = (char*)malloc(size);
   data = (char*)RDMA_Alloc(size);
 
   int i, j;
@@ -67,10 +64,7 @@ int main(int argc, char **argv)
   ee = get_dtime();
   sleep(1);
   printf("Send: %d[MB]  %f %f GB/s\n", (size/1000000) * ITE ,  ee - ss, (size/1000000000.0 * ITE )/(ee -  ss));
-  //  sleep(2);
   return 0;
-  //  RDMA_Active_Finalize(&comm);
-
 }
 
 int get_tag(void)
@@ -79,8 +73,8 @@ int get_tag(void)
   int tag = 0;
   int i;
   ip = get_ip_addr("ib0");
-  /*use last three ip octet for the message tag.                                                                                                                                                
-    Fisrt octet is passed.                                                                                                                                                                      
+  /*use last three ip octet for the message tag.                                                                                                                                 
+    Fisrt octet is passed.
   */
   atoi(strtok(ip, "."));
   tag = atoi(strtok(NULL, "."));
@@ -90,22 +84,3 @@ int get_tag(void)
   }
   return tag;
 }
-
-/*
-char* get_ip_addr (char* interface)
-{
-  char *ip;
-  int fd;
-  struct ifreq ifr;
-  fd = socket(AF_INET, SOCK_STREAM, 0);
-  ifr.ifr_addr.sa_family = AF_INET;
-  strncpy(ifr.ifr_name, interface, IFNAMSIZ-1);
-  ioctl(fd, SIOCGIFADDR, &ifr);
-  printf("%s\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
-  ip = inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-  return ip;
-  }*/
-
-
-
-

@@ -1,25 +1,31 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/utsname.h>
-
 #include <netinet/in.h>
 #include <net/if.h>
 #include <arpa/inet.h>
-
 
 #include "common.h"
 #include "rdma_common.h"
 #include "list_queue.h"
 #include "rdma_ppool.h"
 
-//#include "hashtable.h"
+struct regmr {
+  void* addr;
+  uint32_t size;
+  struct ibv_mr *mr;
+  int count;
+};
 
+struct alloc_entry {
+  void *addr;
+  size_t size;
+  struct ibv_mr *mr;
+};
 
 const int TIMEOUT_IN_MS = 500; /* ms */
 struct ibv_cq *cq = NULL;
 static struct context *s_ctx = NULL;
-
-
 
 /*For active side*/
 static uint32_t mr_number = 0;
@@ -33,20 +39,10 @@ static uint32_t allocated_mr_size = 0;
 static uint64_t regmem_sum = 0;
 pthread_mutex_t regmem_sum_mutex = PTHREAD_MUTEX_INITIALIZER;
 static lq mr_q;
-struct regmr {
-  void* addr;
-  uint32_t size;
-  struct ibv_mr *mr;
-  int count;
-};
 
 /*For rdma_alloc and rdma_free*/
 static lq rdma_alloc_q;
-struct alloc_entry {
-  void *addr;
-  size_t size;
-  struct ibv_mr *mr;
-};
+
 
 static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, struct rdma_read_request_entry *rrre);
 static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event_type requested_event);
@@ -158,17 +154,15 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   struct RDMA_communicator *comm;
   struct sockaddr_in addr;
   struct rdma_cm_event *event = NULL;
-  //  struct rdma_cm_id *listener = NULL;                                                                                                                             
-  //  struct rdma_event_channel *ec = NULL;                                                                                                                           
-  uint16_t port = 0;
   struct sockaddr_in *local_addr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+
+  uint16_t port = 0;
 
   comm = (struct RDMA_communicator *) arg;
   pthread_mutex_init(&(comm->post_mutex), NULL);
 
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
-  //  addr.sin_port   = htons(RDMA_PORT);
   inet_aton(get_ip_addr("ib0"), &(addr.sin_addr.s_addr));
 
   if (!(comm->ec = rdma_create_event_channel())) {
@@ -186,7 +180,6 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
     exit(1);
   }
 
-
   /* TODO: Determine appropriate backlog value */
   /*       backlog=10 is arbitrary */
   if (rdma_listen(comm->cm_id, 10)) {
@@ -197,8 +190,6 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
   port = ntohs(rdma_get_src_port(comm->cm_id));
   local_addr = (struct sockaddr_in*)rdma_get_local_addr(comm->cm_id);
   join_passive_pool(inet_ntoa(local_addr->sin_addr), port);
-  //fprintf(stderr, "listening on port %d, addr:%s ...\n", port,  inet_ntoa(local_addr->sin_addr));
-
 
   while (1) {
     int rc =0;
@@ -211,7 +202,6 @@ void* rdma_passive_init(void * arg /*(struct RDMA_communicator *comm)*/)
     switch (event->event){
     case RDMA_CM_EVENT_CONNECT_REQUEST:
       accept_connection(event->id);
-      //accept_connection(comm->cm_id);
       comm->cm_id = event->id;
       accepted = 1;
       break;
@@ -256,27 +246,20 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
   struct addrinfo *addr;
   struct rdma_conn_param cm_params;
   char port[16];
+  char host[16];
   struct psockaddr psaddr;
-  int i;//,j;                                                                                                                                                        
+  int i;
   sprintf(port, "%d", RDMA_PORT);
   find_passive_host(&psaddr, 0);
 
-  {
-    char host[16];
-    gethostname(host, sizeof(host));
-    fprintf(stderr, "%s:%p IP: %s, PORT:%d\n",host, &host, psaddr.addr, psaddr.port);
-  }
-  //  sleep(100);
-  pthread_mutex_init(&(comm->post_mutex), NULL);
+  gethostname(host, sizeof(host));
+  fprintf(stderr, "%s:%p IP: %s, PORT:%d\n",host, &host, psaddr.addr, psaddr.port);
 
+  pthread_mutex_init(&(comm->post_mutex), NULL);
   param->host = psaddr.addr;
   sprintf(port, "%d", psaddr.port);
 
-  //  param->host = "10.1.6.179";
-
-  //  fprintf(stderr, "%s, %s\n", param->host, port);
   if(getaddrinfo(param->host, port, NULL, &addr)){
-    //  if(getaddrinfo(psaddr.addr, port, NULL, &addr)){
     fprintf(stderr, "RDMA lib: SEND: ERROR: getaddrinfo failed @ %s:%d\n", __FILE__, __LINE__);
     exit(1);
   }
@@ -297,13 +280,11 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
     exit(1);
   }
 
-
   if (wait_for_event(comm->ec, RDMA_CM_EVENT_ADDR_RESOLVED)) {
     fprintf(stderr, "RDMA lib: SEND: ERROR: event wait failed: RDMA_CMEVENT_ADDR_RESOLVED: port = %s @ %s:%d\n", port, __FILE__, __LINE__);
     exit(1);
   }
   freeaddrinfo(addr);
-
   build_connection(comm->cm_id);
 
   if (rdma_resolve_route(comm->cm_id, TIMEOUT_IN_MS)) {
@@ -359,7 +340,6 @@ static int wait_for_event(struct rdma_event_channel *channel, enum rdma_cm_event
       return (rc);
     }
   debug(printf("got \"%s\" event\n", event_type_str(event->event)), 1);
-
   if (event->event == requested_event)
     rv = 0;
   rdma_ack_cm_event(event);
@@ -380,17 +360,13 @@ static void build_context(struct ibv_context *verbs)
 
   TEST_Z(s_ctx->pd = ibv_alloc_pd(s_ctx->ctx));
   TEST_Z(s_ctx->comp_channel = ibv_create_comp_channel(s_ctx->ctx));
-  //  TEST_Z(s_ctx->cq = ibv_create_cq(s_ctx->ctx, 100, NULL, s_ctx->comp_channel, 0)); /* cqe=10 is arbitrary/ comp_vector:0 */
   TEST_Z(s_ctx->cq = ibv_create_cq(s_ctx->ctx, 1000, NULL, s_ctx->comp_channel, 0)); /* cqe=10 is arbitrary up to 131071 (36 nodes =>200 cq) */
   TEST_NZ(ibv_req_notify_cq(s_ctx->cq, 0));
-
-  //  TEST_NZ(pthread_create(&s_ctx->cq_poller_thread, NULL, poll_cq, NULL));
 }
 
 static void build_params(struct rdma_conn_param *params)
 {
   memset(params, 0, sizeof(*params));
-
   params->initiator_depth = 10;
   params->responder_resources = 10;
   params->rnr_retry_count = 7; /*7= infinite retry */
@@ -401,16 +377,14 @@ static void build_params(struct rdma_conn_param *params)
 static void build_qp_attr(struct ibv_qp_init_attr *qp_attr)
 {
   memset(qp_attr, 0, sizeof(*qp_attr));
-
   qp_attr->send_cq = s_ctx->cq;
   qp_attr->recv_cq = s_ctx->cq;
   qp_attr->qp_type = IBV_QPT_RC;
   qp_attr->sq_sig_all = 0;
-
-  qp_attr->cap.max_send_wr = 1000;// 10
-  qp_attr->cap.max_recv_wr = 1000;//10
-  qp_attr->cap.max_send_sge = 5;//1
-  qp_attr->cap.max_recv_sge = 5;//1
+  qp_attr->cap.max_send_wr = 1000;
+  qp_attr->cap.max_recv_wr = 1000;
+  qp_attr->cap.max_send_sge = 5;
+  qp_attr->cap.max_recv_sge = 5;
 }
 
 
@@ -420,25 +394,9 @@ static void
   struct connection *conn, *clone;
   struct ibv_qp_init_attr qp_attr;
 
-
   build_context(id->verbs);/*build_context() runs only once internally*/
   build_qp_attr(&qp_attr);
-
-
-
   TEST_NZ(rdma_create_qp(id, s_ctx->pd, &qp_attr));
-
-  /*
-  id->context = conn = (struct connection *)malloc(sizeof(struct connection));
-
-  conn->id = id;
-  conn->qp = id->qp;
-
-  
-  conn->connected = 0;
-
-  register_memory(conn);
-  */
 
   //TODO: create_connection in rdma_client.c and rdma_server.c
   id->context = conn = create_connection(id);
@@ -452,18 +410,15 @@ struct connection* create_connection(struct rdma_cm_id *id)
   struct connection* conn = (struct connection *)malloc(sizeof(struct connection));
 
   conn->count = count++;
-  
   conn->id = id;
   conn->qp = id->qp;
-  
   conn->send_msg = malloc(sizeof(struct rdma_read_request_entry));
   conn->recv_msg = malloc(sizeof(struct rdma_read_request_entry));
-
   conn->send_mr = reg_mr(conn->send_msg, sizeof(struct rdma_read_request_entry));
   conn->recv_mr = reg_mr(conn->recv_msg, sizeof(struct rdma_read_request_entry));
-
   conn->active_rrre = NULL;
   conn->passive_rrre = NULL;
+
   return conn;
 }
 
@@ -496,7 +451,6 @@ void* rdma_alloc (size_t size)
     exit(1);
   }
   mr = reg_mr(ptr, size);
-  //  fprintf(stderr, "%p\n", mr);
   ae = (struct alloc_entry*)malloc(sizeof(struct alloc_entry));
   ae->addr = ptr;
   ae->mr   = mr;
@@ -508,28 +462,17 @@ void* rdma_alloc (size_t size)
 void rdma_free (void *ptr)
 {
   struct alloc_entry *ae;
-  //  fprintf(stderr, "free\n");
   lq_init_it(&rdma_alloc_q);
-  //  fprintf(stderr, "0.free\n");
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
-    //    fprintf(stderr, "1.free\n");
     if (ae->addr == ptr) {
-      //      fprintf(stderr, "2.free\n");
       /** dereg_mr() does not deregistrate a mr, which is queued in "rdma_alloc_q".
        *  So call lq_remove() before calling dereg_mr() to be able to 
        * deregistrate the mr. */
       lq_remove(&rdma_alloc_q, ae);
-      //      fprintf(stderr, "3.free\n");
       lq_fin_it(&rdma_alloc_q);
-      //      fprintf(stderr, "4.free %p\n", ae->mr);
-      //      sleep(3);
-      //      fprintf(stderr, "4-1.free %p\n", ae->mr);
       dereg_mr(ae->mr);
-      //      fprintf(stderr, "5.free\n");
       free(ae->addr);
-      //      fprintf(stderr, "6.free\n");
       free(ae);
-      //      fprintf(stderr, "7.free\n");
       break;
     }
   }
@@ -541,65 +484,50 @@ int free_connection(struct connection* conn)
 {
   if (conn->active_rrre != NULL) {free(conn->active_rrre);}
   if (conn->passive_rrre != NULL) {free(conn->passive_rrre);}
-
   dereg_mr(conn->send_mr);
   dereg_mr(conn->recv_mr);
-
   free(conn->send_msg);
   free(conn->recv_msg);
-
   free(conn);
-
   return 0;
 }
 
 void dereg_mr(struct ibv_mr *mr) 
 {
-  int retry = 100;
-  uint64_t size;
-  void* addr;
+  struct regmr *rmr;
+  struct alloc_entry *ae;
+
+  int		retry = 100;
+  uint64_t	size;
+  void*		addr;
 
   TEST_Z(mr);
-
   size = mr->length;
   addr = mr->addr;
   TEST_Z(addr);
 
-  struct regmr *rmr;
-  struct alloc_entry *ae;
-
-  //  fprintf(stderr, "1.de\n");
   lq_init_it(&rdma_alloc_q);
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
     TEST_Z(ae);
-    //    fprintf(stderr, "2.kento. %p %p\n", ae->mr, mr);
     if (ae->mr == mr) {
       lq_fin_it(&rdma_alloc_q);
       return;
     }
   }
   lq_fin_it(&rdma_alloc_q);
-  //  fprintf(stderr, "2.dereg: mr:%p %d %p\n", mr, mr->length, mr->addr);
   pthread_mutex_lock(&regmem_sum_mutex);
-  //  fprintf(stderr, "dereg: %p\n", mr);
   while (ibv_dereg_mr(mr) != 0) {
-    //    fprintf(stderr, "RDMA lib: COMM: FAILED: memory region dereg again: retry = %d @ %s:%d\n", retry, __FILE__, __LINE__);
     if (retry < 0) {
       fprintf(stderr, "RDMA lib: COMM: ERROR: memory region deregistration failed mr:%p @ %s:%d\n", mr,  __FILE__, __LINE__);
       exit(1);
     }
     retry--;
   }
-  //  fprintf(stderr, "3.de\n");
   regmem_sum = regmem_sum - size/1000000;
-  //  printf(" ---%lu\n", regmem_sum);
   pthread_mutex_unlock(&regmem_sum_mutex);
   debug(fprintf(stderr, "RDMA lib: COMM: Dereg: addr=%p, length=%lu\n", addr, size), 2);
-  //  fprintf(stderr, "4.de\n");
   return;
 }
-
-
 
 
 struct ibv_mr* reg_mr (void* addr, uint32_t size) 
@@ -607,50 +535,16 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
   struct ibv_mr *mr;
   struct regmr *rmr;
   struct alloc_entry *ae;
-  //====
-  /*
-  int i;
-  uint64_t alloc_sz=0;
-  
-  for (i = 1 * 1024 * 1024 * 1024 ; ;) {
-    addr = malloc(i);
-    do {
-      mr = ibv_reg_mr(
-		      s_ctx->pd,
-		      addr,
-		      i,
-		      IBV_ACCESS_LOCAL_WRITE
-		      | IBV_ACCESS_REMOTE_READ);
-      
-      if (mr == NULL) {
-	fprintf(stderr, "RDMA lib: COMM: ERROR: Memory region registration failed (regmem_sum= %lu[MB])@ %s:%d\n",  regmem_sum, __FILE__, __LINE__);
-	exit(1);
-      }
-    } while(mr == NULL);
-    regmem_sum = regmem_sum +  i/1000000;
-    fprintf(stderr, "%lu\n", regmem_sum);
-    }*/
-  //====
 
   lq_init_it(&rdma_alloc_q);
   while ((ae = (struct alloc_entry*)lq_next(&rdma_alloc_q)) != NULL) {
     if (ae->addr <= addr && addr + size <= ae-> addr + ae->size) {
       lq_fin_it(&rdma_alloc_q);
-      //      fprintf(stderr, "1.kento. %p\n", ae->mr);
       return ae->mr;
     }
-    /*
-    if (ae->addr == addr && ae->size >= size) {
-      lq_fin_it(&rdma_alloc_q);
-      return ae->mr;
-    }
-    */
   }
   lq_fin_it(&rdma_alloc_q);
-
   pthread_mutex_lock(&regmem_sum_mutex);
-
-  //  fprintf(stderr, "testeakdjfl;\n");
     
   int try = 1000;
   /*TODO: Detect duplicated registrations and skip the region to be registered twice.*/
@@ -663,7 +557,6 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
 		    | IBV_ACCESS_REMOTE_READ);
 
     if (mr == NULL) {
-      //      fprintf(stderr, "RDMA lib: COMM: WARN: Memory region registration trial left %d (regmem_sum= %lu[MB])@ %s:%d\n", try,  regmem_sum, __FILE__, __LINE__);
       try--;
       if (try < 0) {
 	fprintf(stderr, "RDMA lib: COMM: ERROR: Memory region registration failed (regmem_sum= %lu[MB])@ %s:%d\n",  regmem_sum, __FILE__, __LINE__);
@@ -671,7 +564,6 @@ struct ibv_mr* reg_mr (void* addr, uint32_t size)
       }
     }
   } while(mr == NULL);
-
 
   debug(fprintf(stderr, "RDMA lib: COMM: Reg(%p): addr=%p, length=%lu, lkey=%p, rkey=%p\n", mr,  mr->addr, mr->length, mr->lkey, mr->rkey), 1);
   regmem_sum = regmem_sum +  size/1000000;
@@ -691,7 +583,7 @@ int recv_wc (int num_entries, struct connection** conn)
   while(1) {
     if (cq != NULL) {
       while ((length = ibv_poll_cq(cq, num_entries, &wc))){
-	/*Check if a request was successed*/
+	/*Checking if a request was successed*/
 	if (wc.status != IBV_WC_SUCCESS) {
 	  const char* err_str = rdma_err_status_str(wc.status);
 	  fprintf(stderr, "RDMA lib: COMM: ERROR: status is not IBV_WC_SUCCESS: Erro=%s(%d) @ %s:%d\n", err_str, wc.status, __FILE__, __LINE__);
@@ -700,22 +592,17 @@ int recv_wc (int num_entries, struct connection** conn)
 	c = (struct connection *)(uintptr_t)wc.wr_id;
 	c->slid = wc.slid;
 	c->opcode = wc.opcode;
-	//c->cmt = c->recv_msg->cmt;
 	*conn = c;
 
 	debug(printf("RDMA lib: COMM: Recv REQ(%s): id=%lu(%lu), wc.slid=%u |%f\n",  ibv_wc_opcode_str(c->opcode), c->count, c->id, wc.slid, get_dtime()), 1);
 	return length;
       }
     }
-    //    fprintf(stderr, "aaaaa: %d\n", length);
     if (ibv_get_cq_event(s_ctx->comp_channel, &cq, &ctx)) {
       fprintf(stderr, "RDMA lib: SEND: ERROR: get cq event  failed @ %s:%d\n", __FILE__, __LINE__);
       exit(1);
     }
-    //    fprintf(stderr, "bbbbb\n");
-    
     ibv_ack_cq_events(cq, 1);
-    
     if (ibv_req_notify_cq(cq, 0)) {
       fprintf(stderr, "RDMA lib: SEND: ERROR: request notification failed @ %s:%d\n", __FILE__, __LINE__);
       exit(1);
@@ -724,14 +611,11 @@ int recv_wc (int num_entries, struct connection** conn)
   return 0;
 }
 
-/*Note: If cmt=MR_CHUNK, a register_rdma_msg_mr(...) function has to be called to register [mr_index]th memory region  */
+/*Note: If cmt=MR_CHUNK, a register_rdma_msg_mr(...) function has to be called to register [mr_index]the memory region  */
 int send_ctl_msg (struct connection* conn, enum ctl_msg_type cmt, struct rdma_read_request_entry *entry)
 { 
   post_send_ctl_msg(conn, cmt, entry);
   post_recv_ctl_msg(conn);
-  //TODO: free_connection(conn);
-  //free_connection(conn);
-  //  debug(printf("RDMA lib: COMM: Post %s\n",  rdma_ctl_msg_type_str(cmt)), 2);
   return 0;
 }
 
@@ -740,8 +624,6 @@ static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, str
   static uint64_t post_count = 0;
   struct ibv_send_wr wrs, *bad_wrs = NULL;
   struct ibv_sge sges;
-
-  //  conn->send_msg->cmt = cmt;
 
   switch (cmt) {
   case MR_INIT:
@@ -760,12 +642,10 @@ static int post_send_ctl_msg(struct connection *conn, enum ctl_msg_type cmt, str
   wrs.sg_list = &sges;
   wrs.num_sge = 1;
   wrs.send_flags = IBV_SEND_SIGNALED;
-  //  wrs.send_flags = IBV_SEND_INLINE;
   wrs.imm_data = post_count++;
   sges.addr = (uintptr_t)conn->send_msg;
-  sges.length = (uint32_t)conn->send_mr->length;//sizeof(struct rdma_read_request_entry);
+  sges.length = (uint32_t)conn->send_mr->length;
   sges.lkey = (uint32_t)conn->send_mr->lkey;
-  //  fprintf(stderr, "%p, %p\n", conn_old->id->qp, conn->id->qp);
   TEST_NZ(ibv_post_send(conn->qp, &wrs, &bad_wrs));
   debug(printf("RDMA lib: COMM: Post %s: id=%lu,  post_count=%lu, imm_data=%d, local_addr=%p, length=%u, lkey=%p\n", rdma_ctl_msg_type_str(cmt), (uintptr_t)conn, conn->count, wrs.imm_data, sges.addr, sges.length, sges.lkey), 2);
   return 0;
