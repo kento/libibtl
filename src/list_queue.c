@@ -13,7 +13,6 @@ void lq_init (lq *q)
 void lq_enq (lq *q, void *data) 
 {
   lq_d	*d;
-
   pthread_mutex_lock(&(q->mut));
   d	  = (lq_d*) malloc(sizeof(lq_d));
   d->next = NULL;
@@ -58,6 +57,7 @@ void lq_init_it (lq* q) {
 void lq_fin_it (lq* q) {
   q->cur = NULL;
   pthread_mutex_unlock(&(q->mut));
+
   return;
 }
 

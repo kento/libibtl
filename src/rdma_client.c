@@ -89,13 +89,12 @@ static void* poll_cq(struct poll_cq_args* args)
   struct RDMA_communicator	*comm;
   struct connection*		 conn_send;
   struct connection*		 conn_recv;
-  struct rdma_read_request_entry rrrre;
+  struct rdma_read_request_entry rrre;
   struct ibv_mr			*passive_mr;
 
   int	num_entries;
   double s, e;
   double mm,ee,ss, te, ts;
-
 
 
 
@@ -155,7 +154,7 @@ static void* poll_cq(struct poll_cq_args* args)
       debug(fprintf(stderr, "RDMA lib: SEND: Recv REQ: id=%lu, count=%lu,  slid=%u recv_wc time=%f(%f) total_time=%f\n",   conn_recv->id, conn_recv->count, conn_recv->slid, ee - ss, mm, te - ts), 2);
       return;
     } else if (conn_recv->opcode == IBV_WC_SEND) {
-      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - gs, mm), 10);
+      debug(printf("RDMA lib: SEND: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - gs, mm), 1);
       continue;
     } else {
       die("unknow opecode.");

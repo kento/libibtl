@@ -14,10 +14,8 @@ int main(int argc, char **argv) {
 
   while (1) {
     latency = RDMA_Latency(RDMA_ANY_SOURCE, &comm);
-    if (latency > A) {
-      fprintf(stderr, "Latency: %.10f (%.10f)\n", latency, A);
-    }
-    usleep(100);
+    fprintf(stderr, "Latency: %.10f (%.10f)\n", latency, A);
+    sleep(1);
   }
   return 0;
 }

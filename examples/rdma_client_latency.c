@@ -14,47 +14,32 @@
 
 #define NUM 1
 #define ITE 1000
-#define SLP 0
+#define SLP 1
+
+#define BUF_SIZE 64
 
 int get_tag(void);
 
 int main(int argc, char **argv)
 {
-  char* host;
   char* data;
   uint64_t size;
   int flag1;
-  double s,e;
-  double ss,ee;
-  if (argc < 2) {
-    printf("./rdma_client_test <host> <send size(Bytes)>\n");
-    exit(1);
-  }
-  host = argv[1];
-  size = atoi(argv[2]);
-  
-  struct  RDMA_communicator comm;
-  struct  RDMA_param param;
-  param.host = host;
-
-  s = get_dtime();
-  RDMA_Active_Init(&comm, &param);
-  e = get_dtime();
-
-  /* ===== */
-  data = (char*)RDMA_Alloc(size);
-
   int i, j;
   char * a;
-  flag1= 0;
-  for (i=0; i <= size-2; i++) {
-    data[i] = 'x';
-  }
-  data[size-1] += '\0';
+  double s,e;
+  double ss,ee;
+  struct  RDMA_communicator comm;
+  struct  RDMA_param param;
+  struct RDMA_request req[NUM];
   
+  size = BUF_SIZE;
+
+  RDMA_Active_Init(&comm, &param);
+  data = (char*)RDMA_Alloc(size);
   printf("Initialization: %f\n",e - s);
   ss = get_dtime();
-  struct RDMA_request req[NUM];
+
   
   for (j = 0; j < ITE; j++) {
     s = get_dtime();

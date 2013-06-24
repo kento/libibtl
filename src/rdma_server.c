@@ -47,6 +47,9 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
 {
   static int thread_running = 0;
 
+  lq_init(&rdma_request_aq);
+  lq_init(&rdma_request_pq);
+
   set_envs();
   TEST_NZ(pthread_create(&listen_thread, NULL, (void *) rdma_passive_init, comm));
   wait_accept();
@@ -68,8 +71,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
   struct connection* conn_send;
   struct connection* conn_recv;
 
-  lq_init(&rdma_request_aq);
-  lq_init(&rdma_request_pq);
+
 
   while (1) {
     double mm, ss, ee, rss, ree;
@@ -77,6 +79,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
 
     ss = get_dtime();
     num_entries = recv_wc(1, &conn_recv);
+    
     mm = ss - ee;
     ee = get_dtime();
     debug(fprintf(stdout, "RDMA lib: RECV: recv_wc time: %f(%f) (%s)\n", ee - ss, mm, ibv_wc_opcode_str(conn_recv->opcode) ), 1);
@@ -98,7 +101,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
     } else if (conn_recv->opcode == IBV_WC_RDMA_READ) {
       ree = get_dtime();
       struct rdma_read_request_entry *passive_rrre;
-      debug(printf("RDMA lib: COMM: Done IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f), rdma_time=%f\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm, ree - rss), 2);
+      debug(printf("RDMA lib: COMM: Done IBV_WC_RDMA_READ: id=%lu(%lu) recv_wc time=%f(%f), rdma_time=%f\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm, ree - rss), 1);
       passive_rrre = conn_recv->passive_rrre;
       //TODO: find an optimal location for "create_connection()", "sem_post()".
       if (passive_rrre->silent == 1) {
@@ -125,7 +128,7 @@ static void * poll_cq(struct RDMA_communicator *comm)
 
       continue;
     } else if (conn_recv->opcode == IBV_WC_SEND) {
-      debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 2);
+      debug(printf("RDMA lib: COMM: Sent IBV_WC_SEND: id=%lu(%lu) recv_wc time=%f(%f)\n", conn_recv->count, (uintptr_t)conn_recv, ee - ss, mm), 1);
       /* ========
 	Note: free_connection(conn_recv) is not needed, 
 	      because conn_recv was used for post_sent but the conn_recv is being used for post_recv for the XSnext msg.
@@ -221,8 +224,9 @@ static int post_matched_request (int target_q_id, struct rdma_read_request_entry
   }
 
   lq_enq(cur_rrre_q, cur_rrre);
-  debug(fprintf(stderr,"Queued: %p: id:%lu, tag:%lu\n", cur_rrre_q, cur_rrre->id, cur_rrre->tag), 1);
+  debug(fprintf(stderr,"Queued: %p: id:%lu, tag:%lu tq:%p, hd:%p,\n", cur_rrre_q, cur_rrre->id, cur_rrre->tag, target_rrre_q, cur_rrre_q->head),  1);
   lq_fin_it(target_rrre_q);
+
   pthread_mutex_unlock(&post_req_lock);      
   return 1;
 }
@@ -245,14 +249,14 @@ static int matched_requests (struct rdma_read_request_entry *req1, struct rdma_r
 long double rdma_latency_r (int source, struct RDMA_communicator *rdma_com) 
 {
   long double begin, end;
-  void *buf = malloc(MIN_LENGTH);
+  char v;
   struct RDMA_request request;
    //TODO: define datatypes and use an appropriate datatype here, for now, allocate NULL.
-  rdma_irecv_r_opt(buf, MIN_LENGTH, NULL, source, RDMA_ANY_TAG, rdma_com, &request, 1);
+  rdma_irecv_r_opt(&v, 1, NULL, source, RDMA_ANY_TAG, rdma_com, &request, 1);
   begin = get_dtime();
   rdma_wait(&request);
   end = get_dtime();
-  free(buf);
+
   return end - begin;
 }
 
@@ -300,6 +304,7 @@ static int rdma_irecv_r_opt_offset (void *buf, int offset, int size, void* datat
   memcpy(&(rrre->mr), passive_mr, sizeof(struct ibv_mr));
   rrre->passive_mr =  passive_mr;
   debug(fprintf(stderr,"RDMA lib: RECV: local_addr=%p, length=%lu, lkey=%lu\n", rrre->mr.addr, rrre->mr.length, rrre->mr.lkey), 1);
+
   if (!post_matched_request (ACTIVE, rrre)) {
     return 0;
   }

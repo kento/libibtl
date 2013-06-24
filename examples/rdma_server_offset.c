@@ -12,6 +12,8 @@ int main(int argc, char **argv) {
   int ctl_tag;
   double ss, ee;
   int max;
+  int req_num = 2;
+  struct RDMA_request req;
 
   chunk = 1024 * 1024 * 1;
   max   = 1024 * 1024 * 1024;
@@ -19,8 +21,6 @@ int main(int argc, char **argv) {
   RDMA_Passive_Init(&comm);
   data = (char*)RDMA_Alloc(max);
   memset(data, 1, max);
-  int req_num = 2;
-  struct RDMA_request req;
 
   sleep(1);
   ss = get_dtime();    

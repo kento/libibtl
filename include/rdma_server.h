@@ -3,8 +3,8 @@
 
 //int alloc_size = 0;
 
-#define RDMA_ANY_SOURCE -1
-#define RDMA_ANY_TAG -2
+#define RDMA_ANY_SOURCE (-1)
+#define RDMA_ANY_TAG (-2)
 
 
 int RDMA_Passive_Init(struct RDMA_communicator *comm);
