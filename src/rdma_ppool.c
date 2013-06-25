@@ -458,7 +458,7 @@ void join_passive_pool(char *addr, int port)
   make_port_file(addr);           //         /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/port
   update_port_file(addr, port);   // update  /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/port
   update_count_file(addr);        // update  /home/usr2/11D37048/ibtl/ndpool/t2a006178/10.1.6.178/count
-  fprintf(stderr, "%s:%d Joined !\n", addr, port);
+  //  fprintf(stderr, "%s:%d Joined !\n", addr, port);
 }
 
 static void update_port_file(char *addr, int port)

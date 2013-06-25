@@ -4,24 +4,23 @@
 #include "ibtls.h"
 #include "common.h"
 
+#define BUF_SIZE_MIN 1024
+#define BUF_SIZE_MAX (1024 * 1024)
 
 int main(int argc, char **argv) {
   struct RDMA_communicator comm;
-  struct RDMA_request *req1, *req2;
+  struct RDMA_request req;
   char *data;
-  uint64_t min, s;
-  int ctl_tag;
+  uint64_t min, max;
   double ss, ee;
-  int max;
+  uint64_t s;
 
-  min = 1024;
-  max = 1024 * 1024;
+  min = BUF_SIZE_MIN;
+  max = BUF_SIZE_MAX;
 
   RDMA_Passive_Init(&comm);
   data = (char*)RDMA_Alloc(max);
   memset(data, 1, max);
-  int req_num = 2;
-  struct RDMA_request req;
 
   while (1) {
     for (s = min; s <= max; s = s * 2) {

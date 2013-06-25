@@ -4,38 +4,37 @@
 #include "ibtls.h"
 #include "common.h"
 
+#define BUF_SIZE (1024 * 1024 * 128)
+#define NUM_CHUNK (1024)
+
 int main(int argc, char **argv) {
   struct RDMA_communicator comm;
-  struct RDMA_request *req1, *req2;
-  char *data;
-  uint64_t chunk, offset;
-  int ctl_tag;
-  double ss, ee;
-  int max;
-  int req_num = 2;
   struct RDMA_request req;
-
-  chunk = 1024 * 1024 * 1;
-  max   = 1024 * 1024 * 1024;
+  char *data;
+  uint64_t max, chunk, offset;
+  double ss, ee;
 
   RDMA_Passive_Init(&comm);
+
+  chunk = BUF_SIZE / NUM_CHUNK;
+  max   = BUF_SIZE;
+  fprintf(stderr, "chunk: %d, max: %d\n", chunk, max);
+
   data = (char*)RDMA_Alloc(max);
   memset(data, 1, max);
 
-  sleep(1);
   ss = get_dtime();    
   for (offset = 0; offset + chunk <= max; offset += chunk) {
     if (offset + chunk == max) {
       RDMA_Irecv_offset(data, offset, chunk, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req);  
-      fprintf(stderr, "Last\n");
     } else {
       RDMA_Irecv_silent_offset(data, offset, chunk, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm, &req);  
     }
     RDMA_Wait(&req);
   }
   ee = get_dtime();
-  sleep(1);
-  fprintf(stderr, "[%c] Size: %d [bytes], Latency: %f, Throughput: %f [Gbytes/sec]\n", data[max-chunk], max, ee- ss, (max/1000000000.0)/(ee - ss));
+
+  fprintf(stderr, "Size: %d [bytes], Latency: %f, Throughput: %f [Gbytes/sec]\n",  max, ee- ss, (max/1000000000.0)/(ee - ss));
   return 0;
 }
 

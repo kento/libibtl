@@ -4,7 +4,6 @@ bin_PROGRAMS = rdma_server_test \
 	       rdma_server_latency \
 	       rdma_client_silent \
 	       rdma_server_silent \
-	       rdma_server_silent_overlap \
 	       rdma_client_offset \
 	       rdma_server_offset 
 
@@ -37,10 +36,6 @@ rdma_server_silent_SOURCES = rdma_server_silent.c $(TARGET)
 rdma_server_silent_CFLAGS = -I$(INCLUDE_DIR)
 rdma_server_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 
-rdma_server_silent_overlap_SOURCES = rdma_server_silent_overlap.c $(TARGET)
-rdma_server_silent_overlap_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_silent_overlap_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-
 rdma_client_offset_SOURCES =  rdma_client_offset.c $(TARGET)
 rdma_client_offset_CFLAGS = -I$(INCLUDE_DIR)
 rdma_client_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
@@ -63,8 +58,7 @@ dist_examples_DATA = \
 	rdma_client_silent.c \
 	rdma_server_silent.c \
 	rdma_client_latency.c \
-	rdma_server_latency.c \
-	rdma_server_silent_overlap.c
+	rdma_server_latency.c 
 
 EXTRA_DIST = makefile.example
 

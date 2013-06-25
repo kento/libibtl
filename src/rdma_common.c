@@ -252,8 +252,8 @@ int rdma_active_init(struct RDMA_communicator *comm, struct RDMA_param *param)
   sprintf(port, "%d", RDMA_PORT);
   find_passive_host(&psaddr, 0);
 
-  gethostname(host, sizeof(host));
-  fprintf(stderr, "%s:%p IP: %s, PORT:%d\n",host, &host, psaddr.addr, psaddr.port);
+  //  gethostname(host, sizeof(host));
+  //  fprintf(stderr, "%s:%p IP: %s, PORT:%d\n",host, &host, psaddr.addr, psaddr.port);
 
   pthread_mutex_init(&(comm->post_mutex), NULL);
   param->host = psaddr.addr;

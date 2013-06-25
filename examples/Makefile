@@ -38,7 +38,6 @@ host_triplet = x86_64-unknown-linux-gnu
 bin_PROGRAMS = rdma_server_test$(EXEEXT) rdma_client_test$(EXEEXT) \
 	rdma_client_latency$(EXEEXT) rdma_server_latency$(EXEEXT) \
 	rdma_client_silent$(EXEEXT) rdma_server_silent$(EXEEXT) \
-	rdma_server_silent_overlap$(EXEEXT) \
 	rdma_client_offset$(EXEEXT) rdma_server_offset$(EXEEXT)
 subdir = examples
 DIST_COMMON = README $(dist_examples_DATA) $(srcdir)/Makefile.am \
@@ -164,23 +163,7 @@ rdma_server_silent_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(rdma_server_silent_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__objects_8 = rdma_server_silent_overlap-list_queue.$(OBJEXT) \
-	rdma_server_silent_overlap-rdma_ppool.$(OBJEXT) \
-	rdma_server_silent_overlap-rdma_client.$(OBJEXT) \
-	rdma_server_silent_overlap-rdma_server.$(OBJEXT) \
-	rdma_server_silent_overlap-rdma_common.$(OBJEXT) \
-	rdma_server_silent_overlap-common.$(OBJEXT) \
-	rdma_server_silent_overlap-ibtls.$(OBJEXT)
-am_rdma_server_silent_overlap_OBJECTS = rdma_server_silent_overlap-rdma_server_silent_overlap.$(OBJEXT) \
-	$(am__objects_8)
-rdma_server_silent_overlap_OBJECTS =  \
-	$(am_rdma_server_silent_overlap_OBJECTS)
-rdma_server_silent_overlap_DEPENDENCIES = $(am__DEPENDENCIES_1)
-rdma_server_silent_overlap_LINK = $(LIBTOOL) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-am__objects_9 = rdma_server_test-list_queue.$(OBJEXT) \
+am__objects_8 = rdma_server_test-list_queue.$(OBJEXT) \
 	rdma_server_test-rdma_ppool.$(OBJEXT) \
 	rdma_server_test-rdma_client.$(OBJEXT) \
 	rdma_server_test-rdma_server.$(OBJEXT) \
@@ -188,7 +171,7 @@ am__objects_9 = rdma_server_test-list_queue.$(OBJEXT) \
 	rdma_server_test-common.$(OBJEXT) \
 	rdma_server_test-ibtls.$(OBJEXT)
 am_rdma_server_test_OBJECTS =  \
-	rdma_server_test-rdma_server_test.$(OBJEXT) $(am__objects_9)
+	rdma_server_test-rdma_server_test.$(OBJEXT) $(am__objects_8)
 rdma_server_test_OBJECTS = $(am_rdma_server_test_OBJECTS)
 rdma_server_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
 rdma_server_test_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -210,14 +193,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(rdma_client_latency_SOURCES) $(rdma_client_offset_SOURCES) \
 	$(rdma_client_silent_SOURCES) $(rdma_client_test_SOURCES) \
 	$(rdma_server_latency_SOURCES) $(rdma_server_offset_SOURCES) \
-	$(rdma_server_silent_SOURCES) \
-	$(rdma_server_silent_overlap_SOURCES) \
-	$(rdma_server_test_SOURCES)
+	$(rdma_server_silent_SOURCES) $(rdma_server_test_SOURCES)
 DIST_SOURCES = $(rdma_client_latency_SOURCES) \
 	$(rdma_client_offset_SOURCES) $(rdma_client_silent_SOURCES) \
 	$(rdma_client_test_SOURCES) $(rdma_server_latency_SOURCES) \
 	$(rdma_server_offset_SOURCES) $(rdma_server_silent_SOURCES) \
-	$(rdma_server_silent_overlap_SOURCES) \
 	$(rdma_server_test_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -375,9 +355,6 @@ rdma_client_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 rdma_server_silent_SOURCES = rdma_server_silent.c $(TARGET)
 rdma_server_silent_CFLAGS = -I$(INCLUDE_DIR)
 rdma_server_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_server_silent_overlap_SOURCES = rdma_server_silent_overlap.c $(TARGET)
-rdma_server_silent_overlap_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_silent_overlap_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 rdma_client_offset_SOURCES = rdma_client_offset.c $(TARGET)
 rdma_client_offset_CFLAGS = -I$(INCLUDE_DIR)
 rdma_client_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
@@ -397,8 +374,7 @@ dist_examples_DATA = \
 	rdma_client_silent.c \
 	rdma_server_silent.c \
 	rdma_client_latency.c \
-	rdma_server_latency.c \
-	rdma_server_silent_overlap.c
+	rdma_server_latency.c 
 
 EXTRA_DIST = makefile.example
 all: all-am
@@ -499,9 +475,6 @@ rdma_server_offset$(EXEEXT): $(rdma_server_offset_OBJECTS) $(rdma_server_offset_
 rdma_server_silent$(EXEEXT): $(rdma_server_silent_OBJECTS) $(rdma_server_silent_DEPENDENCIES) 
 	@rm -f rdma_server_silent$(EXEEXT)
 	$(rdma_server_silent_LINK) $(rdma_server_silent_OBJECTS) $(rdma_server_silent_LDADD) $(LIBS)
-rdma_server_silent_overlap$(EXEEXT): $(rdma_server_silent_overlap_OBJECTS) $(rdma_server_silent_overlap_DEPENDENCIES) 
-	@rm -f rdma_server_silent_overlap$(EXEEXT)
-	$(rdma_server_silent_overlap_LINK) $(rdma_server_silent_overlap_OBJECTS) $(rdma_server_silent_overlap_LDADD) $(LIBS)
 rdma_server_test$(EXEEXT): $(rdma_server_test_OBJECTS) $(rdma_server_test_DEPENDENCIES) 
 	@rm -f rdma_server_test$(EXEEXT)
 	$(rdma_server_test_LINK) $(rdma_server_test_OBJECTS) $(rdma_server_test_LDADD) $(LIBS)
@@ -568,14 +541,6 @@ include ./$(DEPDIR)/rdma_server_silent-rdma_common.Po
 include ./$(DEPDIR)/rdma_server_silent-rdma_ppool.Po
 include ./$(DEPDIR)/rdma_server_silent-rdma_server.Po
 include ./$(DEPDIR)/rdma_server_silent-rdma_server_silent.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-common.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-ibtls.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-list_queue.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-rdma_client.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-rdma_common.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-rdma_ppool.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-rdma_server.Po
-include ./$(DEPDIR)/rdma_server_silent_overlap-rdma_server_silent_overlap.Po
 include ./$(DEPDIR)/rdma_server_test-common.Po
 include ./$(DEPDIR)/rdma_server_test-ibtls.Po
 include ./$(DEPDIR)/rdma_server_test-list_queue.Po
@@ -1389,118 +1354,6 @@ rdma_server_silent-ibtls.obj: $(SRC_DIR)/ibtls.c
 #	source='$(SRC_DIR)/ibtls.c' object='rdma_server_silent-ibtls.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_CFLAGS) $(CFLAGS) -c -o rdma_server_silent-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
-
-rdma_server_silent_overlap-rdma_server_silent_overlap.o: rdma_server_silent_overlap.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_server_silent_overlap.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_server_silent_overlap.Tpo -c -o rdma_server_silent_overlap-rdma_server_silent_overlap.o `test -f 'rdma_server_silent_overlap.c' || echo '$(srcdir)/'`rdma_server_silent_overlap.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_server_silent_overlap.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_server_silent_overlap.Po
-#	source='rdma_server_silent_overlap.c' object='rdma_server_silent_overlap-rdma_server_silent_overlap.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_server_silent_overlap.o `test -f 'rdma_server_silent_overlap.c' || echo '$(srcdir)/'`rdma_server_silent_overlap.c
-
-rdma_server_silent_overlap-rdma_server_silent_overlap.obj: rdma_server_silent_overlap.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_server_silent_overlap.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_server_silent_overlap.Tpo -c -o rdma_server_silent_overlap-rdma_server_silent_overlap.obj `if test -f 'rdma_server_silent_overlap.c'; then $(CYGPATH_W) 'rdma_server_silent_overlap.c'; else $(CYGPATH_W) '$(srcdir)/rdma_server_silent_overlap.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_server_silent_overlap.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_server_silent_overlap.Po
-#	source='rdma_server_silent_overlap.c' object='rdma_server_silent_overlap-rdma_server_silent_overlap.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_server_silent_overlap.obj `if test -f 'rdma_server_silent_overlap.c'; then $(CYGPATH_W) 'rdma_server_silent_overlap.c'; else $(CYGPATH_W) '$(srcdir)/rdma_server_silent_overlap.c'; fi`
-
-rdma_server_silent_overlap-list_queue.o: $(SRC_DIR)/list_queue.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-list_queue.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-list_queue.Tpo -c -o rdma_server_silent_overlap-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-list_queue.Tpo $(DEPDIR)/rdma_server_silent_overlap-list_queue.Po
-#	source='$(SRC_DIR)/list_queue.c' object='rdma_server_silent_overlap-list_queue.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
-
-rdma_server_silent_overlap-list_queue.obj: $(SRC_DIR)/list_queue.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-list_queue.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-list_queue.Tpo -c -o rdma_server_silent_overlap-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-list_queue.Tpo $(DEPDIR)/rdma_server_silent_overlap-list_queue.Po
-#	source='$(SRC_DIR)/list_queue.c' object='rdma_server_silent_overlap-list_queue.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
-
-rdma_server_silent_overlap-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_ppool.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_ppool.Tpo -c -o rdma_server_silent_overlap-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_ppool.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_ppool.Po
-#	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_silent_overlap-rdma_ppool.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
-
-rdma_server_silent_overlap-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_ppool.Tpo -c -o rdma_server_silent_overlap-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_ppool.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_ppool.Po
-#	source='$(SRC_DIR)/rdma_ppool.c' object='rdma_server_silent_overlap-rdma_ppool.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
-
-rdma_server_silent_overlap-rdma_client.o: $(SRC_DIR)/rdma_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_client.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_client.Tpo -c -o rdma_server_silent_overlap-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_client.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_client.Po
-#	source='$(SRC_DIR)/rdma_client.c' object='rdma_server_silent_overlap-rdma_client.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
-
-rdma_server_silent_overlap-rdma_client.obj: $(SRC_DIR)/rdma_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_client.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_client.Tpo -c -o rdma_server_silent_overlap-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_client.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_client.Po
-#	source='$(SRC_DIR)/rdma_client.c' object='rdma_server_silent_overlap-rdma_client.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
-
-rdma_server_silent_overlap-rdma_server.o: $(SRC_DIR)/rdma_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_server.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_server.Tpo -c -o rdma_server_silent_overlap-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_server.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_server.Po
-#	source='$(SRC_DIR)/rdma_server.c' object='rdma_server_silent_overlap-rdma_server.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
-
-rdma_server_silent_overlap-rdma_server.obj: $(SRC_DIR)/rdma_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_server.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_server.Tpo -c -o rdma_server_silent_overlap-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_server.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_server.Po
-#	source='$(SRC_DIR)/rdma_server.c' object='rdma_server_silent_overlap-rdma_server.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
-
-rdma_server_silent_overlap-rdma_common.o: $(SRC_DIR)/rdma_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_common.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_common.Tpo -c -o rdma_server_silent_overlap-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_common.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_common.Po
-#	source='$(SRC_DIR)/rdma_common.c' object='rdma_server_silent_overlap-rdma_common.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
-
-rdma_server_silent_overlap-rdma_common.obj: $(SRC_DIR)/rdma_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-rdma_common.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-rdma_common.Tpo -c -o rdma_server_silent_overlap-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-rdma_common.Tpo $(DEPDIR)/rdma_server_silent_overlap-rdma_common.Po
-#	source='$(SRC_DIR)/rdma_common.c' object='rdma_server_silent_overlap-rdma_common.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
-
-rdma_server_silent_overlap-common.o: $(SRC_DIR)/common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-common.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-common.Tpo -c -o rdma_server_silent_overlap-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-common.Tpo $(DEPDIR)/rdma_server_silent_overlap-common.Po
-#	source='$(SRC_DIR)/common.c' object='rdma_server_silent_overlap-common.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
-
-rdma_server_silent_overlap-common.obj: $(SRC_DIR)/common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-common.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-common.Tpo -c -o rdma_server_silent_overlap-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-common.Tpo $(DEPDIR)/rdma_server_silent_overlap-common.Po
-#	source='$(SRC_DIR)/common.c' object='rdma_server_silent_overlap-common.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
-
-rdma_server_silent_overlap-ibtls.o: $(SRC_DIR)/ibtls.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-ibtls.o -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-ibtls.Tpo -c -o rdma_server_silent_overlap-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-ibtls.Tpo $(DEPDIR)/rdma_server_silent_overlap-ibtls.Po
-#	source='$(SRC_DIR)/ibtls.c' object='rdma_server_silent_overlap-ibtls.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
-
-rdma_server_silent_overlap-ibtls.obj: $(SRC_DIR)/ibtls.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -MT rdma_server_silent_overlap-ibtls.obj -MD -MP -MF $(DEPDIR)/rdma_server_silent_overlap-ibtls.Tpo -c -o rdma_server_silent_overlap-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
-	$(am__mv) $(DEPDIR)/rdma_server_silent_overlap-ibtls.Tpo $(DEPDIR)/rdma_server_silent_overlap-ibtls.Po
-#	source='$(SRC_DIR)/ibtls.c' object='rdma_server_silent_overlap-ibtls.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_silent_overlap_CFLAGS) $(CFLAGS) -c -o rdma_server_silent_overlap-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
 
 rdma_server_test-rdma_server_test.o: rdma_server_test.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rdma_server_test_CFLAGS) $(CFLAGS) -MT rdma_server_test-rdma_server_test.o -MD -MP -MF $(DEPDIR)/rdma_server_test-rdma_server_test.Tpo -c -o rdma_server_test-rdma_server_test.o `test -f 'rdma_server_test.c' || echo '$(srcdir)/'`rdma_server_test.c
