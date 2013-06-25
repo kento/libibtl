@@ -1,18 +1,1 @@
-TODO 1: 
-     UNSTABLE: If call RDMA_Irecv_silent twice(1st and 2nd) without calling RDMA_Wait. 2nd passive request by RDMA_Irecv_silent() is not processed due to a bug in post_matched_request(); methrosy of a queue search causes the error.
-
-TODO 2:
-     offset support for not-silent recieve 
- remote_addr = (uint64_t)(*active_rrre)->mr.addr;
-      if ((*passive_rrre)->offset > 0) {
-        remote_addr += (*passive_rrre)->offset;
-      }
-      if ((*passive_rrre)->silent == 1) {
-        //      post_RDMA_read ((*active_rrre)->conn, (uint64_t)(*active_rrre)->mr.addr, (*active_rrre)->mr.rkey, (uint64_t)(*pa\
-ssive_rrre)->mr.addr, (*passive_rrre)->mr.length, (*passive_rrre)->mr.lkey) ;                                                    
-        post_RDMA_read ((*active_rrre)->conn, remote_addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rrre)->mr.addr, (*passiv\
-e_rrre)->length, (*passive_rrre)->mr.lkey) ;
-      } else {
-        post_RDMA_read ((*active_rrre)->conn, (uint64_t)(*active_rrre)->mr.addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rr\
-re)->mr.addr, (*active_rrre)->mr.length, (*passive_rrre)->mr.lkey) ;
-      }
+Do not read me
