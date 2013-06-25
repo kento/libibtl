@@ -662,7 +662,7 @@ static void get_top_dir(char *top_dir)
 
   value = getenv("HOME");
   if (value != NULL) {
-    sprintf(top_dir, "%s/ibtl_dir", value);
+    sprintf(top_dir, "%s/.ibtl_dir", value);
     make_dir(top_dir);
     return;
   } 

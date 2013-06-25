@@ -1,1 +1,28 @@
-Do not read me
+*****************************************
+Build libibtl
+*****************************************
+./configure --prefix=/path/to/install/dir
+make 
+make install
+
+
+*****************************************
+Quick Start
+*****************************************
+cd /path/to/install/dir/example
+make
+
+* nodeA
+$ export LD_LIBRARY_PATH=/path/to/install/dir/lib:$LD_LIBRARY_PATH 
+$ ./rdma_client_{latency|offset|silent}
+
+* nodeB
+$ export LD_LIBRARY_PATH=/path/to/install/dir/lib:$LD_LIBRARY_PATH 
+$ ./rdma_server_{latency|offset|silent}
+
+
+*****************************************
+Setting
+*****************************************
+Controll directory
+RDMA_NDPOOL_DIR=/path/to/controll/dir (default:$HOME/.ibtl_dir)

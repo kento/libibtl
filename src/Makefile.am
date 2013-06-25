@@ -1,11 +1,8 @@
 SRC_DIR=../src
 INCLUDE_DIR=../include
 
-include_HEADERS = \
-	$(INCLUDE_DIR)/ibtls.h \
-	$(INCLUDE_DIR)/rdma_server.h \
-	$(INCLUDE_DIR)/rdma_client.h \
-	$(INCLUDE_DIR)/*
+include_HEADERS = $(INCLUDE_DIR)/*
+
 
 # =======================================
 # To build and install static library .a
