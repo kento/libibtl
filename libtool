@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (main) 0.0.1
-# Libtool was configured on host sierra972:
+# Libtool was configured on host sierra0:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -234,10 +234,10 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.4.6 /usr/lib64 /lib64"
+sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib64 /lib64"
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib /usr/lib64/R/lib /usr/lib64/atlas-sse3 /usr/lib64/atlas /usr/lib64/ldapotp /usr/lib64/ldapotp /usr/lib64/mysql /usr/lib64/nvidia /usr/lib/nvidia /usr/lib64/octave/3.4.2 /usr/lib64/qt-3.3/lib /usr/StorMan /usr/lib64/tcl8.5/tclx8.4 /usr/lib64/tcl8.5 /usr/lib64/xulrunner-2 /usr/lib/nsr /usr/lib/nsr/lib64 "
+sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib /usr/lib64/R/lib /usr/lib64/atlas-sse3 /usr/lib64/atlas /usr/lib64/dyninst /usr/lib64/ldapotp /usr/lib64/ldapotp /usr/lib64/mysql /usr/lib64/nvidia /usr/lib/nvidia /usr/lib64/octave/3.4.3 /usr/lib64/qt-3.3/lib /usr/StorMan /usr/lib64/tcl8.5/tclx8.4 /usr/lib64/tcl8.5 /usr/lib64/xulrunner "
 
 # Whether dlopen is supported.
 dlopen_support=unknown

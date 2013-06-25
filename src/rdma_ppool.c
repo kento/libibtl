@@ -577,7 +577,7 @@ static void make_file(char *path)
 {
   int fd;
   if (!(fd = open(path, O_CREAT, S_IREAD | S_IWRITE))) {
-    fprintf(stderr, "%s already exists\n", path);
+    //    fprintf(stderr, "%s already exists\n", path);
   }
   close(fd);
 }
@@ -637,7 +637,7 @@ static int make_dir(char * dir)
 	    S_IROTH | S_IWOTH | S_IXOTH) == 0) {  /* rwx */
     fprintf(stderr,"Created %s\n", dir);
   } else {
-    fprintf(stderr,"Node directory: %s alread exist. skipped.\n", dir);
+    //    fprintf(stderr,"Node directory: %s already exist. skipped.\n", dir);
   }
 }
 
@@ -652,7 +652,24 @@ static void make_top_dir()
 
 static void get_top_dir(char *top_dir)
 {
-  strcpy(top_dir, RDMA_NDPOOL_DIR);
+  char* value;
+  value = getenv("RDMA_NDPOOL_DIR");
+  if (value != NULL) {
+    strcpy(top_dir, value);
+    make_dir(top_dir);
+    return;
+  } 
+
+  value = getenv("HOME");
+  if (value != NULL) {
+    sprintf(top_dir, "%s/ibtl_dir", value);
+    make_dir(top_dir);
+    return;
+  } 
+
+  fprintf(stderr, "Please define RDMA_NDPOOL_DIR env val\n");
+  exit(1);
+
 }
 
 static void make_node_dir() 
