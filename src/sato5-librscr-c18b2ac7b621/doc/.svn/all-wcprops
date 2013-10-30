@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svnroot/scalablecr/!svn/ver/52/trunk/doc
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/scalablecr/!svn/ver/52/trunk/doc/Makefile.in
+END
+scr_developers_manual.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/scalablecr/!svn/ver/32/trunk/doc/scr_developers_manual.pdf
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/scalablecr/!svn/ver/31/trunk/doc/Makefile.am
+END
+scr_users_manual.pdf
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/scalablecr/!svn/ver/32/trunk/doc/scr_users_manual.pdf
+END

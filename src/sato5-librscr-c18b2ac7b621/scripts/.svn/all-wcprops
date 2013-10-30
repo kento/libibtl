@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svnroot/scalablecr/!svn/ver/58/trunk/scripts
+END
+param_test
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/scalablecr/!svn/ver/2/trunk/scripts/param_test
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/scalablecr/!svn/ver/58/trunk/scripts/Makefile.in
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/scalablecr/!svn/ver/58/trunk/scripts/Makefile.am
+END

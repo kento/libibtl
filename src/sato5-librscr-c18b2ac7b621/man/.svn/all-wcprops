@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svnroot/scalablecr/!svn/ver/52/trunk/man
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/scalablecr/!svn/ver/52/trunk/man/Makefile.in
+END
+scr_index.1.in
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svnroot/scalablecr/!svn/ver/32/trunk/man/scr_index.1.in
+END
+scr_srun.1.in
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/scalablecr/!svn/ver/31/trunk/man/scr_srun.1.in
+END
+scr_halt.1.in
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/scalablecr/!svn/ver/31/trunk/man/scr_halt.1.in
+END
+scr_postrun.1.in
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/scalablecr/!svn/ver/31/trunk/man/scr_postrun.1.in
+END
+scr_prerun.1.in
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/scalablecr/!svn/ver/31/trunk/man/scr_prerun.1.in
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/scalablecr/!svn/ver/31/trunk/man/Makefile.am
+END
+scr.1.in
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnroot/scalablecr/!svn/ver/27/trunk/man/scr.1.in
+END

@@ -23,7 +23,9 @@ libibtls_a_SOURCES = \
         $(SRC_DIR)/common.c \
         $(INCLUDE_DIR)/common.h \
         $(SRC_DIR)/ibtls.c \
-        $(INCLUDE_DIR)/ibtls.h 
+        $(INCLUDE_DIR)/ibtls.h \
+        $(SRC_DIR)/ibtl_io_client.c 
+
 
 libibtls_a_LIBADD = @LIBOBJS@
 libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
@@ -40,8 +42,21 @@ libibtls_la_SOURCES = \
         $(SRC_DIR)/rdma_server.c \
         $(SRC_DIR)/rdma_common.c \
         $(SRC_DIR)/common.c \
-        $(SRC_DIR)/ibtls.c 
+        $(SRC_DIR)/ibtls.c \
+        $(SRC_DIR)/ibtl_io_client.c 
 
 libibtls_la_LIBADD = @LIBOBJS@
 libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
 libibtls_la_LDFLAGS =  -lrdmacm -lpthread -libverbs -version-info 1:0:0 -release 1
+
+# ============================================================
+# To build binaries
+# ============================================================
+bin_PROGRAMS=ibtl_io_server
+SRC_DIR=./
+INCLUDE_DIR=../include
+
+ibtl_io_server_SOURCES =ibtl_io_server.c pgz.c scr_list_queue.c common.c yarn.c ${SRC_DIR}/libibtls.a
+ibtl_io_server_DEPENDENCIES =  ${SRC_DIR}/libibtls.a
+ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
+ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 

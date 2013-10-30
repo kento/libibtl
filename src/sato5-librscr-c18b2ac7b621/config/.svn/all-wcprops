@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svnroot/scalablecr/!svn/ver/53/trunk/config
+END
+config.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svnroot/scalablecr/!svn/ver/53/trunk/config/config.h.in
+END
+depcomp
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/scalablecr/!svn/ver/2/trunk/config/depcomp
+END
+compile
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/scalablecr/!svn/ver/2/trunk/config/compile
+END
+missing
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/scalablecr/!svn/ver/2/trunk/config/missing
+END
+config.guess
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/scalablecr/!svn/ver/44/trunk/config/config.guess
+END
+aclocal.m4
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/scalablecr/!svn/ver/53/trunk/config/aclocal.m4
+END
+config.sub
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/scalablecr/!svn/ver/44/trunk/config/config.sub
+END
+ltmain.sh
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/scalablecr/!svn/ver/2/trunk/config/ltmain.sh
+END
+install-sh
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/scalablecr/!svn/ver/2/trunk/config/install-sh
+END

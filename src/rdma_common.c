@@ -4,6 +4,8 @@
 #include <netinet/in.h>
 #include <net/if.h>
 #include <arpa/inet.h>
+#include <errno.h>
+#include <string.h>
 
 #include "common.h"
 #include "rdma_common.h"
@@ -396,7 +398,10 @@ static void
 
   build_context(id->verbs);/*build_context() runs only once internally*/
   build_qp_attr(&qp_attr);
-  TEST_NZ(rdma_create_qp(id, s_ctx->pd, &qp_attr));
+  
+  if (rdma_create_qp(id, s_ctx->pd, &qp_attr) < 0) {
+    ibtl_err("rdma_create failed: %s(errno=%d)", strerror(errno), errno);
+  }
 
   //TODO: create_connection in rdma_client.c and rdma_server.c
   id->context = conn = create_connection(id);

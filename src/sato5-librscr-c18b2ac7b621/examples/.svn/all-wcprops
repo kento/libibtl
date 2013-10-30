@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svnroot/scalablecr/!svn/ver/52/trunk/examples
+END
+makefile.examples.in
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/scalablecr/!svn/ver/28/trunk/examples/makefile.examples.in
+END
+test_ckpt.C
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/scalablecr/!svn/ver/23/trunk/examples/test_ckpt.C
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/scalablecr/!svn/ver/52/trunk/examples/Makefile.in
+END
+test_interpose_multiple.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/scalablecr/!svn/ver/2/trunk/examples/test_interpose_multiple.c
+END
+scr.moab
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/scalablecr/!svn/ver/2/trunk/examples/scr.moab
+END
+test_api_multiple.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/scalablecr/!svn/ver/2/trunk/examples/test_api_multiple.c
+END
+test_ckpt.F
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/scalablecr/!svn/ver/23/trunk/examples/test_ckpt.F
+END
+test_common.c
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/scalablecr/!svn/ver/2/trunk/examples/test_common.c
+END
+test_interpose.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/scalablecr/!svn/ver/2/trunk/examples/test_interpose.c
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/scalablecr/!svn/ver/29/trunk/examples/Makefile.am
+END
+test_api.c
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/scalablecr/!svn/ver/19/trunk/examples/test_api.c
+END
+scr_interpose.moab
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/scalablecr/!svn/ver/2/trunk/examples/scr_interpose.moab
+END
+test_common.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/scalablecr/!svn/ver/2/trunk/examples/test_common.h
+END

@@ -102,12 +102,12 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run aclocal-1.11
-AMTAR = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run tar
+ACLOCAL = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run aclocal-1.11
+AMTAR = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run autoconf
-AUTOHEADER = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run autoheader
-AUTOMAKE = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run automake-1.11
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -131,7 +131,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /usr/local/bin/ld -m elf_x86_64
+LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
@@ -139,7 +139,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -160,10 +160,10 @@ SET_MAKE =
 SHELL = /bin/sh
 STRIP = strip
 VERSION = 0.0.1
-abs_builddir = /g/g90/sato5/lib/libibtl
-abs_srcdir = /g/g90/sato5/lib/libibtl
-abs_top_builddir = /g/g90/sato5/lib/libibtl
-abs_top_srcdir = /g/g90/sato5/lib/libibtl
+abs_builddir = /home/kent/lib/ibtl/libibtl
+abs_srcdir = /home/kent/lib/ibtl/libibtl
+abs_top_builddir = /home/kent/lib/ibtl/libibtl
+abs_top_srcdir = /home/kent/lib/ibtl/libibtl
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
 am__include = include
@@ -191,7 +191,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /g/g90/sato5/lib/libibtl/install-sh
+install_sh = ${SHELL} /home/kent/lib/ibtl/libibtl/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -533,7 +533,7 @@ distcheck: dist
 	*.zip*) \
 	  unzip $(distdir).zip ;;\
 	esac
-	chmod -R a-w $(distdir); chmod a+w $(distdir)
+	chmod -R a-w $(distdir); chmod u+w $(distdir)
 	mkdir $(distdir)/_build
 	mkdir $(distdir)/_inst
 	chmod a-w $(distdir)

@@ -1,8 +1,8 @@
-libibtls_la-rdma_ppool.lo: ../src/rdma_ppool.c /usr/include/string.h \
+libibtls_la-rdma_ppool.lo: rdma_ppool.c /usr/include/string.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.4.5/include/stddef.h \
  /usr/include/xlocale.h /usr/include/bits/string.h \
  /usr/include/bits/string2.h /usr/include/endian.h \
  /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
@@ -14,7 +14,7 @@ libibtls_la-rdma_ppool.lo: ../src/rdma_ppool.c /usr/include/string.h \
  /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
  /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
  /usr/include/_G_config.h /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stdarg.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.4.5/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
  /usr/include/bits/stdio.h /usr/include/sys/stat.h \
  /usr/include/bits/stat.h /usr/include/errno.h /usr/include/bits/errno.h \
@@ -52,7 +52,7 @@ libibtls_la-rdma_ppool.lo: ../src/rdma_ppool.c /usr/include/string.h \
 
 /usr/include/gnu/stubs-64.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.4.5/include/stddef.h:
 
 /usr/include/xlocale.h:
 
@@ -102,7 +102,7 @@ libibtls_la-rdma_ppool.lo: ../src/rdma_ppool.c /usr/include/string.h \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.4.5/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 

@@ -10,6 +10,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
+#include <stdarg.h>
 
 
 int file_dump(char * path, char *content)
@@ -67,5 +68,16 @@ void write_log(char* log)
   fd = open("~/log",  O_WRONLY |O_APPEND| O_CREAT, 0660);
   write(fd, log, strlen(log));
   close(fd);
+}
+
+int ibtl_err(const char* fmt, ...)
+{
+  va_list argp;
+  fprintf(stderr, "IBTL:ERROR: ");
+  va_start(argp, fmt);
+  vfprintf(stderr, fmt, argp);
+  va_end(argp);
+  fprintf(stderr, "\n");
+  exit(1);
 }
 

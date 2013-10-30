@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/scalablecr/!svn/ver/58/trunk/scripts/common
+END
+scr_glob_hosts.in
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/scalablecr/!svn/ver/42/trunk/scripts/common/scr_glob_hosts.in
+END
+scr_postrun.in
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/scalablecr/!svn/ver/42/trunk/scripts/common/scr_postrun.in
+END
+scr_param.pm.in
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/scalablecr/!svn/ver/42/trunk/scripts/common/scr_param.pm.in
+END
+scr_prerun.in
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/scalablecr/!svn/ver/45/trunk/scripts/common/scr_prerun.in
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/scalablecr/!svn/ver/58/trunk/scripts/common/Makefile.am
+END
+scr_cntl_dir.in
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/scalablecr/!svn/ver/42/trunk/scripts/common/scr_cntl_dir.in
+END
+scr_hostlist.pm
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/scalablecr/!svn/ver/47/trunk/scripts/common/scr_hostlist.pm
+END
+scr_watchdog.in
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/scalablecr/!svn/ver/58/trunk/scripts/common/scr_watchdog.in
+END
+scr_test_datemanip.in
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svnroot/scalablecr/!svn/ver/42/trunk/scripts/common/scr_test_datemanip.in
+END
+scr_check_node.in
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svnroot/scalablecr/!svn/ver/42/trunk/scripts/common/scr_check_node.in
+END
+scr_test_runtime.in
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svnroot/scalablecr/!svn/ver/42/trunk/scripts/common/scr_test_runtime.in
+END
