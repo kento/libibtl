@@ -64,6 +64,7 @@ int ibtl_open(const char *pathname, int flags, int mode)
 
   if (!is_init) {
     RDMA_Active_Init(&comm, &param);
+
   }
 
   ctl = &ctls[ctls_index];
