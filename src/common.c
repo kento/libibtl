@@ -81,3 +81,13 @@ int ibtl_err(const char* fmt, ...)
   exit(1);
 }
 
+int ibtl_dbg(const char* fmt, ...)
+{
+  va_list argp;
+  fprintf(stderr, "IBTL:DEBUG: ");
+  va_start(argp, fmt);
+  vfprintf(stderr, fmt, argp);
+  va_end(argp);
+  fprintf(stderr, "\n");
+}
+

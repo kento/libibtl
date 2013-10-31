@@ -10,7 +10,7 @@
 #include "pgz.h"
 
 
-#define COMPRESS 1
+#define COMPRESS 0
 #define BUF_SIZE (2 * 1024 * 1024 * 1024L)
 
 struct write_args {
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
         break;
       }
       RDMA_Recv(&file_info, sizeof(file_info), NULL, RDMA_ANY_SOURCE, 0, &comm);
-      fprintf(stderr, "PATH: %s, ID: %d size:%lu\n", file_info.path, file_info.id, file_info.size);
+      //      fprintf(stderr, "PATH: %s, ID: %d size:%lu\n", file_info.path, file_info.id, file_info.size);
 
       wa = (struct write_args*)malloc(sizeof(struct write_args));
       wa->id = file_info.id;
@@ -96,14 +96,22 @@ int main(int argc, char **argv)
       struct write_args* recv_wa;
       req_id = RDMA_Reqid(&comm, 1);
       recv_wa = get_write_arg(&wq, req_id);
+      //      fprintf(stderr, "req_id: %d, recv_wa: %p\n", req_id, recv_wa);
+      //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id); 
+      //     ibtl_dbg("%d: Offset: %lu, size: %lu, req_id:%d", req_id, recv_wa->offset, recv_wa->size, req_id); 
+
       RDMA_Recv(recv_wa->addr + recv_wa->offset, 0, NULL, req_id, 1, &comm);
       recv_wa->offset += chunk_size;
       if (recv_wa->offset > recv_wa->size) {
         recv_wa->offset = recv_wa->size;
       }
       //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id);
-      if (recv_wa->size == recv_wa->offset) {
 
+      if (recv_wa->size == recv_wa->offset) {
+      /*If I receive the all data to the buffer, I start writing the data to a file system */
+	ibtl_dbg("start");
+	RDMA_Send(recv_wa->addr + recv_wa->offset - CHUNK_SIZE, CHUNK_SIZE, NULL, req_id, 1, &comm);
+	ibtl_dbg("end");
 #if COMPRESS == 1
         pthread_mutex_lock(&compress_mutex);
         if (pthread_create(&thread, NULL, (void *)compress_write, recv_wa)) {
@@ -111,6 +119,7 @@ int main(int argc, char **argv)
           exit(1);
         }
 #else
+
         pthread_mutex_lock(&dump_mutex);
         if (pthread_create(&thread, NULL, (void *)simple_write, recv_wa)) {
           fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__);
@@ -168,7 +177,8 @@ int simple_write(struct write_args *wa)
   int size   = wa->size;
 
   write_s = get_dtime();
-  fd = open(path, O_WRONLY | O_APPEND | O_CREAT, S_IREAD | S_IWRITE); 
+  //  fd = open(path, O_WRONLY | O_APPEND | O_CREAT, S_IREAD | S_IWRITE); 
+  fd = open(path, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE); 
   if (fd <= 0) {
     fprintf(stderr, "error(%d): path: |%s|, size: %d, fd=%d\n",  errno, path, size, fd);
     exit(1);
@@ -187,7 +197,7 @@ int simple_write(struct write_args *wa)
   write_e = get_dtime();
   free_write_args(wa);
   pthread_mutex_unlock(&dump_mutex);
-  //  fprintf(stderr, "OVLP: WRIT %f %d %f %f\n", write_s, dump_count, write_e, write_e - write_s);
+  fprintf(stderr, "OVLP: Write: Time: %f bw:%f GB/s size: %d \n", write_e - write_s, n_write_sum / (write_e - write_s) / 1000000000.0, n_write_sum);
   //  fprintf(stderr, "OVLP: WRIT %f %d\n", write_e, dump_count++);
   //  fprintf(stderr, "OVLP: WRIT \n");
 }

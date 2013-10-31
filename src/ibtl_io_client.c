@@ -21,9 +21,12 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "common.h"
+
 /*For RDMA transfer*/
 #define IBTL_FILE_BUF_SIZE ((512 + 128) * 1024 * 1024)
 #define NUM_BUFFS 2
+#define MAX_NOFILE 1024
 
 
 /* TODO: use direct I/O for improved performance */
@@ -52,27 +55,70 @@ static int file_transfer(char *from, char* to);
 static uint64_t get_file_size(char* path);
 static int get_id(void);
 
+struct scr_transfer_ctl ctls[MAX_NOFILE];
+static int ctls_index = 3;
 
 int ibtl_open(const char *pathname, int flags, int mode)
 {
+  struct scr_transfer_ctl *ctl;
+
   if (!is_init) {
     RDMA_Active_Init(&comm, &param);
   }
-  memcpy(ctl.path, to, PATH_SIZE);
-  ctl.id = get_id(); 
-  ctl.size = get_file_size(from);  
-  RDMA_Send(&ctl, sizeof(ctl), NULL, ctl.id, 0, &comm);
-}
 
-ssize_t ibtl_read(int fd, void *buf, size_t count) 
-{
-  printf("read called\n");
+  ctl = &ctls[ctls_index];
+  memcpy(ctl->path, pathname, PATH_SIZE);
+  return ctls_index++;
 }
 
 ssize_t ibtl_write(int fd, void *buf, size_t count)
 {
-  printf("write called\n");
+  struct scr_transfer_ctl *ctl;
+  size_t offset = 0;
+  size_t chunk_size = CHUNK_SIZE;
+
+  ctl = &ctls[fd];
+  ctl->id = get_id(); 
+  ctl->size = count;
+  RDMA_Send(ctl, sizeof(struct scr_transfer_ctl), NULL, ctl->id, 0, &comm);
+  //  ibtl_dbg("write called: id: %d, size: %d", ctl->id, sizeof(ctl));
+  while(offset < count) {
+    if (offset + chunk_size > count) {
+      chunk_size = count - offset;
+    }
+    RDMA_Send(buf + offset, chunk_size, NULL, ctl->id, 1, &comm);
+    offset += chunk_size;
+    //    ibtl_dbg("offset: %lu, count: %lu", offset, count);
+  }
+  ibtl_dbg("start");
+  RDMA_Recv(buf + offset, 0, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);
+  ibtl_dbg("end");
+  return count;
 }
+
+ssize_t ibtl_read(int fd, void *buf, size_t count) 
+{
+  struct scr_transfer_ctl *ctl;
+  size_t offset = 0;
+  size_t chunk_size = CHUNK_SIZE;
+
+  ctl = &ctls[fd];
+  ctl->id = get_id(); 
+  ctl->size = count;
+  RDMA_Send(ctl, sizeof(struct scr_transfer_ctl), NULL, ctl->id, 0, &comm);
+  //  ibtl_dbg("write called: id: %d, size: %d", ctl->id, sizeof(ctl));
+  while(offset < count) {
+    if (offset + chunk_size > count) {
+      chunk_size = count - offset;
+    }
+    RDMA_Send(buf + offset, chunk_size, NULL, ctl->id, 1, &comm);
+    offset += chunk_size;
+    //    ibtl_dbg("offset: %lu, count: %lu", offset, count);
+  }
+  return count;
+}
+
+
 
 int ibtl_close(int fd)
 {
@@ -98,12 +144,15 @@ static int file_transfer(char *from, char* to)
   int nread = 1;
   int buff_index = 0;
   int i, j;
+
   
   memcpy(ctl.path, to, PATH_SIZE);
   ctl.id = get_id(); 
   ctl.size = get_file_size(from);  
-
   RDMA_Send(&ctl, sizeof(ctl), NULL, ctl.id, 0, &comm);
+
+  
+
 
   fd_src = scr_open(from, O_RDONLY);
   int send_count = 0;

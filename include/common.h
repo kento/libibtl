@@ -6,4 +6,5 @@ int get_rand(void);
 double get_dtime(void);
 char* get_ip_addr (char* interface);
 void write_log(char* log);
-
+int ibtl_dbg(const char* fmt, ...);
+int ibtl_err(const char* fmt, ...);

@@ -1,13 +1,15 @@
 SUBDIRS = ../src
-bin_PROGRAMS = rdma_server_test \
-	       rdma_client_test \
-	       rdma_client_latency \
-	       rdma_server_latency \
-	       rdma_client_silent \
-	       rdma_server_silent \
-	       rdma_client_offset \
-	       rdma_server_offset \
-	       ibtl_io
+#bin_PROGRAMS = rdma_server_test \
+#	        rdma_client_test \
+#	        rdma_client_latency \
+#	        rdma_server_latency \
+#	        rdma_client_silent \
+#	        rdma_server_silent \
+#	        rdma_client_offset \
+#	        rdma_server_offset \
+#	       ibtl_io
+
+bin_PROGRAMS = ibtl_io
 
 SRC_DIR=../src
 INCLUDE_DIR=../include 

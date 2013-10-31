@@ -1,4 +1,4 @@
-#define CHUNK_SIZE (5 * 1024 * 1024)
+#define CHUNK_SIZE (128 * 1024 * 1024)
 #define PATH_SIZE (128)
 #define NUM_BUFF (2)
 

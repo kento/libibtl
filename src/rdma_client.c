@@ -54,6 +54,7 @@ void rdma_isend_r(void *buf, int size, void* datatype, int dest, int tag, struct
    */
   pthread_mutex_lock(&(rdma_com->post_mutex));
 
+
   if (pthread_create(&thread, NULL,(void *)poll_cq, args)) {
     fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__);
     exit(1);
