@@ -21,7 +21,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "common.h"
+#inclue "fdmi.h"
+
 
 /*For RDMA transfer*/
 #define IBTL_FILE_BUF_SIZE ((512 + 128) * 1024 * 1024)
@@ -63,59 +64,58 @@ int ibtl_open(const char *pathname, int flags, int mode)
   struct scr_transfer_ctl *ctl;
 
   if (!is_init) {
-    RDMA_Active_Init(&comm, &param);
-
+    fdmi_verbs_init(0, NULL);
   }
 
-  ctl = &ctls[ctls_index];
-  memcpy(ctl->path, pathname, PATH_SIZE);
+  /* ctl = &ctls[ctls_index]; */
+  /* memcpy(ctl->path, pathname, PATH_SIZE); */
   return ctls_index++;
 }
 
 ssize_t ibtl_write(int fd, void *buf, size_t count)
 {
-  struct scr_transfer_ctl *ctl;
-  size_t offset = 0;
-  size_t chunk_size = CHUNK_SIZE;
+  /* struct scr_transfer_ctl *ctl; */
+  /* size_t offset = 0; */
+  /* size_t chunk_size = CHUNK_SIZE; */
 
-  ctl = &ctls[fd];
-  ctl->id = get_id(); 
-  ctl->size = count;
-  RDMA_Send(ctl, sizeof(struct scr_transfer_ctl), NULL, ctl->id, 0, &comm);
-  //  ibtl_dbg("write called: id: %d, size: %d", ctl->id, sizeof(ctl));
-  while(offset < count) {
-    if (offset + chunk_size > count) {
-      chunk_size = count - offset;
-    }
-    RDMA_Send(buf + offset, chunk_size, NULL, ctl->id, 1, &comm);
-    offset += chunk_size;
-    //    ibtl_dbg("offset: %lu, count: %lu", offset, count);
-  }
-  ibtl_dbg("start");
-  RDMA_Recv(buf + offset, 0, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm);
-  ibtl_dbg("end");
+  /* ctl = &ctls[fd]; */
+  /* ctl->id = get_id();  */
+  /* ctl->size = count; */
+  /* RDMA_Send(ctl, sizeof(struct scr_transfer_ctl), NULL, ctl->id, 0, &comm); */
+  /* //  ibtl_dbg("write called: id: %d, size: %d", ctl->id, sizeof(ctl)); */
+  /* while(offset < count) { */
+  /*   if (offset + chunk_size > count) { */
+  /*     chunk_size = count - offset; */
+  /*   } */
+  /*   RDMA_Send(buf + offset, chunk_size, NULL, ctl->id, 1, &comm); */
+  /*   offset += chunk_size; */
+  /*   //    ibtl_dbg("offset: %lu, count: %lu", offset, count); */
+  /* } */
+  /* ibtl_dbg("start"); */
+  /* RDMA_Recv(buf + offset, 0, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm); */
+  /* ibtl_dbg("end"); */
   return count;
 }
 
 ssize_t ibtl_read(int fd, void *buf, size_t count) 
 {
-  struct scr_transfer_ctl *ctl;
-  size_t offset = 0;
-  size_t chunk_size = CHUNK_SIZE;
+  /* struct scr_transfer_ctl *ctl; */
+  /* size_t offset = 0; */
+  /* size_t chunk_size = CHUNK_SIZE; */
 
-  ctl = &ctls[fd];
-  ctl->id = get_id(); 
-  ctl->size = count;
-  RDMA_Send(ctl, sizeof(struct scr_transfer_ctl), NULL, ctl->id, 0, &comm);
-  //  ibtl_dbg("write called: id: %d, size: %d", ctl->id, sizeof(ctl));
-  while(offset < count) {
-    if (offset + chunk_size > count) {
-      chunk_size = count - offset;
-    }
-    RDMA_Send(buf + offset, chunk_size, NULL, ctl->id, 1, &comm);
-    offset += chunk_size;
-    //    ibtl_dbg("offset: %lu, count: %lu", offset, count);
-  }
+  /* ctl = &ctls[fd]; */
+  /* ctl->id = get_id();  */
+  /* ctl->size = count; */
+  /* RDMA_Send(ctl, sizeof(struct scr_transfer_ctl), NULL, ctl->id, 0, &comm); */
+  /* //  ibtl_dbg("write called: id: %d, size: %d", ctl->id, sizeof(ctl)); */
+  /* while(offset < count) { */
+  /*   if (offset + chunk_size > count) { */
+  /*     chunk_size = count - offset; */
+  /*   } */
+  /*   RDMA_Send(buf + offset, chunk_size, NULL, ctl->id, 1, &comm); */
+  /*   offset += chunk_size; */
+  /*   //    ibtl_dbg("offset: %lu, count: %lu", offset, count); */
+  /* } */
   return count;
 }
 
@@ -128,83 +128,81 @@ int ibtl_close(int fd)
 
 static int transfer_init(void)
 {
-  int i;
-  RDMA_Active_Init(&comm, &param);
-  for (i = 0; i < NUM_BUFFS; i++) {
-    buff[i] = RDMA_Alloc(scr_file_buf_size);
-  }
+  /* int i; */
+  /* RDMA_Active_Init(&comm, &param); */
+  /* for (i = 0; i < NUM_BUFFS; i++) { */
+  /*   buff[i] = RDMA_Alloc(scr_file_buf_size); */
+  /* } */
   return 1;
 }
 
 static int file_transfer(char *from, char* to)
 {
-  struct RDMA_request req[NUM_BUFFS], init_req;
-  int init = 1;
-  struct scr_transfer_ctl ctl;
-  int fd_src;
-  int nread = 1;
-  int buff_index = 0;
-  int i, j;
+  /* struct RDMA_request req[NUM_BUFFS], init_req; */
+  /* int init = 1; */
+  /* struct scr_transfer_ctl ctl; */
+  /* int fd_src; */
+  /* int nread = 1; */
+  /* int buff_index = 0; */
+  /* int i, j; */
 
   
-  memcpy(ctl.path, to, PATH_SIZE);
-  ctl.id = get_id(); 
-  ctl.size = get_file_size(from);  
-  RDMA_Send(&ctl, sizeof(ctl), NULL, ctl.id, 0, &comm);
-
-  
+  /* memcpy(ctl.path, to, PATH_SIZE); */
+  /* ctl.id = get_id();  */
+  /* ctl.size = get_file_size(from);   */
+  /* RDMA_Send(&ctl, sizeof(ctl), NULL, ctl.id, 0, &comm); */
 
 
-  fd_src = scr_open(from, O_RDONLY);
-  int send_count = 0;
-  for (i = 0; i < NUM_BUFF; i++) {
-    //    fprintf(stderr, "read : %d ...", buff_index);
-    nread = scr_read(from, fd_src, buff[buff_index], scr_file_buf_size);
-    //    fprintf(stderr, "done (%d) \n", nread);
-    if (!nread) {
-      while (send_count > 0) {
-	buff_index = (buff_index + 1) % NUM_BUFF;
-	//	fprintf(stderr, "Wait : %d ...", buff_index);
-	RDMA_Wait(&req[buff_index]);
-	send_count--;
-	//	fprintf(stderr, "%p: DONE\n");
-      }
-      return 0;
-    }
-    //    fprintf(stderr, "Send :  %d ... ", buff_index);
-    RDMA_Isend(buff[buff_index], scr_file_buf_size, NULL, ctl.id, 1, &comm, &req[buff_index]);
-    send_count++;
-    //    fprintf(stderr, "DONE (count:%d)\n", send_count);
-    buff_index = (buff_index + 1) % NUM_BUFF;
-  }
-  //  fprintf(stderr, "TEST !!\n");
-  while(1) {
-    RDMA_Wait(&req[buff_index]);
-    send_count--;
-    //    fprintf(stderr, "Read : %d ...", buff_index);
-    nread = scr_read(from, fd_src, buff[buff_index], scr_file_buf_size);
-    //    fprintf(stderr, "done (%d) \n", nread);
-    if (!nread) {
-      while (send_count > 0) {
-	buff_index = (buff_index + 1) % NUM_BUFF;
-	//	fprintf(stderr, "RDMA Wait1: %d  ... ", buff_index);
-	RDMA_Wait(&req[buff_index]);
-	send_count--;
-	//	fprintf(stderr, "DONE (count:%d)\n", send_count);
-      }
-      return 0;
-    }
-    //    fprintf(stderr, "Send : %d ...", buff_index);
-    RDMA_Isend(buff[buff_index], scr_file_buf_size, NULL, ctl.id, 1, &comm, &req[buff_index]);
-    send_count++;
-    //    fprintf(stderr, "DONE (count:%d)\n", send_count);
-    buff_index = (buff_index + 1) % NUM_BUFF;
-  }
+  /* fd_src = scr_open(from, O_RDONLY); */
+  /* int send_count = 0; */
+  /* for (i = 0; i < NUM_BUFF; i++) { */
+  /*   //    fprintf(stderr, "read : %d ...", buff_index); */
+  /*   nread = scr_read(from, fd_src, buff[buff_index], scr_file_buf_size); */
+  /*   //    fprintf(stderr, "done (%d) \n", nread); */
+  /*   if (!nread) { */
+  /*     while (send_count > 0) { */
+  /* 	buff_index = (buff_index + 1) % NUM_BUFF; */
+  /* 	//	fprintf(stderr, "Wait : %d ...", buff_index); */
+  /* 	RDMA_Wait(&req[buff_index]); */
+  /* 	send_count--; */
+  /* 	//	fprintf(stderr, "%p: DONE\n"); */
+  /*     } */
+  /*     return 0; */
+  /*   } */
+  /*   //    fprintf(stderr, "Send :  %d ... ", buff_index); */
+  /*   RDMA_Isend(buff[buff_index], scr_file_buf_size, NULL, ctl.id, 1, &comm, &req[buff_index]); */
+  /*   send_count++; */
+  /*   //    fprintf(stderr, "DONE (count:%d)\n", send_count); */
+  /*   buff_index = (buff_index + 1) % NUM_BUFF; */
+  /* } */
+  /* //  fprintf(stderr, "TEST !!\n"); */
+  /* while(1) { */
+  /*   RDMA_Wait(&req[buff_index]); */
+  /*   send_count--; */
+  /*   //    fprintf(stderr, "Read : %d ...", buff_index); */
+  /*   nread = scr_read(from, fd_src, buff[buff_index], scr_file_buf_size); */
+  /*   //    fprintf(stderr, "done (%d) \n", nread); */
+  /*   if (!nread) { */
+  /*     while (send_count > 0) { */
+  /* 	buff_index = (buff_index + 1) % NUM_BUFF; */
+  /* 	//	fprintf(stderr, "RDMA Wait1: %d  ... ", buff_index); */
+  /* 	RDMA_Wait(&req[buff_index]); */
+  /* 	send_count--; */
+  /* 	//	fprintf(stderr, "DONE (count:%d)\n", send_count); */
+  /*     } */
+  /*     return 0; */
+  /*   } */
+  /*   //    fprintf(stderr, "Send : %d ...", buff_index); */
+  /*   RDMA_Isend(buff[buff_index], scr_file_buf_size, NULL, ctl.id, 1, &comm, &req[buff_index]); */
+  /*   send_count++; */
+  /*   //    fprintf(stderr, "DONE (count:%d)\n", send_count); */
+  /*   buff_index = (buff_index + 1) % NUM_BUFF; */
+  /* } */
 
-  for (j = 0; j < NUM_BUFF; j++) {
-    buff_index = (buff_index + 1) % NUM_BUFF;
-    RDMA_Wait(&req[buff_index]);
-  }
+  /* for (j = 0; j < NUM_BUFF; j++) { */
+  /*   buff_index = (buff_index + 1) % NUM_BUFF; */
+  /*   RDMA_Wait(&req[buff_index]); */
+  /* } */
   return 0;
 }
 

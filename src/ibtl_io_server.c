@@ -78,7 +78,7 @@ int main(int argc, char **argv)
         break;
       }
       RDMA_Recv(&file_info, sizeof(file_info), NULL, RDMA_ANY_SOURCE, 0, &comm);
-      //      fprintf(stderr, "PATH: %s, ID: %d size:%lu\n", file_info.path, file_info.id, file_info.size);
+      ibtl_dbg("PATH: %s, ID: %d size:%lu\n", file_info.path, file_info.id, file_info.size);
 
       wa = (struct write_args*)malloc(sizeof(struct write_args));
       wa->id = file_info.id;

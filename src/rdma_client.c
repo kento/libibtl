@@ -28,6 +28,9 @@ static int	get_id(void);
 double	gs, ge;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
+/*Additionals*/
+pthread_t listen_thread;
+
 static void set_envs () {
   /*Leave empty for future requirement*/
   return;
@@ -49,21 +52,50 @@ void rdma_isend_r(void *buf, int size, void* datatype, int dest, int tag, struct
   sem_init(&(request->is_rdma_completed), 0, 0);
   args->is_rdma_completed     = &(request->is_rdma_completed);
 
-  /* Wait until previous send post request is finished 
-   * and "rdma_isend_r" call is completed
-   */
-  pthread_mutex_lock(&(rdma_com->post_mutex));
 
 
-  if (pthread_create(&thread, NULL,(void *)poll_cq, args)) {
-    fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__);
-    exit(1);
+  {
+    struct RDMA_communicator	*comm;
+    struct connection*		 conn_send;
+    struct rdma_read_request_entry rrre;
+    struct ibv_mr			*passive_mr;
+    int	num_entries;
+    double s, e;
+    double mm,ee,ss, te, ts;
+
+    /* Wait until previous send post request is finished 
+     * and "rdma_isend_r" call is completed
+     */
+    pthread_mutex_lock(&(rdma_com->post_mutex));
+
+    comm = args->comm;
+    rrre.id    = get_id();
+    rrre.order = 2;
+    rrre.tag   = args->tag;
+
+    passive_mr		 = reg_mr(args->buf, args->size);
+    memcpy(&rrre.mr, passive_mr, sizeof(struct ibv_mr));
+    ts			 = get_dtime();
+    rrre.passive_mr	 = passive_mr;
+    rrre.is_rdma_completed = args->is_rdma_completed;
+    conn_send		 = create_connection(comm->cm_id);
+
+    conn_send->active_rrre = &rrre;
+    ibtl_dbg("active_rrre: %p is_rdma: %p, mr:%p", conn_send->active_rrre, conn_send->active_rrre->is_rdma_completed, conn_send->active_rrre->passive_mr);
+    ee			 = get_dtime();
+
+    send_ctl_msg(conn_send, MR_INIT, &rrre);
+    gs = get_dtime();
+
+    /* Now we havested the request, a next asynchronous 
+     * send function can be called.
+     * We can safely unlock the post_mutex here.
+     */
+    pthread_mutex_unlock(&(comm->post_mutex));
+
+    s		= get_dtime();
   }
-  
-  if (pthread_detach(thread)) {
-    fprintf(stderr, "RDMA lib: SEND: ERROR: pthread detach failed @ %s:%d", __FILE__, __LINE__);
-    exit(1);
-  }
+
   return;
 }
 
@@ -71,11 +103,12 @@ int RDMA_Active_Init(struct RDMA_communicator *comm, struct RDMA_param *param)
 {
   set_envs();
   rdma_active_init(comm, param);
+  pthread_create(&listen_thread, NULL, (void *)poll_cq_common, comm);
   return 0;
 }
 
 
-  /*
+/*
     args: (+) used (-) use in future
       + args->buf      = buf;
       + args->size     = size;
@@ -84,7 +117,7 @@ int RDMA_Active_Init(struct RDMA_communicator *comm, struct RDMA_param *param)
       + args->tag      = tag;
       - args->comm     = rdma_com;
       + args->is_rdma_completed;
-  */
+*/
 static void* poll_cq(struct poll_cq_args* args)
 {
   struct RDMA_communicator	*comm;
@@ -164,6 +197,9 @@ static void* poll_cq(struct poll_cq_args* args)
   }
   return NULL;
 }
+
+
+
 
 static int get_id(void)
 {

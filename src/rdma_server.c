@@ -28,14 +28,6 @@ static struct context *s_ctx = NULL;
 
 pthread_t listen_thread;
 
-/*Queue in which RDMA requests from active sides are put */
-static lq rdma_request_aq;
-
-/*Queue in which RDMA requests on this process are put */
-static lq rdma_request_pq;
-
-/*Lock for post_matched_request*/
-static pthread_mutex_t post_req_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static void set_envs()
 {
@@ -56,7 +48,7 @@ int RDMA_Passive_Init(struct RDMA_communicator *comm)
 
   if (thread_running == 0) {
     thread_running = 1;
-    TEST_NZ(pthread_create(&listen_thread, NULL, (void *)poll_cq, comm));
+    TEST_NZ(pthread_create(&listen_thread, NULL, (void *)poll_cq_common, comm));
   } else {
     fprintf(stderr, "RDMA lib: RECV: Do not call RDMA_Passive_Init more than once\n");
     exit(1);
@@ -70,8 +62,6 @@ static void * poll_cq(struct RDMA_communicator *comm)
 
   struct connection* conn_send;
   struct connection* conn_recv;
-
-
 
   while (1) {
     double mm, ss, ee, rss, ree;
@@ -144,6 +134,8 @@ static void * poll_cq(struct RDMA_communicator *comm)
   return NULL;
 }
 
+
+
 static int create_rrre(struct connection *conn, struct rdma_read_request_entry *rrre)
 {
   rrre = (struct rdma_read_request_entry*)malloc(sizeof(struct rdma_read_request_entry));
@@ -163,73 +155,7 @@ static int free_rrre(int mode, struct rdma_read_request_entry *rrre)
   }
 }
 
-static int post_matched_request (int target_q_id, struct rdma_read_request_entry* cur_rrre)
-{
-  struct rdma_read_request_entry* target_rrre;
-  struct rdma_read_request_entry** active_rrre, **passive_rrre;
-  lq *target_rrre_q, *cur_rrre_q;
-  uint64_t remote_addr;
 
-  pthread_mutex_lock(&post_req_lock);
-  switch (target_q_id){
-  case ACTIVE:
-    target_rrre_q = &rdma_request_aq;
-    cur_rrre_q = &rdma_request_pq;
-    active_rrre = &target_rrre;
-    passive_rrre = &cur_rrre;
-    break;
-  case PASSIVE:
-    target_rrre_q = &rdma_request_pq;
-    cur_rrre_q = &rdma_request_aq;
-    active_rrre = &cur_rrre;
-    passive_rrre = &target_rrre;
-    break;
-  default:
-    fprintf(stderr, "Wrong Q id \n");
-    exit(1);
-  }
-
-  lq_init_it(target_rrre_q);
-  while ((target_rrre = (struct rdma_read_request_entry*)lq_next(target_rrre_q)) != NULL) {
-    if (matched_requests(target_rrre, cur_rrre)) {
-      debug(fprintf(stderr, "RDMA lib: RECV: match target:%p(tag:%lu) cur:%p(tag:%lu)\n", target_rrre, target_rrre->tag, cur_rrre, cur_rrre->tag ), 1);
-      (*active_rrre)->conn->active_rrre = *active_rrre;
-      (*active_rrre)->conn->passive_rrre = *passive_rrre;
-
-      remote_addr = (uint64_t)(*active_rrre)->mr.addr;
-      if ((*passive_rrre)->offset > 0) {
-	remote_addr += (*passive_rrre)->offset;
-      }
-      if ((*passive_rrre)->silent == 1) {
-	post_RDMA_read ((*active_rrre)->conn, remote_addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rrre)->mr.addr, (*passive_rrre)->length, (*passive_rrre)->mr.lkey) ;
-      } else {
-	post_RDMA_read ((*active_rrre)->conn, (uint64_t)(*active_rrre)->mr.addr, (*active_rrre)->mr.rkey, (uint64_t)(*passive_rrre)->mr.addr, (*active_rrre)->mr.length, (*passive_rrre)->mr.lkey) ;
-      }
-      // For rdma_latency_r
-      if (((*passive_rrre)->silent == 1 && target_q_id == PASSIVE) ||
-	  (*passive_rrre)->silent == 0) {
-	lq_remove(target_rrre_q, target_rrre);	
-      }
-      if ((*passive_rrre)->silent == 1 && target_q_id == PASSIVE) { 
-	lq_enq(cur_rrre_q, cur_rrre);
-
-	lq_fin_it(target_rrre_q);
-	pthread_mutex_unlock(&post_req_lock);
-	return 1;
-      }
-      lq_fin_it(target_rrre_q);
-      pthread_mutex_unlock(&post_req_lock);
-      return 0;
-    }
-  }
-
-  lq_enq(cur_rrre_q, cur_rrre);
-  debug(fprintf(stderr,"Queued: %p: id:%lu, tag:%lu tq:%p, hd:%p,\n", cur_rrre_q, cur_rrre->id, cur_rrre->tag, target_rrre_q, cur_rrre_q->head),  1);
-  lq_fin_it(target_rrre_q);
-
-  pthread_mutex_unlock(&post_req_lock);      
-  return 1;
-}
 
 static int matched_requests (struct rdma_read_request_entry *req1, struct rdma_read_request_entry *req2)
 {
