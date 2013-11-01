@@ -9,10 +9,10 @@
 #include <rdma/rdma_cma.h>
 #include <semaphore.h>
 
-#include "src/config/fdmi_config.h"
-#include "src/ptv/fdmi_pmtv_common.h"
-#include "src/datatype/fdmi_datatype.h"
-#include "src/proc/fdmi_proc_man.h"
+#include "fdmi_config.h"
+#include "fdmi_pmtv_common.h"
+#include "fdmi_datatype.h"
+#include "fdmi_proc_man.h"
 
 
 #ifndef RDMA_PORT
@@ -85,6 +85,8 @@ enum fdmi_option {
 
 
 int	fdmi_verbs_init(int *argc, char ***argv);
+struct fdmi_connection* fdmi_verbs_connect(int rank, char *hostname);
+
 int	fdmi_verbs_comm_size(struct fdmi_communicator *comm, int *size);
 int	fdmi_verbs_comm_vrank(struct fdmi_communicator *comm, int *vrank);
 int	fdmi_verbs_isend (const void* buf, int count, struct fdmi_datatype dataype, int dest, int tag, struct fdmi_communicator *comm, struct fdmi_request* request, int op);

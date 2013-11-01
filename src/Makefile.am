@@ -12,18 +12,17 @@ lib_LIBRARIES = libibtls.a
 libibtls_a_SOURCES = \
         $(SRC_DIR)/list_queue.c \
         $(INCLUDE_DIR)/list_queue.h \
-        $(SRC_DIR)/rdma_ppool.c \
-        $(INCLUDE_DIR)/rdma_ppool.h \
-        $(SRC_DIR)/rdma_client.c \
-        $(INCLUDE_DIR)/rdma_client.h \
-        $(SRC_DIR)/rdma_server.c \
-        $(INCLUDE_DIR)/rdma_server.h \
-        $(SRC_DIR)/rdma_common.c \
-        $(INCLUDE_DIR)/rdma_common.h \
-        $(SRC_DIR)/common.c \
-        $(INCLUDE_DIR)/common.h \
-        $(SRC_DIR)/ibtls.c \
-        $(INCLUDE_DIR)/ibtls.h \
+        $(SRC_DIR)/fdmi_err.c \
+        $(SRC_DIR)/fdmi_param.c \
+        $(SRC_DIR)/fdmi_mem.c \
+        $(SRC_DIR)/fdmi_util.c \
+        $(SRC_DIR)/fdmi_hashtable.c \
+	$(SRC_DIR)/fdmi_queue.c \
+        $(INCLUDE_DIR)/fdmi_queue.h \
+	$(SRC_DIR)/fdmi_datatype.c \
+	$(SRC_DIR)/fdmi_proc_man.c \
+        $(SRC_DIR)/fdmi.c \
+        $(INCLUDE_DIR)/fdmi.h \
         $(SRC_DIR)/ibtl_io_client.c 
 
 
@@ -37,12 +36,16 @@ libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
 lib_LTLIBRARIES	= libibtls.la
 libibtls_la_SOURCES = \
         $(SRC_DIR)/list_queue.c \
-        $(SRC_DIR)/rdma_ppool.c \
-        $(SRC_DIR)/rdma_client.c \
-        $(SRC_DIR)/rdma_server.c \
-        $(SRC_DIR)/rdma_common.c \
-        $(SRC_DIR)/common.c \
         $(SRC_DIR)/ibtls.c \
+        $(SRC_DIR)/fdmi_err.c \
+        $(SRC_DIR)/fdmi_param.c \
+        $(SRC_DIR)/fdmi_mem.c \
+        $(SRC_DIR)/fdmi_util.c \
+        $(SRC_DIR)/fdmi_hashtable.c \
+        $(SRC_DIR)/fdmi_queue.c \
+	$(SRC_DIR)/fdmi_datatype.c \
+	$(SRC_DIR)/fdmi_proc_man.c \
+        $(SRC_DIR)/fdmi.c \
         $(SRC_DIR)/ibtl_io_client.c 
 
 libibtls_la_LIBADD = @LIBOBJS@
@@ -56,7 +59,7 @@ bin_PROGRAMS=ibtl_io_server
 SRC_DIR=./
 INCLUDE_DIR=../include
 
-ibtl_io_server_SOURCES =ibtl_io_server.c pgz.c scr_list_queue.c common.c yarn.c ${SRC_DIR}/libibtls.a
+ibtl_io_server_SOURCES =ibtl_io_server.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
 ibtl_io_server_DEPENDENCIES =  ${SRC_DIR}/libibtls.a
 ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
 ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 

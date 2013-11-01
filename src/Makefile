@@ -77,18 +77,22 @@ ARFLAGS = cru
 libibtls_a_AR = $(AR) $(ARFLAGS)
 libibtls_a_DEPENDENCIES = 
 am_libibtls_a_OBJECTS = libibtls_a-list_queue.$(OBJEXT) \
-	libibtls_a-rdma_ppool.$(OBJEXT) \
-	libibtls_a-rdma_client.$(OBJEXT) \
-	libibtls_a-rdma_server.$(OBJEXT) \
-	libibtls_a-rdma_common.$(OBJEXT) libibtls_a-common.$(OBJEXT) \
-	libibtls_a-ibtls.$(OBJEXT) libibtls_a-ibtl_io_client.$(OBJEXT)
+	libibtls_a-fdmi_err.$(OBJEXT) libibtls_a-fdmi_param.$(OBJEXT) \
+	libibtls_a-fdmi_mem.$(OBJEXT) libibtls_a-fdmi_util.$(OBJEXT) \
+	libibtls_a-fdmi_hashtable.$(OBJEXT) \
+	libibtls_a-fdmi_queue.$(OBJEXT) \
+	libibtls_a-fdmi_datatype.$(OBJEXT) \
+	libibtls_a-fdmi_proc_man.$(OBJEXT) libibtls_a-fdmi.$(OBJEXT) \
+	libibtls_a-ibtl_io_client.$(OBJEXT)
 libibtls_a_OBJECTS = $(am_libibtls_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libibtls_la_DEPENDENCIES = 
 am_libibtls_la_OBJECTS = libibtls_la-list_queue.lo \
-	libibtls_la-rdma_ppool.lo libibtls_la-rdma_client.lo \
-	libibtls_la-rdma_server.lo libibtls_la-rdma_common.lo \
-	libibtls_la-common.lo libibtls_la-ibtls.lo \
+	libibtls_la-ibtls.lo libibtls_la-fdmi_err.lo \
+	libibtls_la-fdmi_param.lo libibtls_la-fdmi_mem.lo \
+	libibtls_la-fdmi_util.lo libibtls_la-fdmi_hashtable.lo \
+	libibtls_la-fdmi_queue.lo libibtls_la-fdmi_datatype.lo \
+	libibtls_la-fdmi_proc_man.lo libibtls_la-fdmi.lo \
 	libibtls_la-ibtl_io_client.lo
 libibtls_la_OBJECTS = $(am_libibtls_la_OBJECTS)
 libibtls_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -98,7 +102,10 @@ PROGRAMS = $(bin_PROGRAMS)
 am_ibtl_io_server_OBJECTS = ibtl_io_server-ibtl_io_server.$(OBJEXT) \
 	ibtl_io_server-pgz.$(OBJEXT) \
 	ibtl_io_server-scr_list_queue.$(OBJEXT) \
-	ibtl_io_server-common.$(OBJEXT) ibtl_io_server-yarn.$(OBJEXT)
+	ibtl_io_server-fdmi_err.$(OBJEXT) \
+	ibtl_io_server-fdmi_param.$(OBJEXT) \
+	ibtl_io_server-fdmi_util.$(OBJEXT) \
+	ibtl_io_server-yarn.$(OBJEXT)
 ibtl_io_server_OBJECTS = $(am_ibtl_io_server_OBJECTS)
 am__DEPENDENCIES_1 =
 ibtl_io_server_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -246,18 +253,17 @@ lib_LIBRARIES = libibtls.a
 libibtls_a_SOURCES = \
         $(SRC_DIR)/list_queue.c \
         $(INCLUDE_DIR)/list_queue.h \
-        $(SRC_DIR)/rdma_ppool.c \
-        $(INCLUDE_DIR)/rdma_ppool.h \
-        $(SRC_DIR)/rdma_client.c \
-        $(INCLUDE_DIR)/rdma_client.h \
-        $(SRC_DIR)/rdma_server.c \
-        $(INCLUDE_DIR)/rdma_server.h \
-        $(SRC_DIR)/rdma_common.c \
-        $(INCLUDE_DIR)/rdma_common.h \
-        $(SRC_DIR)/common.c \
-        $(INCLUDE_DIR)/common.h \
-        $(SRC_DIR)/ibtls.c \
-        $(INCLUDE_DIR)/ibtls.h \
+        $(SRC_DIR)/fdmi_err.c \
+        $(SRC_DIR)/fdmi_param.c \
+        $(SRC_DIR)/fdmi_mem.c \
+        $(SRC_DIR)/fdmi_util.c \
+        $(SRC_DIR)/fdmi_hashtable.c \
+	$(SRC_DIR)/fdmi_queue.c \
+        $(INCLUDE_DIR)/fdmi_queue.h \
+	$(SRC_DIR)/fdmi_datatype.c \
+	$(SRC_DIR)/fdmi_proc_man.c \
+        $(SRC_DIR)/fdmi.c \
+        $(INCLUDE_DIR)/fdmi.h \
         $(SRC_DIR)/ibtl_io_client.c 
 
 libibtls_a_LIBADD = 
@@ -269,18 +275,22 @@ libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
 lib_LTLIBRARIES = libibtls.la
 libibtls_la_SOURCES = \
         $(SRC_DIR)/list_queue.c \
-        $(SRC_DIR)/rdma_ppool.c \
-        $(SRC_DIR)/rdma_client.c \
-        $(SRC_DIR)/rdma_server.c \
-        $(SRC_DIR)/rdma_common.c \
-        $(SRC_DIR)/common.c \
         $(SRC_DIR)/ibtls.c \
+        $(SRC_DIR)/fdmi_err.c \
+        $(SRC_DIR)/fdmi_param.c \
+        $(SRC_DIR)/fdmi_mem.c \
+        $(SRC_DIR)/fdmi_util.c \
+        $(SRC_DIR)/fdmi_hashtable.c \
+        $(SRC_DIR)/fdmi_queue.c \
+	$(SRC_DIR)/fdmi_datatype.c \
+	$(SRC_DIR)/fdmi_proc_man.c \
+        $(SRC_DIR)/fdmi.c \
         $(SRC_DIR)/ibtl_io_client.c 
 
 libibtls_la_LIBADD = 
 libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
 libibtls_la_LDFLAGS = -lrdmacm -lpthread -libverbs -version-info 1:0:0 -release 1
-ibtl_io_server_SOURCES = ibtl_io_server.c pgz.c scr_list_queue.c common.c yarn.c ${SRC_DIR}/libibtls.a
+ibtl_io_server_SOURCES = ibtl_io_server.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
 ibtl_io_server_DEPENDENCIES = ${SRC_DIR}/libibtls.a
 ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
 ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 
@@ -440,27 +450,36 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/ibtl_io_server-common.Po
+include ./$(DEPDIR)/ibtl_io_server-fdmi_err.Po
+include ./$(DEPDIR)/ibtl_io_server-fdmi_param.Po
+include ./$(DEPDIR)/ibtl_io_server-fdmi_util.Po
 include ./$(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
 include ./$(DEPDIR)/ibtl_io_server-pgz.Po
 include ./$(DEPDIR)/ibtl_io_server-scr_list_queue.Po
 include ./$(DEPDIR)/ibtl_io_server-yarn.Po
-include ./$(DEPDIR)/libibtls_a-common.Po
+include ./$(DEPDIR)/libibtls_a-fdmi.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_datatype.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_err.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_hashtable.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_mem.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_param.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_proc_man.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_queue.Po
+include ./$(DEPDIR)/libibtls_a-fdmi_util.Po
 include ./$(DEPDIR)/libibtls_a-ibtl_io_client.Po
-include ./$(DEPDIR)/libibtls_a-ibtls.Po
 include ./$(DEPDIR)/libibtls_a-list_queue.Po
-include ./$(DEPDIR)/libibtls_a-rdma_client.Po
-include ./$(DEPDIR)/libibtls_a-rdma_common.Po
-include ./$(DEPDIR)/libibtls_a-rdma_ppool.Po
-include ./$(DEPDIR)/libibtls_a-rdma_server.Po
-include ./$(DEPDIR)/libibtls_la-common.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_datatype.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_err.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_hashtable.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_mem.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_param.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_proc_man.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_queue.Plo
+include ./$(DEPDIR)/libibtls_la-fdmi_util.Plo
 include ./$(DEPDIR)/libibtls_la-ibtl_io_client.Plo
 include ./$(DEPDIR)/libibtls_la-ibtls.Plo
 include ./$(DEPDIR)/libibtls_la-list_queue.Plo
-include ./$(DEPDIR)/libibtls_la-rdma_client.Plo
-include ./$(DEPDIR)/libibtls_la-rdma_common.Plo
-include ./$(DEPDIR)/libibtls_la-rdma_ppool.Plo
-include ./$(DEPDIR)/libibtls_la-rdma_server.Plo
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -497,89 +516,131 @@ libibtls_a-list_queue.obj: $(SRC_DIR)/list_queue.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
 
-libibtls_a-rdma_ppool.o: $(SRC_DIR)/rdma_ppool.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_ppool.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_ppool.Tpo -c -o libibtls_a-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_ppool.Tpo $(DEPDIR)/libibtls_a-rdma_ppool.Po
-#	source='$(SRC_DIR)/rdma_ppool.c' object='libibtls_a-rdma_ppool.o' libtool=no \
+libibtls_a-fdmi_err.o: $(SRC_DIR)/fdmi_err.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_err.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_err.Tpo -c -o libibtls_a-fdmi_err.o `test -f '$(SRC_DIR)/fdmi_err.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_err.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_err.Tpo $(DEPDIR)/libibtls_a-fdmi_err.Po
+#	source='$(SRC_DIR)/fdmi_err.c' object='libibtls_a-fdmi_err.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_ppool.o `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_err.o `test -f '$(SRC_DIR)/fdmi_err.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_err.c
 
-libibtls_a-rdma_ppool.obj: $(SRC_DIR)/rdma_ppool.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_ppool.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_ppool.Tpo -c -o libibtls_a-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_ppool.Tpo $(DEPDIR)/libibtls_a-rdma_ppool.Po
-#	source='$(SRC_DIR)/rdma_ppool.c' object='libibtls_a-rdma_ppool.obj' libtool=no \
+libibtls_a-fdmi_err.obj: $(SRC_DIR)/fdmi_err.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_err.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_err.Tpo -c -o libibtls_a-fdmi_err.obj `if test -f '$(SRC_DIR)/fdmi_err.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_err.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_err.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_err.Tpo $(DEPDIR)/libibtls_a-fdmi_err.Po
+#	source='$(SRC_DIR)/fdmi_err.c' object='libibtls_a-fdmi_err.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_ppool.obj `if test -f '$(SRC_DIR)/rdma_ppool.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_ppool.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_ppool.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_err.obj `if test -f '$(SRC_DIR)/fdmi_err.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_err.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_err.c'; fi`
 
-libibtls_a-rdma_client.o: $(SRC_DIR)/rdma_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_client.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_client.Tpo -c -o libibtls_a-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_client.Tpo $(DEPDIR)/libibtls_a-rdma_client.Po
-#	source='$(SRC_DIR)/rdma_client.c' object='libibtls_a-rdma_client.o' libtool=no \
+libibtls_a-fdmi_param.o: $(SRC_DIR)/fdmi_param.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_param.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_param.Tpo -c -o libibtls_a-fdmi_param.o `test -f '$(SRC_DIR)/fdmi_param.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_param.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_param.Tpo $(DEPDIR)/libibtls_a-fdmi_param.Po
+#	source='$(SRC_DIR)/fdmi_param.c' object='libibtls_a-fdmi_param.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_client.o `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_param.o `test -f '$(SRC_DIR)/fdmi_param.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_param.c
 
-libibtls_a-rdma_client.obj: $(SRC_DIR)/rdma_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_client.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_client.Tpo -c -o libibtls_a-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_client.Tpo $(DEPDIR)/libibtls_a-rdma_client.Po
-#	source='$(SRC_DIR)/rdma_client.c' object='libibtls_a-rdma_client.obj' libtool=no \
+libibtls_a-fdmi_param.obj: $(SRC_DIR)/fdmi_param.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_param.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_param.Tpo -c -o libibtls_a-fdmi_param.obj `if test -f '$(SRC_DIR)/fdmi_param.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_param.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_param.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_param.Tpo $(DEPDIR)/libibtls_a-fdmi_param.Po
+#	source='$(SRC_DIR)/fdmi_param.c' object='libibtls_a-fdmi_param.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_client.obj `if test -f '$(SRC_DIR)/rdma_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_client.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_param.obj `if test -f '$(SRC_DIR)/fdmi_param.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_param.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_param.c'; fi`
 
-libibtls_a-rdma_server.o: $(SRC_DIR)/rdma_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_server.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_server.Tpo -c -o libibtls_a-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_server.Tpo $(DEPDIR)/libibtls_a-rdma_server.Po
-#	source='$(SRC_DIR)/rdma_server.c' object='libibtls_a-rdma_server.o' libtool=no \
+libibtls_a-fdmi_mem.o: $(SRC_DIR)/fdmi_mem.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_mem.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_mem.Tpo -c -o libibtls_a-fdmi_mem.o `test -f '$(SRC_DIR)/fdmi_mem.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_mem.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_mem.Tpo $(DEPDIR)/libibtls_a-fdmi_mem.Po
+#	source='$(SRC_DIR)/fdmi_mem.c' object='libibtls_a-fdmi_mem.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_server.o `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_mem.o `test -f '$(SRC_DIR)/fdmi_mem.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_mem.c
 
-libibtls_a-rdma_server.obj: $(SRC_DIR)/rdma_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_server.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_server.Tpo -c -o libibtls_a-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_server.Tpo $(DEPDIR)/libibtls_a-rdma_server.Po
-#	source='$(SRC_DIR)/rdma_server.c' object='libibtls_a-rdma_server.obj' libtool=no \
+libibtls_a-fdmi_mem.obj: $(SRC_DIR)/fdmi_mem.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_mem.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_mem.Tpo -c -o libibtls_a-fdmi_mem.obj `if test -f '$(SRC_DIR)/fdmi_mem.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_mem.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_mem.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_mem.Tpo $(DEPDIR)/libibtls_a-fdmi_mem.Po
+#	source='$(SRC_DIR)/fdmi_mem.c' object='libibtls_a-fdmi_mem.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_server.obj `if test -f '$(SRC_DIR)/rdma_server.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_server.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_server.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_mem.obj `if test -f '$(SRC_DIR)/fdmi_mem.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_mem.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_mem.c'; fi`
 
-libibtls_a-rdma_common.o: $(SRC_DIR)/rdma_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_common.o -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_common.Tpo -c -o libibtls_a-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_common.Tpo $(DEPDIR)/libibtls_a-rdma_common.Po
-#	source='$(SRC_DIR)/rdma_common.c' object='libibtls_a-rdma_common.o' libtool=no \
+libibtls_a-fdmi_util.o: $(SRC_DIR)/fdmi_util.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_util.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_util.Tpo -c -o libibtls_a-fdmi_util.o `test -f '$(SRC_DIR)/fdmi_util.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_util.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_util.Tpo $(DEPDIR)/libibtls_a-fdmi_util.Po
+#	source='$(SRC_DIR)/fdmi_util.c' object='libibtls_a-fdmi_util.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_common.o `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_util.o `test -f '$(SRC_DIR)/fdmi_util.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_util.c
 
-libibtls_a-rdma_common.obj: $(SRC_DIR)/rdma_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-rdma_common.obj -MD -MP -MF $(DEPDIR)/libibtls_a-rdma_common.Tpo -c -o libibtls_a-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-rdma_common.Tpo $(DEPDIR)/libibtls_a-rdma_common.Po
-#	source='$(SRC_DIR)/rdma_common.c' object='libibtls_a-rdma_common.obj' libtool=no \
+libibtls_a-fdmi_util.obj: $(SRC_DIR)/fdmi_util.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_util.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_util.Tpo -c -o libibtls_a-fdmi_util.obj `if test -f '$(SRC_DIR)/fdmi_util.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_util.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_util.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_util.Tpo $(DEPDIR)/libibtls_a-fdmi_util.Po
+#	source='$(SRC_DIR)/fdmi_util.c' object='libibtls_a-fdmi_util.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-rdma_common.obj `if test -f '$(SRC_DIR)/rdma_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/rdma_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/rdma_common.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_util.obj `if test -f '$(SRC_DIR)/fdmi_util.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_util.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_util.c'; fi`
 
-libibtls_a-common.o: $(SRC_DIR)/common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-common.o -MD -MP -MF $(DEPDIR)/libibtls_a-common.Tpo -c -o libibtls_a-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
-	$(am__mv) $(DEPDIR)/libibtls_a-common.Tpo $(DEPDIR)/libibtls_a-common.Po
-#	source='$(SRC_DIR)/common.c' object='libibtls_a-common.o' libtool=no \
+libibtls_a-fdmi_hashtable.o: $(SRC_DIR)/fdmi_hashtable.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_hashtable.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_hashtable.Tpo -c -o libibtls_a-fdmi_hashtable.o `test -f '$(SRC_DIR)/fdmi_hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_hashtable.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_hashtable.Tpo $(DEPDIR)/libibtls_a-fdmi_hashtable.Po
+#	source='$(SRC_DIR)/fdmi_hashtable.c' object='libibtls_a-fdmi_hashtable.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-common.o `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_hashtable.o `test -f '$(SRC_DIR)/fdmi_hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_hashtable.c
 
-libibtls_a-common.obj: $(SRC_DIR)/common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-common.obj -MD -MP -MF $(DEPDIR)/libibtls_a-common.Tpo -c -o libibtls_a-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-common.Tpo $(DEPDIR)/libibtls_a-common.Po
-#	source='$(SRC_DIR)/common.c' object='libibtls_a-common.obj' libtool=no \
+libibtls_a-fdmi_hashtable.obj: $(SRC_DIR)/fdmi_hashtable.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_hashtable.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_hashtable.Tpo -c -o libibtls_a-fdmi_hashtable.obj `if test -f '$(SRC_DIR)/fdmi_hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_hashtable.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_hashtable.Tpo $(DEPDIR)/libibtls_a-fdmi_hashtable.Po
+#	source='$(SRC_DIR)/fdmi_hashtable.c' object='libibtls_a-fdmi_hashtable.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-common.obj `if test -f '$(SRC_DIR)/common.c'; then $(CYGPATH_W) '$(SRC_DIR)/common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/common.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_hashtable.obj `if test -f '$(SRC_DIR)/fdmi_hashtable.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_hashtable.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_hashtable.c'; fi`
 
-libibtls_a-ibtls.o: $(SRC_DIR)/ibtls.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtls.o -MD -MP -MF $(DEPDIR)/libibtls_a-ibtls.Tpo -c -o libibtls_a-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
-	$(am__mv) $(DEPDIR)/libibtls_a-ibtls.Tpo $(DEPDIR)/libibtls_a-ibtls.Po
-#	source='$(SRC_DIR)/ibtls.c' object='libibtls_a-ibtls.o' libtool=no \
+libibtls_a-fdmi_queue.o: $(SRC_DIR)/fdmi_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_queue.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_queue.Tpo -c -o libibtls_a-fdmi_queue.o `test -f '$(SRC_DIR)/fdmi_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_queue.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_queue.Tpo $(DEPDIR)/libibtls_a-fdmi_queue.Po
+#	source='$(SRC_DIR)/fdmi_queue.c' object='libibtls_a-fdmi_queue.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibtls.o `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_queue.o `test -f '$(SRC_DIR)/fdmi_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_queue.c
 
-libibtls_a-ibtls.obj: $(SRC_DIR)/ibtls.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtls.obj -MD -MP -MF $(DEPDIR)/libibtls_a-ibtls.Tpo -c -o libibtls_a-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-ibtls.Tpo $(DEPDIR)/libibtls_a-ibtls.Po
-#	source='$(SRC_DIR)/ibtls.c' object='libibtls_a-ibtls.obj' libtool=no \
+libibtls_a-fdmi_queue.obj: $(SRC_DIR)/fdmi_queue.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_queue.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_queue.Tpo -c -o libibtls_a-fdmi_queue.obj `if test -f '$(SRC_DIR)/fdmi_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_queue.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_queue.Tpo $(DEPDIR)/libibtls_a-fdmi_queue.Po
+#	source='$(SRC_DIR)/fdmi_queue.c' object='libibtls_a-fdmi_queue.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibtls.obj `if test -f '$(SRC_DIR)/ibtls.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtls.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtls.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_queue.obj `if test -f '$(SRC_DIR)/fdmi_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_queue.c'; fi`
+
+libibtls_a-fdmi_datatype.o: $(SRC_DIR)/fdmi_datatype.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_datatype.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_datatype.Tpo -c -o libibtls_a-fdmi_datatype.o `test -f '$(SRC_DIR)/fdmi_datatype.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_datatype.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_datatype.Tpo $(DEPDIR)/libibtls_a-fdmi_datatype.Po
+#	source='$(SRC_DIR)/fdmi_datatype.c' object='libibtls_a-fdmi_datatype.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_datatype.o `test -f '$(SRC_DIR)/fdmi_datatype.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_datatype.c
+
+libibtls_a-fdmi_datatype.obj: $(SRC_DIR)/fdmi_datatype.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_datatype.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_datatype.Tpo -c -o libibtls_a-fdmi_datatype.obj `if test -f '$(SRC_DIR)/fdmi_datatype.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_datatype.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_datatype.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_datatype.Tpo $(DEPDIR)/libibtls_a-fdmi_datatype.Po
+#	source='$(SRC_DIR)/fdmi_datatype.c' object='libibtls_a-fdmi_datatype.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_datatype.obj `if test -f '$(SRC_DIR)/fdmi_datatype.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_datatype.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_datatype.c'; fi`
+
+libibtls_a-fdmi_proc_man.o: $(SRC_DIR)/fdmi_proc_man.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_proc_man.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_proc_man.Tpo -c -o libibtls_a-fdmi_proc_man.o `test -f '$(SRC_DIR)/fdmi_proc_man.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_proc_man.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_proc_man.Tpo $(DEPDIR)/libibtls_a-fdmi_proc_man.Po
+#	source='$(SRC_DIR)/fdmi_proc_man.c' object='libibtls_a-fdmi_proc_man.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_proc_man.o `test -f '$(SRC_DIR)/fdmi_proc_man.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_proc_man.c
+
+libibtls_a-fdmi_proc_man.obj: $(SRC_DIR)/fdmi_proc_man.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_proc_man.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_proc_man.Tpo -c -o libibtls_a-fdmi_proc_man.obj `if test -f '$(SRC_DIR)/fdmi_proc_man.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_proc_man.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_proc_man.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi_proc_man.Tpo $(DEPDIR)/libibtls_a-fdmi_proc_man.Po
+#	source='$(SRC_DIR)/fdmi_proc_man.c' object='libibtls_a-fdmi_proc_man.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi_proc_man.obj `if test -f '$(SRC_DIR)/fdmi_proc_man.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi_proc_man.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi_proc_man.c'; fi`
+
+libibtls_a-fdmi.o: $(SRC_DIR)/fdmi.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi.Tpo -c -o libibtls_a-fdmi.o `test -f '$(SRC_DIR)/fdmi.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi.c
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi.Tpo $(DEPDIR)/libibtls_a-fdmi.Po
+#	source='$(SRC_DIR)/fdmi.c' object='libibtls_a-fdmi.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi.o `test -f '$(SRC_DIR)/fdmi.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi.c
+
+libibtls_a-fdmi.obj: $(SRC_DIR)/fdmi.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi.obj -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi.Tpo -c -o libibtls_a-fdmi.obj `if test -f '$(SRC_DIR)/fdmi.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi.c'; fi`
+	$(am__mv) $(DEPDIR)/libibtls_a-fdmi.Tpo $(DEPDIR)/libibtls_a-fdmi.Po
+#	source='$(SRC_DIR)/fdmi.c' object='libibtls_a-fdmi.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi.obj `if test -f '$(SRC_DIR)/fdmi.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi.c'; fi`
 
 libibtls_a-ibtl_io_client.o: $(SRC_DIR)/ibtl_io_client.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtl_io_client.o -MD -MP -MF $(DEPDIR)/libibtls_a-ibtl_io_client.Tpo -c -o libibtls_a-ibtl_io_client.o `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
@@ -602,47 +663,75 @@ libibtls_la-list_queue.lo: $(SRC_DIR)/list_queue.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
 
-libibtls_la-rdma_ppool.lo: $(SRC_DIR)/rdma_ppool.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_ppool.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_ppool.Tpo -c -o libibtls_la-rdma_ppool.lo `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
-	$(am__mv) $(DEPDIR)/libibtls_la-rdma_ppool.Tpo $(DEPDIR)/libibtls_la-rdma_ppool.Plo
-#	source='$(SRC_DIR)/rdma_ppool.c' object='libibtls_la-rdma_ppool.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_ppool.lo `test -f '$(SRC_DIR)/rdma_ppool.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_ppool.c
-
-libibtls_la-rdma_client.lo: $(SRC_DIR)/rdma_client.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_client.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_client.Tpo -c -o libibtls_la-rdma_client.lo `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
-	$(am__mv) $(DEPDIR)/libibtls_la-rdma_client.Tpo $(DEPDIR)/libibtls_la-rdma_client.Plo
-#	source='$(SRC_DIR)/rdma_client.c' object='libibtls_la-rdma_client.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_client.lo `test -f '$(SRC_DIR)/rdma_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_client.c
-
-libibtls_la-rdma_server.lo: $(SRC_DIR)/rdma_server.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_server.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_server.Tpo -c -o libibtls_la-rdma_server.lo `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
-	$(am__mv) $(DEPDIR)/libibtls_la-rdma_server.Tpo $(DEPDIR)/libibtls_la-rdma_server.Plo
-#	source='$(SRC_DIR)/rdma_server.c' object='libibtls_la-rdma_server.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_server.lo `test -f '$(SRC_DIR)/rdma_server.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_server.c
-
-libibtls_la-rdma_common.lo: $(SRC_DIR)/rdma_common.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-rdma_common.lo -MD -MP -MF $(DEPDIR)/libibtls_la-rdma_common.Tpo -c -o libibtls_la-rdma_common.lo `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
-	$(am__mv) $(DEPDIR)/libibtls_la-rdma_common.Tpo $(DEPDIR)/libibtls_la-rdma_common.Plo
-#	source='$(SRC_DIR)/rdma_common.c' object='libibtls_la-rdma_common.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-rdma_common.lo `test -f '$(SRC_DIR)/rdma_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/rdma_common.c
-
-libibtls_la-common.lo: $(SRC_DIR)/common.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-common.lo -MD -MP -MF $(DEPDIR)/libibtls_la-common.Tpo -c -o libibtls_la-common.lo `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
-	$(am__mv) $(DEPDIR)/libibtls_la-common.Tpo $(DEPDIR)/libibtls_la-common.Plo
-#	source='$(SRC_DIR)/common.c' object='libibtls_la-common.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-common.lo `test -f '$(SRC_DIR)/common.c' || echo '$(srcdir)/'`$(SRC_DIR)/common.c
-
 libibtls_la-ibtls.lo: $(SRC_DIR)/ibtls.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibtls.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibtls.Tpo -c -o libibtls_la-ibtls.lo `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
 	$(am__mv) $(DEPDIR)/libibtls_la-ibtls.Tpo $(DEPDIR)/libibtls_la-ibtls.Plo
 #	source='$(SRC_DIR)/ibtls.c' object='libibtls_la-ibtls.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-ibtls.lo `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
+
+libibtls_la-fdmi_err.lo: $(SRC_DIR)/fdmi_err.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_err.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_err.Tpo -c -o libibtls_la-fdmi_err.lo `test -f '$(SRC_DIR)/fdmi_err.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_err.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_err.Tpo $(DEPDIR)/libibtls_la-fdmi_err.Plo
+#	source='$(SRC_DIR)/fdmi_err.c' object='libibtls_la-fdmi_err.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_err.lo `test -f '$(SRC_DIR)/fdmi_err.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_err.c
+
+libibtls_la-fdmi_param.lo: $(SRC_DIR)/fdmi_param.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_param.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_param.Tpo -c -o libibtls_la-fdmi_param.lo `test -f '$(SRC_DIR)/fdmi_param.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_param.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_param.Tpo $(DEPDIR)/libibtls_la-fdmi_param.Plo
+#	source='$(SRC_DIR)/fdmi_param.c' object='libibtls_la-fdmi_param.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_param.lo `test -f '$(SRC_DIR)/fdmi_param.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_param.c
+
+libibtls_la-fdmi_mem.lo: $(SRC_DIR)/fdmi_mem.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_mem.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_mem.Tpo -c -o libibtls_la-fdmi_mem.lo `test -f '$(SRC_DIR)/fdmi_mem.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_mem.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_mem.Tpo $(DEPDIR)/libibtls_la-fdmi_mem.Plo
+#	source='$(SRC_DIR)/fdmi_mem.c' object='libibtls_la-fdmi_mem.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_mem.lo `test -f '$(SRC_DIR)/fdmi_mem.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_mem.c
+
+libibtls_la-fdmi_util.lo: $(SRC_DIR)/fdmi_util.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_util.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_util.Tpo -c -o libibtls_la-fdmi_util.lo `test -f '$(SRC_DIR)/fdmi_util.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_util.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_util.Tpo $(DEPDIR)/libibtls_la-fdmi_util.Plo
+#	source='$(SRC_DIR)/fdmi_util.c' object='libibtls_la-fdmi_util.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_util.lo `test -f '$(SRC_DIR)/fdmi_util.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_util.c
+
+libibtls_la-fdmi_hashtable.lo: $(SRC_DIR)/fdmi_hashtable.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_hashtable.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_hashtable.Tpo -c -o libibtls_la-fdmi_hashtable.lo `test -f '$(SRC_DIR)/fdmi_hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_hashtable.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_hashtable.Tpo $(DEPDIR)/libibtls_la-fdmi_hashtable.Plo
+#	source='$(SRC_DIR)/fdmi_hashtable.c' object='libibtls_la-fdmi_hashtable.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_hashtable.lo `test -f '$(SRC_DIR)/fdmi_hashtable.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_hashtable.c
+
+libibtls_la-fdmi_queue.lo: $(SRC_DIR)/fdmi_queue.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_queue.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_queue.Tpo -c -o libibtls_la-fdmi_queue.lo `test -f '$(SRC_DIR)/fdmi_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_queue.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_queue.Tpo $(DEPDIR)/libibtls_la-fdmi_queue.Plo
+#	source='$(SRC_DIR)/fdmi_queue.c' object='libibtls_la-fdmi_queue.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_queue.lo `test -f '$(SRC_DIR)/fdmi_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_queue.c
+
+libibtls_la-fdmi_datatype.lo: $(SRC_DIR)/fdmi_datatype.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_datatype.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_datatype.Tpo -c -o libibtls_la-fdmi_datatype.lo `test -f '$(SRC_DIR)/fdmi_datatype.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_datatype.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_datatype.Tpo $(DEPDIR)/libibtls_la-fdmi_datatype.Plo
+#	source='$(SRC_DIR)/fdmi_datatype.c' object='libibtls_la-fdmi_datatype.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_datatype.lo `test -f '$(SRC_DIR)/fdmi_datatype.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_datatype.c
+
+libibtls_la-fdmi_proc_man.lo: $(SRC_DIR)/fdmi_proc_man.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_proc_man.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_proc_man.Tpo -c -o libibtls_la-fdmi_proc_man.lo `test -f '$(SRC_DIR)/fdmi_proc_man.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_proc_man.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi_proc_man.Tpo $(DEPDIR)/libibtls_la-fdmi_proc_man.Plo
+#	source='$(SRC_DIR)/fdmi_proc_man.c' object='libibtls_la-fdmi_proc_man.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi_proc_man.lo `test -f '$(SRC_DIR)/fdmi_proc_man.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_proc_man.c
+
+libibtls_la-fdmi.lo: $(SRC_DIR)/fdmi.c
+	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi.Tpo -c -o libibtls_la-fdmi.lo `test -f '$(SRC_DIR)/fdmi.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi.c
+	$(am__mv) $(DEPDIR)/libibtls_la-fdmi.Tpo $(DEPDIR)/libibtls_la-fdmi.Plo
+#	source='$(SRC_DIR)/fdmi.c' object='libibtls_la-fdmi.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi.lo `test -f '$(SRC_DIR)/fdmi.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi.c
 
 libibtls_la-ibtl_io_client.lo: $(SRC_DIR)/ibtl_io_client.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibtl_io_client.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibtl_io_client.Tpo -c -o libibtls_la-ibtl_io_client.lo `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
@@ -693,19 +782,47 @@ ibtl_io_server-scr_list_queue.obj: scr_list_queue.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-scr_list_queue.obj `if test -f 'scr_list_queue.c'; then $(CYGPATH_W) 'scr_list_queue.c'; else $(CYGPATH_W) '$(srcdir)/scr_list_queue.c'; fi`
 
-ibtl_io_server-common.o: common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-common.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-common.Tpo -c -o ibtl_io_server-common.o `test -f 'common.c' || echo '$(srcdir)/'`common.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-common.Tpo $(DEPDIR)/ibtl_io_server-common.Po
-#	source='common.c' object='ibtl_io_server-common.o' libtool=no \
+ibtl_io_server-fdmi_err.o: fdmi_err.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_err.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo -c -o ibtl_io_server-fdmi_err.o `test -f 'fdmi_err.c' || echo '$(srcdir)/'`fdmi_err.c
+	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo $(DEPDIR)/ibtl_io_server-fdmi_err.Po
+#	source='fdmi_err.c' object='ibtl_io_server-fdmi_err.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-common.o `test -f 'common.c' || echo '$(srcdir)/'`common.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_err.o `test -f 'fdmi_err.c' || echo '$(srcdir)/'`fdmi_err.c
 
-ibtl_io_server-common.obj: common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-common.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-common.Tpo -c -o ibtl_io_server-common.obj `if test -f 'common.c'; then $(CYGPATH_W) 'common.c'; else $(CYGPATH_W) '$(srcdir)/common.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-common.Tpo $(DEPDIR)/ibtl_io_server-common.Po
-#	source='common.c' object='ibtl_io_server-common.obj' libtool=no \
+ibtl_io_server-fdmi_err.obj: fdmi_err.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_err.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo -c -o ibtl_io_server-fdmi_err.obj `if test -f 'fdmi_err.c'; then $(CYGPATH_W) 'fdmi_err.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_err.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo $(DEPDIR)/ibtl_io_server-fdmi_err.Po
+#	source='fdmi_err.c' object='ibtl_io_server-fdmi_err.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-common.obj `if test -f 'common.c'; then $(CYGPATH_W) 'common.c'; else $(CYGPATH_W) '$(srcdir)/common.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_err.obj `if test -f 'fdmi_err.c'; then $(CYGPATH_W) 'fdmi_err.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_err.c'; fi`
+
+ibtl_io_server-fdmi_param.o: fdmi_param.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_param.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo -c -o ibtl_io_server-fdmi_param.o `test -f 'fdmi_param.c' || echo '$(srcdir)/'`fdmi_param.c
+	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo $(DEPDIR)/ibtl_io_server-fdmi_param.Po
+#	source='fdmi_param.c' object='ibtl_io_server-fdmi_param.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_param.o `test -f 'fdmi_param.c' || echo '$(srcdir)/'`fdmi_param.c
+
+ibtl_io_server-fdmi_param.obj: fdmi_param.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_param.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo -c -o ibtl_io_server-fdmi_param.obj `if test -f 'fdmi_param.c'; then $(CYGPATH_W) 'fdmi_param.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_param.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo $(DEPDIR)/ibtl_io_server-fdmi_param.Po
+#	source='fdmi_param.c' object='ibtl_io_server-fdmi_param.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_param.obj `if test -f 'fdmi_param.c'; then $(CYGPATH_W) 'fdmi_param.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_param.c'; fi`
+
+ibtl_io_server-fdmi_util.o: fdmi_util.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_util.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo -c -o ibtl_io_server-fdmi_util.o `test -f 'fdmi_util.c' || echo '$(srcdir)/'`fdmi_util.c
+	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo $(DEPDIR)/ibtl_io_server-fdmi_util.Po
+#	source='fdmi_util.c' object='ibtl_io_server-fdmi_util.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_util.o `test -f 'fdmi_util.c' || echo '$(srcdir)/'`fdmi_util.c
+
+ibtl_io_server-fdmi_util.obj: fdmi_util.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_util.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo -c -o ibtl_io_server-fdmi_util.obj `if test -f 'fdmi_util.c'; then $(CYGPATH_W) 'fdmi_util.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_util.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo $(DEPDIR)/ibtl_io_server-fdmi_util.Po
+#	source='fdmi_util.c' object='ibtl_io_server-fdmi_util.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_util.obj `if test -f 'fdmi_util.c'; then $(CYGPATH_W) 'fdmi_util.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_util.c'; fi`
 
 ibtl_io_server-yarn.o: yarn.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-yarn.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-yarn.Tpo -c -o ibtl_io_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c

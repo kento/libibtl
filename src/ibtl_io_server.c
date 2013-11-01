@@ -3,10 +3,11 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "ibtls.h"
+#include "fdmi.h"
 #include "common.h"
 #include "transfer.h"
 #include "scr_list_queue.h"
+#include "fdmi_util.h"
 #include "pgz.h"
 
 
@@ -39,106 +40,108 @@ uint64_t allocated_size = 0;
 
 int main(int argc, char **argv) 
 {
-  struct RDMA_communicator comm;
-  struct RDMA_request *req1, *req2;
-  struct scr_transfer_ctl ctl[NUM_BUFF];
-  struct scr_transfer_ctl file_info;
-  file_info.size = 0;
+  fdmi_verbs_init(&argc, &argv);
+  sleep(11111);
+/*   struct RDMA_communicator comm; */
+/*   struct RDMA_request *req1, *req2; */
+/*   struct scr_transfer_ctl ctl[NUM_BUFF]; */
+/*   struct scr_transfer_ctl file_info; */
+/*   file_info.size = 0; */
 
-  char *data[NUM_BUFF];
-  int i;
-  int buff_index = 0;
-  uint64_t recv_size = -1;
-  uint64_t ckpt_size = 0;
-  pthread_t thread;
-  scr_lq wq; /*enqueue incomming PFS chkp data*/
+/*   char *data[NUM_BUFF]; */
+/*   int i; */
+/*   int buff_index = 0; */
+/*   uint64_t recv_size = -1; */
+/*   uint64_t ckpt_size = 0; */
+/*   pthread_t thread; */
+/*   scr_lq wq; /\*enqueue incomming PFS chkp data*\/ */
 
-  struct write_args *pendding_write_args = NULL;
-  int req_num = 2;
+/*   struct write_args *pendding_write_args = NULL; */
+/*   int req_num = 2; */
 
-  struct RDMA_request req[req_num];
-  int req_id = 0;
-  int ctl_tag;
-  double rdma_s, rdma_e;
-  int count = 0;
-  int request_status = 0;
-
-
-  RDMA_Passive_Init(&comm);
-  scr_lq_init(&wq);
+/*   struct RDMA_request req[req_num]; */
+/*   int req_id = 0; */
+/*   int ctl_tag; */
+/*   double rdma_s, rdma_e; */
+/*   int count = 0; */
+/*   int request_status = 0; */
 
 
-  while(1) {
-    /*Colloect RDMA read requests until buffer exceeds*/
-    usleep(1000);
-    while (allocated_size < buff_size) {
-      struct write_args *wa;
-      request_status = RDMA_Iprobe(RDMA_ANY_SOURCE, 0, &comm);
-      if (!request_status) {
-        break;
-      }
-      RDMA_Recv(&file_info, sizeof(file_info), NULL, RDMA_ANY_SOURCE, 0, &comm);
-      ibtl_dbg("PATH: %s, ID: %d size:%lu\n", file_info.path, file_info.id, file_info.size);
+/*   RDMA_Passive_Init(&comm); */
+/*   scr_lq_init(&wq); */
 
-      wa = (struct write_args*)malloc(sizeof(struct write_args));
-      wa->id = file_info.id;
-      wa->path = (char *)malloc (128);
-      sprintf(wa->path, "%s", file_info.path);
-      wa->size = file_info.size;
-      wa->offset = 0;
-      allocated_size += file_info.size;
-      wa->addr = RDMA_Alloc(file_info.size);
-      //      fprintf(stderr, "%lu/%lu\n", allocated_size, buff_size );
-      scr_lq_enq(&wq, wa);
-    }
 
-    while (RDMA_Iprobe(RDMA_ANY_SOURCE, 1, &comm)) {
-      struct write_args* recv_wa;
-      req_id = RDMA_Reqid(&comm, 1);
-      recv_wa = get_write_arg(&wq, req_id);
-      //      fprintf(stderr, "req_id: %d, recv_wa: %p\n", req_id, recv_wa);
-      //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id); 
-      //     ibtl_dbg("%d: Offset: %lu, size: %lu, req_id:%d", req_id, recv_wa->offset, recv_wa->size, req_id); 
+/*   while(1) { */
+/*     /\*Colloect RDMA read requests until buffer exceeds*\/ */
+/*     usleep(1000); */
+/*     while (allocated_size < buff_size) { */
+/*       struct write_args *wa; */
+/*       request_status = RDMA_Iprobe(RDMA_ANY_SOURCE, 0, &comm); */
+/*       if (!request_status) { */
+/*         break; */
+/*       } */
+/*       RDMA_Recv(&file_info, sizeof(file_info), NULL, RDMA_ANY_SOURCE, 0, &comm); */
+/*       ibtl_dbg("PATH: %s, ID: %d size:%lu\n", file_info.path, file_info.id, file_info.size); */
 
-      RDMA_Recv(recv_wa->addr + recv_wa->offset, 0, NULL, req_id, 1, &comm);
-      recv_wa->offset += chunk_size;
-      if (recv_wa->offset > recv_wa->size) {
-        recv_wa->offset = recv_wa->size;
-      }
-      //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id);
+/*       wa = (struct write_args*)malloc(sizeof(struct write_args)); */
+/*       wa->id = file_info.id; */
+/*       wa->path = (char *)malloc (128); */
+/*       sprintf(wa->path, "%s", file_info.path); */
+/*       wa->size = file_info.size; */
+/*       wa->offset = 0; */
+/*       allocated_size += file_info.size; */
+/*       wa->addr = RDMA_Alloc(file_info.size); */
+/*       //      fprintf(stderr, "%lu/%lu\n", allocated_size, buff_size ); */
+/*       scr_lq_enq(&wq, wa); */
+/*     } */
 
-      if (recv_wa->size == recv_wa->offset) {
-      /*If I receive the all data to the buffer, I start writing the data to a file system */
-	ibtl_dbg("start");
-	RDMA_Send(recv_wa->addr + recv_wa->offset - CHUNK_SIZE, CHUNK_SIZE, NULL, req_id, 1, &comm);
-	ibtl_dbg("end");
-#if COMPRESS == 1
-        pthread_mutex_lock(&compress_mutex);
-        if (pthread_create(&thread, NULL, (void *)compress_write, recv_wa)) {
-          fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__);
-          exit(1);
-        }
-#else
+/*     while (RDMA_Iprobe(RDMA_ANY_SOURCE, 1, &comm)) { */
+/*       struct write_args* recv_wa; */
+/*       req_id = RDMA_Reqid(&comm, 1); */
+/*       recv_wa = get_write_arg(&wq, req_id); */
+/*       //      fprintf(stderr, "req_id: %d, recv_wa: %p\n", req_id, recv_wa); */
+/*       //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id);  */
+/*       //     ibtl_dbg("%d: Offset: %lu, size: %lu, req_id:%d", req_id, recv_wa->offset, recv_wa->size, req_id);  */
 
-        pthread_mutex_lock(&dump_mutex);
-        if (pthread_create(&thread, NULL, (void *)simple_write, recv_wa)) {
-          fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__);
-          exit(1);
-        }
-#endif
+/*       RDMA_Recv(recv_wa->addr + recv_wa->offset, 0, NULL, req_id, 1, &comm); */
+/*       recv_wa->offset += chunk_size; */
+/*       if (recv_wa->offset > recv_wa->size) { */
+/*         recv_wa->offset = recv_wa->size; */
+/*       } */
+/*       //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id); */
+
+/*       if (recv_wa->size == recv_wa->offset) { */
+/*       /\*If I receive the all data to the buffer, I start writing the data to a file system *\/ */
+/* 	ibtl_dbg("start"); */
+/* 	RDMA_Send(recv_wa->addr + recv_wa->offset - CHUNK_SIZE, CHUNK_SIZE, NULL, req_id, 1, &comm); */
+/* 	ibtl_dbg("end"); */
+/* #if COMPRESS == 1 */
+/*         pthread_mutex_lock(&compress_mutex); */
+/*         if (pthread_create(&thread, NULL, (void *)compress_write, recv_wa)) { */
+/*           fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__); */
+/*           exit(1); */
+/*         } */
+/* #else */
+
+/*         pthread_mutex_lock(&dump_mutex); */
+/*         if (pthread_create(&thread, NULL, (void *)simple_write, recv_wa)) { */
+/*           fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__); */
+/*           exit(1); */
+/*         } */
+/* #endif */
         
-        if (pthread_detach(thread)) {
-          fprintf(stderr, "RDMA lib: SEND: ERROR: pthread detach failed @ %s:%d", __FILE__, __LINE__);
-          exit(1);
-        }
-        scr_lq_remove(&wq, recv_wa);
+/*         if (pthread_detach(thread)) { */
+/*           fprintf(stderr, "RDMA lib: SEND: ERROR: pthread detach failed @ %s:%d", __FILE__, __LINE__); */
+/*           exit(1); */
+/*         } */
+/*         scr_lq_remove(&wq, recv_wa); */
 
-      } else if  (recv_wa->size <= recv_wa->offset) {
-        fprintf(stderr, "Received size exceeded the actual file size: file size=%lu, Received size=%lu\n", recv_wa->size, recv_wa->offset);
-      }
-    }
-  }
-  return 1;
+/*       } else if  (recv_wa->size <= recv_wa->offset) { */
+/*         fprintf(stderr, "Received size exceeded the actual file size: file size=%lu, Received size=%lu\n", recv_wa->size, recv_wa->offset); */
+/*       } */
+/*     } */
+/*   } */
+/*   return 1; */
 }
 
 static struct write_args* get_write_arg(scr_lq *q, int id)
@@ -158,10 +161,10 @@ static struct write_args* get_write_arg(scr_lq *q, int id)
 
 
 int free_write_args(struct write_args *wa) {
-  free(wa->path);                                                                                                                
-  RDMA_Free(wa->addr);                                                                                                           
-  allocated_size -= wa->size;
-  free(wa);                                                                                                                      
+  /* free(wa->path);                                                                                                                 */
+  /* RDMA_Free(wa->addr);                                                                                                            */
+  /* allocated_size -= wa->size; */
+  /* free(wa);                                                                                                                       */
 
   return 1;
 }
@@ -176,7 +179,7 @@ int simple_write(struct write_args *wa)
   char *addr = wa->addr;
   int size   = wa->size;
 
-  write_s = get_dtime();
+  write_s = fdmi_get_time();
   //  fd = open(path, O_WRONLY | O_APPEND | O_CREAT, S_IREAD | S_IWRITE); 
   fd = open(path, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE); 
   if (fd <= 0) {
@@ -194,7 +197,7 @@ int simple_write(struct write_args *wa)
   } while(n_write > 0);
   fsync(fd);
   close(fd);
-  write_e = get_dtime();
+  write_e = fdmi_get_time();
   free_write_args(wa);
   pthread_mutex_unlock(&dump_mutex);
   fprintf(stderr, "OVLP: Write: Time: %f bw:%f GB/s size: %d \n", write_e - write_s, n_write_sum / (write_e - write_s) / 1000000000.0, n_write_sum);
@@ -211,9 +214,9 @@ int compress_write(struct write_args *wa)
   //  fprintf(stderr, "ST.");
   cwa = (struct write_args*)malloc(sizeof(struct write_args));
   // =======
-  comp_s = get_dtime();
+  comp_s = fdmi_get_time();
   cwa->size = pcompress(&(cwa->addr), wa->addr, wa->size);
-  comp_e = get_dtime();
+  comp_e = fdmi_get_time();
   //  fprintf(stderr, "OVLP: COMP %f %d %f %f\n", comp_s, comp_count, comp_e, comp_e - comp_s);
   //  fprintf(stderr, "OVLP: COMP %f %d\n", comp_e, comp_count++);
   //  fprintf(stderr, "OVLP: COMP \n");
@@ -250,7 +253,7 @@ int dump_ckpt(struct write_args *cwa)
   char *addr = cwa->addr;
   int size   = cwa->size;
 
-  write_s = get_dtime();
+  write_s = fdmi_get_time();
   fd = open(path, O_WRONLY | O_APPEND | O_CREAT, S_IREAD | S_IWRITE); 
   //  fprintf(stderr, "path: |%s|, size: %d, fd=%d\n",  path, size, fd);
   if (fd <= 0) {
@@ -270,7 +273,7 @@ int dump_ckpt(struct write_args *cwa)
   } while(n_write > 0);
   fsync(fd);
   close(fd);
-  write_e = get_dtime();
+  write_e = fdmi_get_time();
   //  fprintf(stderr, "OVLP: WRIT %f %d %f %f\n", write_s, dump_count, write_e, write_e - write_s);
   //  fprintf(stderr, "OVLP: WRIT %f %d\n", write_e, dump_count++);
   //  fprintf(stderr, "OVLP: WRIT \n");

@@ -17,10 +17,9 @@ ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c /usr/include/stdlib.h \
  /usr/include/sys/stat.h /usr/include/errno.h /usr/include/bits/errno.h \
  /usr/include/linux/errno.h /usr/include/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- ../include/ibtls.h ../include/rdma_client.h ../include/rdma_common.h \
- /usr/include/netdb.h /usr/include/netinet/in.h /usr/include/stdint.h \
- /usr/include/bits/wchar.h /usr/include/sys/socket.h \
- /usr/include/sys/uio.h /usr/include/bits/uio.h \
+ fdmi.h /usr/include/netdb.h /usr/include/netinet/in.h \
+ /usr/include/stdint.h /usr/include/bits/wchar.h \
+ /usr/include/sys/socket.h /usr/include/sys/uio.h /usr/include/bits/uio.h \
  /usr/include/bits/socket.h /usr/include/bits/sockaddr.h \
  /usr/include/asm/socket.h /usr/include/asm-generic/socket.h \
  /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h \
@@ -34,9 +33,9 @@ ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c /usr/include/stdlib.h \
  /usr/include/rdma/rdma_cma.h /usr/include/infiniband/verbs.h \
  /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
  /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
- /usr/include/semaphore.h /usr/include/bits/semaphore.h \
- ../include/rdma_server.h ../include/common.h transfer.h scr_list_queue.h \
- pgz.h
+ /usr/include/semaphore.h /usr/include/bits/semaphore.h fdmi_config.h \
+ fdmi_pmtv_common.h fdmi_datatype.h fdmi_proc_man.h ../include/common.h \
+ transfer.h scr_list_queue.h fdmi_util.h pgz.h
 
 /usr/include/stdlib.h:
 
@@ -114,11 +113,7 @@ ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c /usr/include/stdlib.h \
 
 /usr/include/asm-generic/errno-base.h:
 
-../include/ibtls.h:
-
-../include/rdma_client.h:
-
-../include/rdma_common.h:
+fdmi.h:
 
 /usr/include/netdb.h:
 
@@ -194,12 +189,20 @@ ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c /usr/include/stdlib.h \
 
 /usr/include/bits/semaphore.h:
 
-../include/rdma_server.h:
+fdmi_config.h:
+
+fdmi_pmtv_common.h:
+
+fdmi_datatype.h:
+
+fdmi_proc_man.h:
 
 ../include/common.h:
 
 transfer.h:
 
 scr_list_queue.h:
+
+fdmi_util.h:
 
 pgz.h:

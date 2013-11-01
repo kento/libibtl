@@ -8,12 +8,13 @@
 #include <errno.h>
 
 #include "fdmi.h"
-#include "src/utils/fdmi_param.h"
-#include "src/utils/fdmi_err.h"
-#include "src/utils/fdmi_mem.h"
-#include "src/utils/fdmi_util.h"
-#include "src/utils/fdmi_queue.h"
-#include "src/proc/fdmi_proc_man.h"
+#include "fdmi_param.h"
+#include "fdmi_err.h"
+#include "fdmi_mem.h"
+#include "fdmi_util.h"
+#include "fdmi_queue.h"
+#include "fdmi_proc_man.h"
+#include "fdmi_datatype.h"
 //#include "fdmi_loop.h"
 
 #define  DEBUG_TEST
@@ -29,6 +30,9 @@
 
 //#define FDMI_EAGER_BUFF_SIZE (513 * 1024)
 //#define FDMI_EAGER_BUFF_SIZE (713 * 1024)
+
+#define IBTL_LISTEN_PORT (841015)
+
 #define FDMI_EAGER_BUFF_SIZE (64 * 1024)
 #define FDMI_MAX_PENDING_RECV_QUERY 10
 
@@ -36,6 +40,17 @@
 #define RDMA_LISTEN_BACKLOG (16)
 
 #define FDMI_RECOVERY_TAG 28047
+
+#define FMI_SUCCESS (0)
+#define FMI_RECOVERY (1)
+#define FMI_FAiLURE (2)
+
+#define FMI_ANY_SOURCE (-1)
+#define FMI_ANY_TAG (-1)
+
+#define FDMI_FAILURE (1)
+#define FDMI_RECOVERY (2)
+#define FDMI_JOINING (3)
 
 const int TIMEOUT_IN_MS = 5000; /* ms */
 
@@ -495,54 +510,7 @@ struct fdmi_domain*  fdmi_create_domain(struct ibv_context *ctx) {
   return domain;
 }
 
-static struct fdmi_recv_channel* fdmi_create_recv_channel()
-{
-  struct fdmi_recv_channel *recv_channel;
-  struct fdmi_domain **domain;
-  struct fdmi_peer **peer;
-  struct ibv_device **device, **device_to_free;
 
-  int i;
-  char* value;
-
-  recv_channel = (struct fdmi_recv_channel*)fdmi_malloc(sizeof(struct fdmi_recv_channel));
-  recv_channel->numdomain = get_port_count();
-  recv_channel->domains = (struct fdmi_domain**)fdmi_malloc(sizeof(struct fdmi_domain*) * recv_channel->numdomain);
-
-  if ((device = device_to_free = ibv_get_device_list(NULL)) == NULL) {
-    fdmi_err ("ibv_get_device_list failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
-  }
-  
-  for (i = 0, domain = recv_channel->domains;
-       i < recv_channel->numdomain;
-       i++, domain++, device++) {
-
-    struct ibv_context *ctx;
-
-    if ((ctx = ibv_open_device(*device)) == NULL) {
-      fdmi_err ("ibv_open_device failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
-    }
-
-    *domain = fdmi_create_domain(ctx);
-    /* TODO: close ctx when finalization */
-    if(ibv_close_device(ctx) == -1) {
-      fdmi_err ("ibv_close_device failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
-    }
-  }
-  ibv_free_device_list(device_to_free);
-
-  /* TODO: Decide wether we really need "peers" variable for recv_channel ?
-         For now, I do not commente out.
-  */
-  recv_channel->numpeer = fdmi_size;
-  recv_channel->peers = (struct fdmi_peer**)fdmi_malloc(sizeof(struct fdmi_peer*) * recv_channel->numpeer);
-
-  for (i = 0, peer = recv_channel->peers; i < recv_channel->numpeer; i++, peer++) {
-    *peer = fdmi_create_peer (recv_channel->domains, recv_channel->numdomain);
-  }
-
-  return recv_channel;
-}
 
 static void fdmi_destroy_recv_channel(struct fdmi_recv_channel* recv_channel)
 {
@@ -550,51 +518,6 @@ static void fdmi_destroy_recv_channel(struct fdmi_recv_channel* recv_channel)
 }
 
 
-
-static struct fdmi_send_channel* fdmi_create_send_channel()
-{
-  struct fdmi_send_channel *send_channel;
-  struct fdmi_domain **domain;
-  struct ibv_device **device, **device_to_free;
-  struct fdmi_peer **peer;
-  int i;
-  char* value;
-
-  send_channel = (struct fdmi_send_channel*)fdmi_malloc(sizeof(struct fdmi_send_channel));
-  send_channel->numdomain = get_port_count();
-  send_channel->domains = (struct fdmi_domain**)fdmi_malloc(sizeof(struct fdmi_domain*) * send_channel->numdomain);
-
-  if ((device = device_to_free = ibv_get_device_list(NULL)) == NULL) {
-    fdmi_err ("ibv_get_device_list failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
-  }
-
-  for (i = 0, domain = send_channel->domains;
-       i < send_channel->numdomain;
-       i++, domain++, device++) {
-
-    struct ibv_context *ctx;
-
-    if ((ctx = ibv_open_device(*device)) == NULL) {
-      fdmi_err ("ibv_open_device failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
-    }
-
-
-    *domain = fdmi_create_domain(ctx);
-    if(ibv_close_device(ctx) == -1) {
-      fdmi_err ("ibv_close_device failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
-    }
-  }
-  ibv_free_device_list(device_to_free);
-
-  send_channel->numpeer = fdmi_size;
-  send_channel->peers = (struct fdmi_peer**)fdmi_malloc(sizeof(struct fdmi_peer*) * send_channel->numpeer);
-
-
-  for (i = 0, peer = send_channel->peers; i < send_channel->numpeer; i++, peer++) {
-    *peer = *peer = fdmi_create_peer (send_channel->domains, send_channel->numdomain);
-  }
-  return send_channel;
-}
 
 static void fdmi_destroy_send_channel(struct fdmi_send_channel* send_channel)
 {
@@ -637,6 +560,7 @@ static struct fdmi_sendrecv_channel* fdmi_create_sendrecv_channel()
 
   sendrecv_channel->numpeer = fdmi_size;
   sendrecv_channel->peers = (struct fdmi_peer**)fdmi_malloc(sizeof(struct fdmi_peer*) * sendrecv_channel->numpeer);
+
 
   for (i = 0, peer = sendrecv_channel->peers; i < sendrecv_channel->numpeer; i++, peer++) {
     *peer = fdmi_create_peer (sendrecv_channel->domains, sendrecv_channel->numdomain);
@@ -740,13 +664,14 @@ static void fdmi_bind_addr_and_listen(struct fdmi_sendrecv_channel* sendrecv_cha
     memset(addr, 0, sizeof(struct sockaddr_in));
     addr->sin_family = AF_INET;
     /* TODO: Better port determination ? */
-    port = 10 * RDMA_PORT + prank;
+    port = IBTL_LISTEN_PORT;
 
     addr->sin_port   = htons(port);
     sprintf(iname, "ib0", domain_count);
 #if defined(DEBUG_P_INIT)
     fdmi_dbg("P:Bind and Listen: iname=%s, port=%d", iname, port);
 #endif
+    fdmi_dbg("P:Bind and Listen: iname=%s, port=%d", iname, port);
     inet_aton(get_ip_addr(iname), (struct in_addr*)&(addr->sin_addr.s_addr));
 
     if (rdma_bind_addr((*domain)->rcid, (struct sockaddr *)addr)) {
@@ -2079,6 +2004,7 @@ static void* fdmi_poll_event_recv_channel(void* arg)
 #if defined(DEBUG_P_INIT)
     fdmi_dbg("P:P_EVENT=\"%s\"", event_type_str(event->event));
 #endif
+    fdmi_dbg("P:P_EVENT=\"%s\"", event_type_str(event->event));
 
     unsigned int v;
     switch (event->event){
@@ -2203,10 +2129,11 @@ static void* fdmi_poll_event_recv_channel(void* arg)
 	3. If the conn[domain_id] is NULL and previus connection not is on going, 
 	 then this connection will be used.	 
       ========================================================= */
+
       if (sendrecv_channel->peers[fdmi_rmap_itop_get(event->id)]->conn[domain_id] == NULL) {
 	sendrecv_channel->peers[fdmi_rmap_itop_get(event->id)]->conn[domain_id] = conn;
 	if (rdma_resolve_route(event->id, TIMEOUT_IN_MS)) {
-	  fdmi_err ("rdma_resolve_route failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
+	  fdmi_err ("rdma_resolve_route failed: (%s:%s:%d)",  __FILE__, __func__, __LINE__);
 	}
       }
       //      fdmi_dbgi(0, "1. connect to id: %p", event->id);
@@ -2475,7 +2402,7 @@ static void fdmi_make_ring_connection(struct fdmi_sendrecv_channel* sendrecv_cha
 static void fdmi_init_proc_man(void) {
   int i;
   /*TODO: I multipled size of rank_map_vtop by 2(extra) for dynamic scaling, but the magic number should be removed */
-  fdmi_proc_man_init(fdmi_size, fdmi_numspare, fdmi_numproc, prank);
+  fdmi_proc_man_init(100, 0, 1, 0);
   /**/
 }
 
@@ -2568,16 +2495,72 @@ int fdmi_verbs_init(int *argc, char ***argv)
   //  fdmi_make_line_connection(sendrecv_channel);
   /* Make ring network where a proces connects a neightber */
    //   if (prank == 0) sleep(1);
-
-
-  fdmi_make_ring_connection(sendrecv_channel);
+  //  fdmi_make_ring_connection(sendrecv_channel);
 
 
 
   /*If a process is standby one, the process is barriered in this 
     line until the process is elected for recovery process*/
-  fdmi_barrier_standby();
+  //  fdmi_barrier_standby();
   return 0;
+}
+
+/*
+connect to "hostname". "rank" is associated with "hostname", 
+so a user need to use "rank" for the succesive communication function, isend or irecv.
+*/
+struct fdmi_connection* fdmi_verbs_connect(int rank, char *hostname)
+{
+  struct rdma_conn_param	cm_params;
+  struct rdma_cm_id*		new_rcid;
+  struct fdmi_domain**		domain;
+  struct fdmi_peer*		peer;
+  struct fdmi_connection**	conn;
+  struct addrinfo*		addr;
+  
+  char*		nodelist;
+  char		port[32];
+  int		fdmi_numnode;
+  int           nodeid;
+  int		i, k;
+
+
+  peer	   = sendrecv_channel->peers[rank];
+  for (i = 0, domain = sendrecv_channel->domains;
+       i < sendrecv_channel->numdomain;
+       i++, domain++)
+    {
+      int ret = 0;
+      int is_locked = 0;
+
+      conn = peer->conn + i;
+
+      if (rdma_create_id((*domain)->rec, &new_rcid, NULL, RDMA_PS_TCP)){
+	fdmi_err ("rdma_create_id failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
+      }
+      sprintf(port, "%d", IBTL_LISTEN_PORT);
+      fdmi_rmap_itop_add((void*)new_rcid, rank);
+
+#ifdef DEBUG_P_INIT
+      fdmi_dbg("A:Connecting: Domain:%p, Hostname:%s(%d), port:%s", *domain, hostname, rank, port);
+#endif
+      fdmi_dbg("A:Connecting: Domain:%p, Hostname:%s(%d), port:%s, peer:%p", *domain, hostname, rank, port, peer);
+
+      if(getaddrinfo(hostname, port, NULL, &addr)){
+	fdmi_err("getaddrinfo failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
+      }
+      if (rdma_resolve_addr(new_rcid, NULL, addr->ai_addr, TIMEOUT_IN_MS)) {
+	fdmi_err ("rdma_resolve_addr failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
+      }
+      fdmi_dbg("lock: %d, rank:%d, is_connected:%d", ret, rank, sendrecv_channel->peers[rank]->is_connected);
+      while (fdmi_is_connected(rank) == 0) {
+	usleep(1000);
+	//	fdmi_dbg("waiting connection to rank:%d", rank);
+      }
+      fdmi_dbg("=====> lock: %d, rank:%d, is_connected:%d", ret, rank, sendrecv_channel->peers[rank]->is_connected);
+    }
+
+  return *conn;
 }
 
 struct fdmi_connection* fdmi_connect(struct fdmi_sendrecv_channel* sendrecv_channel, int rank)
@@ -2634,11 +2617,8 @@ struct fdmi_connection* fdmi_connect(struct fdmi_sendrecv_channel* sendrecv_chan
 	if (rdma_create_id((*domain)->rec, &new_rcid, NULL, RDMA_PS_TCP)){
 	  fdmi_err ("rdma_create_id failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
 	}
-	/* TODO: fix port = 10 * RDMA_PORT + rank */
-	sprintf(port, "%d", 10 * RDMA_PORT + rank);
-	/* TODO: Multiple HCA support
-	   e.g.) t2a00123-> [10.0.0.123, 10.0.1.123]
-	*/
+
+	sprintf(port, "%d", IBTL_LISTEN_PORT);
 	fdmi_rmap_itop_add((void*)new_rcid, rank);
 
 #ifdef DEBUG_P_INIT
@@ -2944,6 +2924,8 @@ static int fdmi_set_envs ()
 
   if ((value = fdmi_param_get("FDMI_SIZE")) != NULL) {
     fdmi_size = atoi(value);
+  } else {
+    fdmi_size = 128; //TODO:
   }
 
   if ((value = fdmi_param_get("FDMI_NUMPROC")) != NULL) {
@@ -3229,7 +3211,7 @@ const char *event_type_str(enum rdma_cm_event_type event)
   switch (event)
     {
     case RDMA_CM_EVENT_ADDR_RESOLVED: return ("Addr resolved");
-    case RDMA_CM_EVENT_ADDR_ERROR: return ("Addr Error");
+    case RDMA_CM_EVENT_ADDR_ERROR: return ("RDMA_CM_EVENT_ADDR_ERROR");
     case RDMA_CM_EVENT_ROUTE_RESOLVED: return ("Route resolved");
     case RDMA_CM_EVENT_ROUTE_ERROR: return ("Route Error");
     case RDMA_CM_EVENT_CONNECT_REQUEST: return ("RDMA_CM_EVENT_CONNECT_REQUEST");

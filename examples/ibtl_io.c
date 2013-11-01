@@ -9,7 +9,6 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
-#include "ibtls.h"
 #include "ibtl_io_client.h"
 #include "common.h"
 
@@ -28,10 +27,12 @@ int main(int argc, char **argv)
   int fd;
   double s, e;
   fd = ibtl_open("/data/test", 0, 0);
-  s = get_dtime();
+  sleep(1111);
+  //  s = get_dtime();
   ibtl_write(fd, data, BUF_SIZE);
-  e = get_dtime();
-  ibtl_dbg("Time: %f, size: %d GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000, BUF_SIZE / (e - s) / 1000000000.0 );
+
+  //  e = get_dtime();
+  //  ibtl_dbg("Time: %f, size: %d GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000, BUF_SIZE / (e - s) / 1000000000.0 );
   //ibtl_read(fd, data, BUF_SIZE);
   //  ibtl_close(fd);
   return 0;

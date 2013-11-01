@@ -1,7 +1,6 @@
 /*For RDMA transfer*/
 #include "ibtl_io_client.h"
 #include "ibtls.h"
-#include "common.h"
 #include "transfer.h"
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -21,7 +20,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#inclue "fdmi.h"
+#include "fdmi.h"
 
 
 /*For RDMA transfer*/
@@ -66,7 +65,11 @@ int ibtl_open(const char *pathname, int flags, int mode)
   if (!is_init) {
     fdmi_verbs_init(0, NULL);
   }
-
+  
+  //  fdmi_verbs_connect(0, "rkm00.m.gsic.titech.ac.jp");
+  fdmi_verbs_connect(0, "10.1.4.200");
+                   
+  fdmi_isend()
   /* ctl = &ctls[ctls_index]; */
   /* memcpy(ctl->path, pathname, PATH_SIZE); */
   return ctls_index++;

@@ -26,17 +26,8 @@ ibtl_io-ibtl_io.o: ibtl_io.c /usr/include/sys/time.h \
  /usr/include/asm-generic/ioctl.h /usr/include/bits/ioctl-types.h \
  /usr/include/sys/ttydefaults.h /usr/include/netinet/in.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h /usr/include/bits/in.h \
- /usr/include/net/if.h /usr/include/arpa/inet.h ../include/ibtls.h \
- ../include/rdma_client.h ../include/rdma_common.h /usr/include/netdb.h \
- /usr/include/rpc/netdb.h /usr/include/bits/netdb.h /usr/include/stdlib.h \
- /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
- /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h \
- /usr/include/bits/string.h /usr/include/bits/string2.h \
- /usr/include/rdma/rdma_cma.h /usr/include/infiniband/verbs.h \
- /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
- /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
- /usr/include/semaphore.h /usr/include/bits/semaphore.h \
- ../include/rdma_server.h ../src/ibtl_io_client.h ../include/common.h
+ /usr/include/net/if.h /usr/include/arpa/inet.h ../src/ibtl_io_client.h \
+ ../include/common.h
 
 /usr/include/sys/time.h:
 
@@ -151,54 +142,6 @@ ibtl_io-ibtl_io.o: ibtl_io.c /usr/include/sys/time.h \
 /usr/include/net/if.h:
 
 /usr/include/arpa/inet.h:
-
-../include/ibtls.h:
-
-../include/rdma_client.h:
-
-../include/rdma_common.h:
-
-/usr/include/netdb.h:
-
-/usr/include/rpc/netdb.h:
-
-/usr/include/bits/netdb.h:
-
-/usr/include/stdlib.h:
-
-/usr/include/bits/waitflags.h:
-
-/usr/include/bits/waitstatus.h:
-
-/usr/include/alloca.h:
-
-/usr/include/string.h:
-
-/usr/include/xlocale.h:
-
-/usr/include/bits/string.h:
-
-/usr/include/bits/string2.h:
-
-/usr/include/rdma/rdma_cma.h:
-
-/usr/include/infiniband/verbs.h:
-
-/usr/include/pthread.h:
-
-/usr/include/sched.h:
-
-/usr/include/bits/sched.h:
-
-/usr/include/bits/setjmp.h:
-
-/usr/include/infiniband/sa.h:
-
-/usr/include/semaphore.h:
-
-/usr/include/bits/semaphore.h:
-
-../include/rdma_server.h:
 
 ../src/ibtl_io_client.h:
 
