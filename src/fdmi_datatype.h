@@ -35,7 +35,6 @@ extern struct fdmi_datatype	FMI_FLOAT;//  = {FDMI_FLOAT, sizeof(float)};
 extern struct fdmi_datatype	FMI_DOUBLE;// = {FDMI_DOUBLE, sizeof(double)};
 
 
-
 size_t fdmi_datatype_size(struct fdmi_datatype dtype);
 int fdmi_datatype_op(int fdmi_op, struct fdmi_datatype dtype, void *target, void *source);
 

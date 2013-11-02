@@ -92,7 +92,7 @@ int	fdmi_verbs_comm_vrank(struct fdmi_communicator *comm, int *vrank);
 int	fdmi_verbs_isend (const void* buf, int count, struct fdmi_datatype dataype, int dest, int tag, struct fdmi_communicator *comm, struct fdmi_request* request, int op);
 int	fdmi_verbs_irecv(const void* buf, int count, struct fdmi_datatype dataype,  int source, int tag, struct fdmi_communicator *comm, struct fdmi_request* request, int op);
 int     fdmi_verbs_test(struct fdmi_request *request);
-int	fdmi_verbs_wait(struct fdmi_request* request, int op);
+int	fdmi_verbs_wait(struct fdmi_request* request, struct fdmi_status *status, int op);
 int     fdmi_verbs_iprobe(int source, int tag, struct fdmi_communicator *comm, int *flag, void* status);
 int     fdmi_verbs_barrier_dignose(void);
 

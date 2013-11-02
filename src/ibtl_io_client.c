@@ -21,7 +21,9 @@
 #include <unistd.h>
 
 #include "fdmi.h"
-
+#include "fdmi_datatype.h"
+#include "fdmi_pmtv_common.h"
+#include "fdmi_proc_man.h"
 
 /*For RDMA transfer*/
 #define IBTL_FILE_BUF_SIZE ((512 + 128) * 1024 * 1024)
@@ -58,9 +60,13 @@ static int get_id(void);
 struct scr_transfer_ctl ctls[MAX_NOFILE];
 static int ctls_index = 3;
 
+char data[4];
+
 int ibtl_open(const char *pathname, int flags, int mode)
 {
   struct scr_transfer_ctl *ctl;
+  FMI_Request req;
+
 
   if (!is_init) {
     fdmi_verbs_init(0, NULL);
@@ -69,7 +75,11 @@ int ibtl_open(const char *pathname, int flags, int mode)
   //  fdmi_verbs_connect(0, "rkm00.m.gsic.titech.ac.jp");
   fdmi_verbs_connect(0, "10.1.4.200");
                    
-  fdmi_isend()
+
+  sprintf(data, "te");
+  fdmi_verbs_isend(data, 4, FMI_BYTE, 0, 0, FMI_COMM_WORLD, &req, 0);
+  fdmi_dbg("data: %s", data);
+  
   /* ctl = &ctls[ctls_index]; */
   /* memcpy(ctl->path, pathname, PATH_SIZE); */
   return ctls_index++;

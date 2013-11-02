@@ -38,9 +38,19 @@ uint64_t buff_size = BUF_SIZE;
 uint64_t chunk_size = CHUNK_SIZE;
 uint64_t allocated_size = 0;
 
+char data[4];
+
 int main(int argc, char **argv) 
 {
+  FMI_Request req;
+  FMI_Status stat;
+
+
   fdmi_verbs_init(&argc, &argv);
+  fdmi_verbs_irecv(data, 4, FMI_BYTE, FMI_ANY_SOURCE, FMI_ANY_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+  fdmi_dbg("irecv");
+  fdmi_verbs_wait(&req, &stat, FDMI_ABORT);
+  fdmi_dbg("data %s", data);
   sleep(11111);
 /*   struct RDMA_communicator comm; */
 /*   struct RDMA_request *req1, *req2; */

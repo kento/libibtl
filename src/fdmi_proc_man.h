@@ -14,6 +14,7 @@ struct fdmi_communicator {
   int	*rmap_vtop;
 };
 
+
 enum fdmi_state {
   FDMI_COMPUTE,
   FDMI_FAILURE,

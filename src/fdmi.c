@@ -605,6 +605,15 @@ static void fdmi_create_qp(struct fdmi_domain_context** dctx, struct rdma_cm_id*
     if((dc->pd = ibv_alloc_pd(dc->ctx)) == NULL) {
       fdmi_err ("ibv_alloc_pd failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
     }
+    //    fdmi_dbg("pd: %p", dc->pd);
+    /* struct ibv_mr *mr = ibv_reg_mr( */
+    /* 		    dc->pd, */
+    /* 		    0x4068f3, */
+    /* 		    4, */
+    /* 		    IBV_ACCESS_LOCAL_WRITE */
+    /* 		    | IBV_ACCESS_REMOTE_READ); */
+    /* fdmi_dbg("mr: %p", mr); */
+    /* fdmi_dbg("ibv_reg_mr failed after several trial: pd:%p, addr:%p, size:%lu error:%s (%s:%s:%d)", dc->pd, rcid, sizeof(struct rdma_cm_id), strerror(errno),  __FILE__, __func__, __LINE__); */
 
     if((dc->cc = ibv_create_comp_channel(dc->ctx)) == NULL) {
       fdmi_err ("ibv_create_comp_channel failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
@@ -1324,133 +1333,133 @@ static int fdmi_check_failure(void)
 /*     return FDMI_COMPUTE; */
 /* } */
 
-static void fdmi_check_recovery()
-{    
-  int flag;
-  int size;
-  int next;
-  struct fdmi_ft_msg local_ft_msg;
-  struct fdmi_request req;
-  int disconnected_rank;
-  double sf, ef;
+/* static void fdmi_check_recovery() */
+/* {     */
+/*   int flag; */
+/*   int size; */
+/*   int next; */
+/*   struct fdmi_ft_msg local_ft_msg; */
+/*   struct fdmi_request req; */
+/*   int disconnected_rank; */
+/*   double sf, ef; */
 
-  if (prank == 0) {
-    int state = 0;
-    fdmi_verbs_comm_size(fdmi_comm_master_ignore, &size);
-    fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &flag, NULL);
-    if (!flag)  return;
-    /* if (fdmi_get_state() == FDMI_FAILURE)  { */
-    /*   /\**  */
-    /*    * A process in FMI_FAILURE state is a process which detected a process failure, the only thing to do is wating REMI_RECOVERY msg. */
-    /*    *\/ */
-    /*   { */
-    /* 	fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); */
-    /*   } while (!flag); */
-    /* } else { */
-    /*   fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); */
-    /*   if (!flag) return; */
-    /* } */
+/*   if (prank == 0) { */
+/*     int state = 0; */
+/*     fdmi_verbs_comm_size(fdmi_comm_master_ignore, &size); */
+/*     fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &flag, NULL); */
+/*     if (!flag)  return; */
+/*     /\* if (fdmi_get_state() == FDMI_FAILURE)  { *\/ */
+/*     /\*   /\\**  *\/ */
+/*     /\*    * A process in FMI_FAILURE state is a process which detected a process failure, the only thing to do is wating REMI_RECOVERY msg. *\/ */
+/*     /\*    *\\/ *\/ */
+/*     /\*   { *\/ */
+/*     /\* 	fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); *\/ */
+/*     /\*   } while (!flag); *\/ */
+/*     /\* } else { *\/ */
+/*     /\*   fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); *\/ */
+/*     /\*   if (!flag) return; *\/ */
+/*     /\* } *\/ */
 
-    while (fdmi_queue_lock_deq(send_req_q) != NULL);
-    sf = fdmi_get_time();
+/*     while (fdmi_queue_lock_deq(send_req_q) != NULL); */
+/*     sf = fdmi_get_time(); */
 
-    fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-    fdmi_verbs_wait(&req, FDMI_FORCE);
+/*     fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*     fdmi_verbs_wait(&req, FDMI_FORCE); */
 
-    disconnected_rank      = local_ft_msg.ranks[0];
-    if (!fdmi_need_update_ft_msg(disconnected_rank)) return;
+/*     disconnected_rank      = local_ft_msg.ranks[0]; */
+/*     if (!fdmi_need_update_ft_msg(disconnected_rank)) return; */
 
-    //    fdmi_dbg("DISCONNECTED: %d", disconnected_rank);
-    fdmi_update_ft_msg(disconnected_rank);
-    ft_msg.msg_type  = FDMI_REPORT_PROPA;
-    ft_msg.epoch++;
+/*     //    fdmi_dbg("DISCONNECTED: %d", disconnected_rank); */
+/*     fdmi_update_ft_msg(disconnected_rank); */
+/*     ft_msg.msg_type  = FDMI_REPORT_PROPA; */
+/*     ft_msg.epoch++; */
 
-    /*TODOB: currently assuming rank:(prank + 1) % fdmi_size is on the same node as one of rank 0*/
-    next = (prank + 1) % fdmi_size;
-    fdmi_verbs_isend(&ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-    fdmi_verbs_wait(&req, FDMI_FORCE);
-    //    fdmi_dbg("Send !! %d type:%d, offset:%d, range:%d", ft_msg.ranks[0], ft_msg.msg_type, ft_msg.offset[0], ft_msg.range[0]);
-    while (1) {
-      fdmi_dbg("Wait for reply");
-      fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-      fdmi_verbs_wait(&req, FDMI_FORCE);
+/*     /\*TODOB: currently assuming rank:(prank + 1) % fdmi_size is on the same node as one of rank 0*\/ */
+/*     next = (prank + 1) % fdmi_size; */
+/*     fdmi_verbs_isend(&ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*     fdmi_verbs_wait(&req, FDMI_FORCE); */
+/*     //    fdmi_dbg("Send !! %d type:%d, offset:%d, range:%d", ft_msg.ranks[0], ft_msg.msg_type, ft_msg.offset[0], ft_msg.range[0]); */
+/*     while (1) { */
+/*       fdmi_dbg("Wait for reply"); */
+/*       fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*       fdmi_verbs_wait(&req, FDMI_FORCE); */
 
-      if (local_ft_msg.msg_type == FDMI_REPORT_PROPA) {
-	fdmi_dbg("reply: Propa");
-	if (ft_msg.id == local_ft_msg.id) {
-	  //	  fdmi_dbg("Recv !! %d type:%d, offset:%d, range:%d", local_ft_msg.ranks[0], local_ft_msg.msg_type, local_ft_msg.offset[0], local_ft_msg.range[0]);
-	  fdmi_update_comm_world(local_ft_msg.offset,  local_ft_msg.range, 
-				 local_ft_msg.eoffset, local_ft_msg.erange, local_ft_msg.elength);
-	  fdmi_state = FDMI_RECOVERY;
-	  ef = fdmi_get_time();
-	  fdmi_dbgi(0, "Communicator recovered in %f seconds", ef - sf);
-	  fdmi_dbgi(0, "Epoch Transitions to %d", ft_msg.epoch);
-	  /* int i; */
-	  /* for (i = 0; i < 48; i++) { */
-	  /*   int a = fdmi_comm_master_elect.rmap_vtop[i]; */
-	  /*   fdmi_dbgi(0, "v=%d -> p=%d, p=%d -> v=%d", i, a, a, fdmi_comm_master_elect.rmap_ptov[a]); */
-	  /* } */
+/*       if (local_ft_msg.msg_type == FDMI_REPORT_PROPA) { */
+/* 	fdmi_dbg("reply: Propa"); */
+/* 	if (ft_msg.id == local_ft_msg.id) { */
+/* 	  //	  fdmi_dbg("Recv !! %d type:%d, offset:%d, range:%d", local_ft_msg.ranks[0], local_ft_msg.msg_type, local_ft_msg.offset[0], local_ft_msg.range[0]); */
+/* 	  fdmi_update_comm_world(local_ft_msg.offset,  local_ft_msg.range,  */
+/* 				 local_ft_msg.eoffset, local_ft_msg.erange, local_ft_msg.elength); */
+/* 	  fdmi_state = FDMI_RECOVERY; */
+/* 	  ef = fdmi_get_time(); */
+/* 	  fdmi_dbgi(0, "Communicator recovered in %f seconds", ef - sf); */
+/* 	  fdmi_dbgi(0, "Epoch Transitions to %d", ft_msg.epoch); */
+/* 	  /\* int i; *\/ */
+/* 	  /\* for (i = 0; i < 48; i++) { *\/ */
+/* 	  /\*   int a = fdmi_comm_master_elect.rmap_vtop[i]; *\/ */
+/* 	  /\*   fdmi_dbgi(0, "v=%d -> p=%d, p=%d -> v=%d", i, a, a, fdmi_comm_master_elect.rmap_ptov[a]); *\/ */
+/* 	  /\* } *\/ */
 
-	  return;
-	}
-	if (ft_msg.id > local_ft_msg.id) continue;
-      } else if (local_ft_msg.msg_type == FDMI_FAILURE_REPORT) {
-	fdmi_dbg("reply: Report: failed:%d", local_ft_msg.ranks[0]);
-	if (fdmi_need_update_ft_msg(local_ft_msg.ranks[0])) {
-	  fdmi_dbg("reply: Update: failed: %d", local_ft_msg.ranks[0]);
-	  fdmi_update_ft_msg(local_ft_msg.ranks[0]);
-	  next = (prank + 1) % fdmi_size;
-	  fdmi_verbs_isend(&ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-	  fdmi_verbs_wait(&req, FDMI_FORCE);
-	} 
-      }
-    }
-  } else {
-    fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &flag, NULL);
-    if (!flag)  return;
-    /* if (fdmi_state == FDMI_FAILURE)  { */
-    /*   /\**  */
-    /*    * A process in FMI_FAILURE state is a process which detected a process failure, the only thing to do is wating REMI_RECOVERY msg. */
-    /*    *\/ */
-    /*   { */
-    /* 	sleep(1); */
-    /* 	fdmi_dbgi(7, "iprove"); */
-    /* 	fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); */
-    /* 	fdmi_dbgi(7, "iprove done: flag %d:", flag); */
-    /* 	fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); */
-    /* 	fdmi_dbgi(7, "iprove done: flag %d:", flag); */
+/* 	  return; */
+/* 	} */
+/* 	if (ft_msg.id > local_ft_msg.id) continue; */
+/*       } else if (local_ft_msg.msg_type == FDMI_FAILURE_REPORT) { */
+/* 	fdmi_dbg("reply: Report: failed:%d", local_ft_msg.ranks[0]); */
+/* 	if (fdmi_need_update_ft_msg(local_ft_msg.ranks[0])) { */
+/* 	  fdmi_dbg("reply: Update: failed: %d", local_ft_msg.ranks[0]); */
+/* 	  fdmi_update_ft_msg(local_ft_msg.ranks[0]); */
+/* 	  next = (prank + 1) % fdmi_size; */
+/* 	  fdmi_verbs_isend(&ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/* 	  fdmi_verbs_wait(&req, FDMI_FORCE); */
+/* 	}  */
+/*       } */
+/*     } */
+/*   } else { */
+/*     fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &flag, NULL); */
+/*     if (!flag)  return; */
+/*     /\* if (fdmi_state == FDMI_FAILURE)  { *\/ */
+/*     /\*   /\\**  *\/ */
+/*     /\*    * A process in FMI_FAILURE state is a process which detected a process failure, the only thing to do is wating REMI_RECOVERY msg. *\/ */
+/*     /\*    *\\/ *\/ */
+/*     /\*   { *\/ */
+/*     /\* 	sleep(1); *\/ */
+/*     /\* 	fdmi_dbgi(7, "iprove"); *\/ */
+/*     /\* 	fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); *\/ */
+/*     /\* 	fdmi_dbgi(7, "iprove done: flag %d:", flag); *\/ */
+/*     /\* 	fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); *\/ */
+/*     /\* 	fdmi_dbgi(7, "iprove done: flag %d:", flag); *\/ */
 
-    /*   } while (!flag); */
-    /*   if (prank == 7) fdmi_err("ssssssyyouou"); */
-    /*   fdmi_dbgi(7, "flag: %d", flag); */
-    /* } else { */
-    /*   fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); */
-    /*   if (!flag) return; */
-    /* } */
+/*     /\*   } while (!flag); *\/ */
+/*     /\*   if (prank == 7) fdmi_err("ssssssyyouou"); *\/ */
+/*     /\*   fdmi_dbgi(7, "flag: %d", flag); *\/ */
+/*     /\* } else { *\/ */
+/*     /\*   fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, &fdmi_comm_master_ignore, &flag, NULL); *\/ */
+/*     /\*   if (!flag) return; *\/ */
+/*     /\* } *\/ */
 
-    fdmi_dbgi(23, "iprobe passed");
-    while (fdmi_queue_lock_deq(send_req_q) != NULL);
-    fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-    fdmi_verbs_wait(&req, FDMI_FORCE);
-    memcpy(&ft_msg, &local_ft_msg, sizeof(struct fdmi_ft_msg));
+/*     fdmi_dbgi(23, "iprobe passed"); */
+/*     while (fdmi_queue_lock_deq(send_req_q) != NULL); */
+/*     fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*     fdmi_verbs_wait(&req, FDMI_FORCE); */
+/*     memcpy(&ft_msg, &local_ft_msg, sizeof(struct fdmi_ft_msg)); */
 
 
-    next = (prank + 1) % fdmi_size;
+/*     next = (prank + 1) % fdmi_size; */
 
-    while (!fdmi_need_update_ft_msg(next)) {
-      next++;
-    }
-    //    fdmi_dbg("Recv !! %d type:%d, offset:%d, range:%d, next=%d", local_ft_msg.ranks[0], local_ft_msg.msg_type, local_ft_msg.offset[0], local_ft_msg.range[0], next);
-    //    usleep(500000);
+/*     while (!fdmi_need_update_ft_msg(next)) { */
+/*       next++; */
+/*     } */
+/*     //    fdmi_dbg("Recv !! %d type:%d, offset:%d, range:%d, next=%d", local_ft_msg.ranks[0], local_ft_msg.msg_type, local_ft_msg.offset[0], local_ft_msg.range[0], next); */
+/*     //    usleep(500000); */
     
-    fdmi_verbs_isend(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-    fdmi_verbs_wait(&req, FDMI_FORCE);
-    fdmi_update_comm_world(local_ft_msg.offset,  local_ft_msg.range, 
-			   local_ft_msg.eoffset, local_ft_msg.erange, local_ft_msg.elength);
-    fdmi_state = FDMI_RECOVERY;
-    return;
-  }
-}
+/*     fdmi_verbs_isend(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*     fdmi_verbs_wait(&req, FDMI_FORCE); */
+/*     fdmi_update_comm_world(local_ft_msg.offset,  local_ft_msg.range,  */
+/* 			   local_ft_msg.eoffset, local_ft_msg.erange, local_ft_msg.elength); */
+/*     fdmi_state = FDMI_RECOVERY; */
+/*     return; */
+/*   } */
+/* } */
 
 /* void fdmi_post_recv_msg_param(struct fdmi_post_recv_param* prparam) */
 /* { */
@@ -1611,6 +1620,11 @@ void fdmi_post_recv_msg_param(struct fdmi_post_recv_param* prparam)
   {
 
     struct fdmi_query *matched_active_query;
+    while (domain->dctx == NULL) {
+      /*Wait until someone connect to me. 
+	If someone do, domain->dctx is allocated by another thread*/
+      usleep(1000);
+    }
     query_qp = domain->dctx->query_qp;
     fdmi_queue_lock(query_qp->aq);
     fdmi_queue_lock(query_qp->pq);
@@ -2406,49 +2420,49 @@ static void fdmi_init_proc_man(void) {
   /**/
 }
 
-static void fdmi_barrier_standby()
-{
-  int flag, size, next;
-  struct fdmi_ft_msg local_ft_msg;
-  struct fdmi_request req;
-  int disconnected_rank;
+/* static void fdmi_barrier_standby() */
+/* { */
+/*   int flag, size, next; */
+/*   struct fdmi_ft_msg local_ft_msg; */
+/*   struct fdmi_request req; */
+/*   int disconnected_rank; */
 
-  if (fdmi_prank_state() != -1) return;
+/*   if (fdmi_prank_state() != -1) return; */
 
-  while(1) {
-    flag = 0;
-    while (!flag) {
-      fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &flag, NULL);
-    }
-    fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-    fdmi_verbs_wait(&req, FDMI_FORCE);
-    memcpy(&ft_msg, &local_ft_msg, sizeof(struct fdmi_ft_msg));
+/*   while(1) { */
+/*     flag = 0; */
+/*     while (!flag) { */
+/*       fdmi_verbs_iprobe(FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &flag, NULL); */
+/*     } */
+/*     fdmi_verbs_irecv(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, FMI_ANY_SOURCE, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*     fdmi_verbs_wait(&req, FDMI_FORCE); */
+/*     memcpy(&ft_msg, &local_ft_msg, sizeof(struct fdmi_ft_msg)); */
 
-    next = (prank + 1) % fdmi_size;
+/*     next = (prank + 1) % fdmi_size; */
 
-    while (!fdmi_need_update_ft_msg(next)) {
-      next++;
-    }
-    fdmi_verbs_isend(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-    fdmi_verbs_wait(&req, FDMI_FORCE);
+/*     while (!fdmi_need_update_ft_msg(next)) { */
+/*       next++; */
+/*     } */
+/*     fdmi_verbs_isend(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, next, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*     fdmi_verbs_wait(&req, FDMI_FORCE); */
 
-    /* int i; */
-    /* for (i = 0; i < 16; i++) { */
-    /*   int a = fdmi_comm_master_elect.rmap_vtop[i]; */
-    /*   fdmi_dbgi(8, "v=%d -> p=%d, p=%d -> v=%d", i, a, a, fdmi_comm_master_elect.rmap_ptov[a]); */
-    /* } */
-    fdmi_update_comm_world(local_ft_msg.offset,  local_ft_msg.range, 
-			   local_ft_msg.eoffset, local_ft_msg.erange, local_ft_msg.elength);
-    /* for (i = 0; i < 16; i++) { */
-    /*   int a = fdmi_comm_master_elect.rmap_vtop[i]; */
-    /*   fdmi_dbgi(8, "v=%d -> p=%d, p=%d -> v=%d", i, a, a, fdmi_comm_master_elect.rmap_ptov[a]); */
-    /* } */
-    if(fdmi_can_join()) {
-      fdmi_state = FDMI_JOINING;
-      break;
-    }
-  }
-}
+/*     /\* int i; *\/ */
+/*     /\* for (i = 0; i < 16; i++) { *\/ */
+/*     /\*   int a = fdmi_comm_master_elect.rmap_vtop[i]; *\/ */
+/*     /\*   fdmi_dbgi(8, "v=%d -> p=%d, p=%d -> v=%d", i, a, a, fdmi_comm_master_elect.rmap_ptov[a]); *\/ */
+/*     /\* } *\/ */
+/*     fdmi_update_comm_world(local_ft_msg.offset,  local_ft_msg.range,  */
+/* 			   local_ft_msg.eoffset, local_ft_msg.erange, local_ft_msg.elength); */
+/*     /\* for (i = 0; i < 16; i++) { *\/ */
+/*     /\*   int a = fdmi_comm_master_elect.rmap_vtop[i]; *\/ */
+/*     /\*   fdmi_dbgi(8, "v=%d -> p=%d, p=%d -> v=%d", i, a, a, fdmi_comm_master_elect.rmap_ptov[a]); *\/ */
+/*     /\* } *\/ */
+/*     if(fdmi_can_join()) { */
+/*       fdmi_state = FDMI_JOINING; */
+/*       break; */
+/*     } */
+/*   } */
+/* } */
 
 int fdmi_verbs_init(int *argc, char ***argv)
 {
@@ -2481,7 +2495,6 @@ int fdmi_verbs_init(int *argc, char ***argv)
 
   /* Bind to HCA/port, and create qpt */
   fdmi_bind_addr_and_listen(sendrecv_channel);
-
 
   /* Handle connection requests from other processes */
   fdmi_run_event_channel_poller(sendrecv_channel);
@@ -2675,7 +2688,7 @@ int fdmi_verbs_comm_vrank(struct fdmi_communicator *comm, int *vrank)
   return 0;
 }
 
-int fdmi_verbs_wait(struct fdmi_request* request, int op)
+int fdmi_verbs_wait(struct fdmi_request* request, struct fdmi_status *status, int op)
 {
   int errno;
 
@@ -2754,28 +2767,28 @@ void show_query_qp_content()
 
 /* } */
 
-int fdmi_on_recovery_report() 
-{
-  int *disconnected_prank;
-  int flag;
-  struct fdmi_request req;
-  struct fdmi_ft_msg local_ft_msg;
+/* int fdmi_on_recovery_report()  */
+/* { */
+/*   int *disconnected_prank; */
+/*   int flag; */
+/*   struct fdmi_request req; */
+/*   struct fdmi_ft_msg local_ft_msg; */
 
-  /*TODOB: currently send just one  failed rank at once*/
-  disconnected_prank = (int*)fdmi_queue_lock_deq(disconnected_prank_q);
-  if (disconnected_prank != NULL) {
-    if (prank != 0) {
-      local_ft_msg.msg_type = FDMI_FAILURE_REPORT;
-      local_ft_msg.rlength   = 1;
-      local_ft_msg.ranks[0]   = *disconnected_prank;
-      fdmi_verbs_isend(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, 0, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE);
-      fdmi_verbs_wait(&req, FDMI_FORCE);
-      //      fdmi_dbg("%d: Reported %d disconnected(addr:%p)", prank, *disconnected_prank, disconnected_prank);
-    }
-  } 
+/*   /\*TODOB: currently send just one  failed rank at once*\/ */
+/*   disconnected_prank = (int*)fdmi_queue_lock_deq(disconnected_prank_q); */
+/*   if (disconnected_prank != NULL) { */
+/*     if (prank != 0) { */
+/*       local_ft_msg.msg_type = FDMI_FAILURE_REPORT; */
+/*       local_ft_msg.rlength   = 1; */
+/*       local_ft_msg.ranks[0]   = *disconnected_prank; */
+/*       fdmi_verbs_isend(&local_ft_msg, sizeof(struct fdmi_ft_msg), FMI_BYTE, 0, FDMI_RECOVERY_TAG, fdmi_comm_master_ignore, &req, FDMI_FORCE); */
+/*       fdmi_verbs_wait(&req, FDMI_FORCE); */
+/*       //      fdmi_dbg("%d: Reported %d disconnected(addr:%p)", prank, *disconnected_prank, disconnected_prank); */
+/*     } */
+/*   }  */
 
-  return 0;
-}
+/*   return 0; */
+/* } */
 
 //TODO: NOT struct fdmi_communicator* but struct fdmi_communiocator
 int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, int vdest, int tag, struct fdmi_communicator *comm, struct fdmi_request *request, int op) 
@@ -2788,11 +2801,12 @@ int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, 
   fs = fdmi_get_time();
 #endif
 
-  if (!(op & FDMI_FORCE)) {
-    if(fdmi_check_failure() != FDMI_COMPUTE) return FMI_RECOVERY;
-  }
+  /* if (!(op & FDMI_FORCE)) { */
+  /*   if(fdmi_check_failure() != FDMI_COMPUTE) return FMI_RECOVERY; */
+  /* } */
 
-  dest = fdmi_comm_get_prank(comm, vdest);
+  //  dest = fdmi_comm_get_prank(comm, vdest);
+  dest = vdest;
 
   if (!fdmi_is_connected(dest)) {
     fdmi_connect(sendrecv_channel, dest);
@@ -2809,10 +2823,10 @@ int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, 
   psparam.op	      = op;
 
   // TODO: use locked_requst_sem_q
-  if ((op & FDMI_ABORT)) {
-    fdmi_queue_lock_enq(locked_request_sem_q, psparam.request_flag);
-    fdmi_queue_lock_enq(send_req_q, psparam.request_flag);
-  }
+  /* if ((op & FDMI_ABORT)) { */
+  /*   fdmi_queue_lock_enq(locked_request_sem_q, psparam.request_flag); */
+  /*   fdmi_queue_lock_enq(send_req_q, psparam.request_flag); */
+  /* } */
 
   /* if ((errno = sem_init(psparam.request_sem, 0, 0)) > 0) { */
   /*   fdmi_err ("sem_init failed (%s:%s:%d)", __FILE__, __func__, __LINE__);   */
@@ -2838,9 +2852,9 @@ int fdmi_verbs_irecv(const void *buf, int count, struct fdmi_datatype datatype, 
   int source;
 
 
-  if (!(op & FDMI_FORCE)) {
-    if(fdmi_check_failure() != FDMI_COMPUTE) return FMI_RECOVERY;
-  }
+  /* if (!(op & FDMI_FORCE)) { */
+  /*   if(fdmi_check_failure() != FDMI_COMPUTE) return FMI_RECOVERY; */
+  /* } */
 
   source = fdmi_comm_get_prank(comm, vsource);
   //  if (comm.id == 5) fdmi_dbg( "here, vsource: %d", vsource);
@@ -3037,6 +3051,7 @@ struct ibv_mr* fdmi_reg_mr (const void* addr, uint32_t size, struct ibv_pd* pd)
 
 
   int try = 1000;
+
   do {
     mr = ibv_reg_mr(
 		    pd,
@@ -3049,10 +3064,11 @@ struct ibv_mr* fdmi_reg_mr (const void* addr, uint32_t size, struct ibv_pd* pd)
       try--;
       if (try < 0) {
 	//*(int*)addr = 1;
-	fdmi_err ("ibv_reg_mr failed after several trial: pd:%p, addr:%p, size:%lu (%s:%s:%d)", pd, addr, size,  __FILE__, __func__, __LINE__);
+	fdmi_err ("ibv_reg_mr failed after several trial: pd:%p, addr:%p, size:%lu error:%s (%s:%s:%d)", pd, addr, size, strerror(errno),  __FILE__, __func__, __LINE__);
       }
     }
   } while(mr == NULL);
+
   fdmi_queue_lock(reg_mr_q);
   fdmi_queue_enq(reg_mr_q, mr);
   reg_mr_cached_size += mr->length;
