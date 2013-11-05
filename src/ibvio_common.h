@@ -5,8 +5,9 @@
 #define IBVIO_OP_READ  (3)
 #define IBVIO_OP_CLOSE (4)
 
-
 #define IBVIO_CHUNK_SIZE (64 * 1024 * 1024)
+
+#define IBVIO_DELAYED_WRITE (1)
 
 struct ibvio_open {
   int fd;

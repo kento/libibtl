@@ -35,7 +35,8 @@ int main(int argc, char **argv)
 
   memset(data, 0, BUF_SIZE);
   ibtl_write(fd, data, BUF_SIZE);
-  ibtl_write(fd, data, BUF_SIZE);
+  sleep(2);
+  //  ibtl_write(fd, data, BUF_SIZE);
   s = get_time();
   ibtl_write(fd, data, BUF_SIZE);
   e = get_time();
