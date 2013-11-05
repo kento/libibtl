@@ -83,6 +83,7 @@ am_libibtls_a_OBJECTS = libibtls_a-list_queue.$(OBJEXT) \
 	libibtls_a-fdmi_queue.$(OBJEXT) \
 	libibtls_a-fdmi_datatype.$(OBJEXT) \
 	libibtls_a-fdmi_proc_man.$(OBJEXT) libibtls_a-fdmi.$(OBJEXT) \
+	libibtls_a-ibvio_common.$(OBJEXT) \
 	libibtls_a-ibtl_io_client.$(OBJEXT)
 libibtls_a_OBJECTS = $(am_libibtls_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
@@ -93,13 +94,14 @@ am_libibtls_la_OBJECTS = libibtls_la-list_queue.lo \
 	libibtls_la-fdmi_util.lo libibtls_la-fdmi_hashtable.lo \
 	libibtls_la-fdmi_queue.lo libibtls_la-fdmi_datatype.lo \
 	libibtls_la-fdmi_proc_man.lo libibtls_la-fdmi.lo \
-	libibtls_la-ibtl_io_client.lo
+	libibtls_la-ibvio_common.lo libibtls_la-ibtl_io_client.lo
 libibtls_la_OBJECTS = $(am_libibtls_la_OBJECTS)
 libibtls_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libibtls_la_CFLAGS) \
 	$(CFLAGS) $(libibtls_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
 am_ibtl_io_server_OBJECTS = ibtl_io_server-ibtl_io_server.$(OBJEXT) \
+	ibtl_io_server-ibvio_common.$(OBJEXT) \
 	ibtl_io_server-pgz.$(OBJEXT) \
 	ibtl_io_server-scr_list_queue.$(OBJEXT) \
 	ibtl_io_server-fdmi_err.$(OBJEXT) \
@@ -264,6 +266,7 @@ libibtls_a_SOURCES = \
 	$(SRC_DIR)/fdmi_proc_man.c \
         $(SRC_DIR)/fdmi.c \
         $(INCLUDE_DIR)/fdmi.h \
+        $(SRC_DIR)/ibvio_common.c \
         $(SRC_DIR)/ibtl_io_client.c 
 
 libibtls_a_LIBADD = @LIBOBJS@
@@ -285,12 +288,13 @@ libibtls_la_SOURCES = \
 	$(SRC_DIR)/fdmi_datatype.c \
 	$(SRC_DIR)/fdmi_proc_man.c \
         $(SRC_DIR)/fdmi.c \
+        $(SRC_DIR)/ibvio_common.c \
         $(SRC_DIR)/ibtl_io_client.c 
 
 libibtls_la_LIBADD = @LIBOBJS@
 libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
 libibtls_la_LDFLAGS = -lrdmacm -lpthread -libverbs -version-info 1:0:0 -release 1
-ibtl_io_server_SOURCES = ibtl_io_server.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
+ibtl_io_server_SOURCES = ibtl_io_server.c ibvio_common.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
 ibtl_io_server_DEPENDENCIES = ${SRC_DIR}/libibtls.a
 ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
 ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 
@@ -454,6 +458,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibtl_io_server-fdmi_param.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibtl_io_server-fdmi_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibtl_io_server-ibtl_io_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibtl_io_server-ibvio_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibtl_io_server-pgz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibtl_io_server-scr_list_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ibtl_io_server-yarn.Po@am__quote@
@@ -467,6 +472,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-fdmi_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-fdmi_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-ibtl_io_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-ibvio_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_a-list_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_la-fdmi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_la-fdmi_datatype.Plo@am__quote@
@@ -479,6 +485,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_la-fdmi_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_la-ibtl_io_client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_la-ibtls.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_la-ibvio_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libibtls_la-list_queue.Plo@am__quote@
 
 .c.o:
@@ -642,6 +649,20 @@ libibtls_a-fdmi.obj: $(SRC_DIR)/fdmi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi.obj `if test -f '$(SRC_DIR)/fdmi.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi.c'; fi`
 
+libibtls_a-ibvio_common.o: $(SRC_DIR)/ibvio_common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibvio_common.o -MD -MP -MF $(DEPDIR)/libibtls_a-ibvio_common.Tpo -c -o libibtls_a-ibvio_common.o `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libibtls_a-ibvio_common.Tpo $(DEPDIR)/libibtls_a-ibvio_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/ibvio_common.c' object='libibtls_a-ibvio_common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibvio_common.o `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
+
+libibtls_a-ibvio_common.obj: $(SRC_DIR)/ibvio_common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibvio_common.obj -MD -MP -MF $(DEPDIR)/libibtls_a-ibvio_common.Tpo -c -o libibtls_a-ibvio_common.obj `if test -f '$(SRC_DIR)/ibvio_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibvio_common.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libibtls_a-ibvio_common.Tpo $(DEPDIR)/libibtls_a-ibvio_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/ibvio_common.c' object='libibtls_a-ibvio_common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibvio_common.obj `if test -f '$(SRC_DIR)/ibvio_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibvio_common.c'; fi`
+
 libibtls_a-ibtl_io_client.o: $(SRC_DIR)/ibtl_io_client.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtl_io_client.o -MD -MP -MF $(DEPDIR)/libibtls_a-ibtl_io_client.Tpo -c -o libibtls_a-ibtl_io_client.o `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libibtls_a-ibtl_io_client.Tpo $(DEPDIR)/libibtls_a-ibtl_io_client.Po
@@ -733,6 +754,13 @@ libibtls_la-fdmi.lo: $(SRC_DIR)/fdmi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi.lo `test -f '$(SRC_DIR)/fdmi.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi.c
 
+libibtls_la-ibvio_common.lo: $(SRC_DIR)/ibvio_common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibvio_common.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibvio_common.Tpo -c -o libibtls_la-ibvio_common.lo `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libibtls_la-ibvio_common.Tpo $(DEPDIR)/libibtls_la-ibvio_common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(SRC_DIR)/ibvio_common.c' object='libibtls_la-ibvio_common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-ibvio_common.lo `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
+
 libibtls_la-ibtl_io_client.lo: $(SRC_DIR)/ibtl_io_client.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibtl_io_client.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibtl_io_client.Tpo -c -o libibtls_la-ibtl_io_client.lo `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libibtls_la-ibtl_io_client.Tpo $(DEPDIR)/libibtls_la-ibtl_io_client.Plo
@@ -753,6 +781,20 @@ ibtl_io_server-ibtl_io_server.obj: ibtl_io_server.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ibtl_io_server.c' object='ibtl_io_server-ibtl_io_server.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibtl_io_server.obj `if test -f 'ibtl_io_server.c'; then $(CYGPATH_W) 'ibtl_io_server.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_server.c'; fi`
+
+ibtl_io_server-ibvio_common.o: ibvio_common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+
+ibtl_io_server-ibvio_common.obj: ibvio_common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
 
 ibtl_io_server-pgz.o: pgz.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-pgz.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-pgz.Tpo -c -o ibtl_io_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c

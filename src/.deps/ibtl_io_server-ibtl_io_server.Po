@@ -35,7 +35,7 @@ ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c /usr/include/stdlib.h \
  /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
  /usr/include/semaphore.h /usr/include/bits/semaphore.h fdmi_config.h \
  fdmi_pmtv_common.h fdmi_datatype.h fdmi_proc_man.h ../include/common.h \
- transfer.h scr_list_queue.h fdmi_util.h pgz.h
+ transfer.h scr_list_queue.h fdmi_util.h pgz.h ibvio_common.h
 
 /usr/include/stdlib.h:
 
@@ -206,3 +206,5 @@ scr_list_queue.h:
 fdmi_util.h:
 
 pgz.h:
+
+ibvio_common.h:

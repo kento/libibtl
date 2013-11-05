@@ -24,6 +24,9 @@
 #include "fdmi_datatype.h"
 #include "fdmi_pmtv_common.h"
 #include "fdmi_proc_man.h"
+#include "fdmi_config.h"
+#include "fdmi_util.h"
+#include "ibvio_common.h"
 
 /*For RDMA transfer*/
 #define IBTL_FILE_BUF_SIZE ((512 + 128) * 1024 * 1024)
@@ -60,33 +63,116 @@ static int get_id(void);
 struct scr_transfer_ctl ctls[MAX_NOFILE];
 static int ctls_index = 3;
 
-char data[4];
+//#define BUF_SIZE (128 * 1024)
+char data[TEST_BUFF_SIZE];
+
+int host_ids[1024]; /*Mapping between fd:host_id */
+int next_host_id = 0;
 
 int ibtl_open(const char *pathname, int flags, int mode)
 {
-  struct scr_transfer_ctl *ctl;
+  struct ibvio_open iopen;
   FMI_Request req;
-
+  FMI_Status stat;
+  int tag;
+  int host_id;
+  struct scr_transfer_ctl *ctl;
+  char local_pathname[256];
+  char *hostname, *path;
+  double s, e;
 
   if (!is_init) {
     fdmi_verbs_init(0, NULL);
   }
-  
-  //  fdmi_verbs_connect(0, "rkm00.m.gsic.titech.ac.jp");
-  fdmi_verbs_connect(0, "10.1.4.200");
-                   
 
-  sprintf(data, "te");
-  fdmi_verbs_isend(data, 4, FMI_BYTE, 0, 0, FMI_COMM_WORLD, &req, 0);
-  fdmi_dbg("data: %s", data);
+  host_id = next_host_id;
+
+
+  sprintf(local_pathname, "%s", pathname);
+  hostname = strtok(local_pathname, ":");
+
+  path     = strtok(NULL, ":");
+  sprintf(iopen.path, "%s", path);
+  iopen.flags = flags;
+  iopen.mode  = mode;
+
+  //  fdmi_verbs_connect(0, "rkm00.m.gsic.titech.ac.jp");
+  fdmi_verbs_connect(host_id, hostname);
   
-  /* ctl = &ctls[ctls_index]; */
-  /* memcpy(ctl->path, pathname, PATH_SIZE); */
-  return ctls_index++;
+  ibvio_serialize_tag(IBVIO_OP_OPEN, 0, &tag);
+  fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, tag, FMI_COMM_WORLD, &req, 0);
+  fdmi_verbs_wait(&req, &stat);
+
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, FMI_ANY_TAG, FMI_COMM_WORLD, &req, 0);
+  fdmi_verbs_wait(&req, &stat);
+
+  host_ids[iopen.fd] = next_host_id;
+  next_host_id++;
+  
+  /* fdmi_verbs_irecv(data, TEST_BUFF_SIZE, FMI_BYTE, FMI_ANY_SOURCE, FMI_ANY_TAG,  FMI_COMM_WORLD, &req, 0); */
+  /* fdmi_verbs_wait(&req, &stat); */
+  /* fdmi_dbg("data: %s: from rank: %d, tag; %d", data, stat.FMI_SOURCE, stat.FMI_TAG); */
+  
+
+  /* s = fdmi_get_time(); */
+  /* sprintf(data, "small"); */
+  /* fdmi_verbs_isend(data, TEST_BUFF_SIZE, FMI_BYTE, host_id, 15, FMI_COMM_WORLD, &req, 0); */
+  /* fdmi_verbs_wait(&req, &stat); */
+  /* fdmi_dbg("data: %s", data); */
+
+  /* fdmi_verbs_irecv(data, TEST_BUFF_SIZE, FMI_BYTE, FMI_ANY_SOURCE, FMI_ANY_TAG,  FMI_COMM_WORLD, &req, 0); */
+  /* fdmi_verbs_wait(&req, &stat); */
+  /* e = fdmi_get_time(); */
+  /* fdmi_dbg("data: %s: from rank: %d, tag; %d, time: %f, bw:%f", data, stat.FMI_SOURCE, stat.FMI_TAG, e - s, TEST_BUFF_SIZE / (e - s) / 1000000000 * 2);   */
+
+
+  /* /\* ctl = &ctls[ctls_index]; *\/ */
+  /* /\* memcpy(ctl->path, pathname, PATH_SIZE); *\/ */
+  /* return ctls_index++; */
+  fdmi_dbg("Finished open");
+  return iopen.fd;
 }
 
 ssize_t ibtl_write(int fd, void *buf, size_t count)
 {
+  struct ibvio_open iopen;
+  FMI_Request req;
+  FMI_Status stat;
+  int host_id;
+  int tag;
+  int current_write_size = 0;
+  double s, e, t1, t2, t3;
+  int chunk_size = IBVIO_CHUNK_SIZE;
+
+  host_id = host_ids[fd];
+
+  ibvio_serialize_tag(IBVIO_OP_WRITE, fd, &tag);
+  
+  iopen.count = count;
+  s = fdmi_get_time();
+  fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, tag, FMI_COMM_WORLD, &req, 0);
+  fdmi_verbs_wait(&req, &stat);
+  t1 = fdmi_get_time() - s;
+
+  s = fdmi_get_time();
+  while (current_write_size < count) {
+    if (current_write_size + chunk_size > count) {
+      chunk_size = count - current_write_size;
+    }
+    fdmi_verbs_isend((char *)buf + current_write_size, chunk_size, FMI_BYTE, host_id, tag, FMI_COMM_WORLD, &req, 0);
+    fdmi_verbs_wait(&req, &stat);
+    current_write_size += chunk_size;
+  }
+  t2 = fdmi_get_time() - s;
+
+  s = fdmi_get_time();
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, FMI_ANY_TAG, FMI_COMM_WORLD, &req, 0);
+  fdmi_verbs_wait(&req, &stat);
+  t3 = fdmi_get_time() - s;
+  
+  fdmi_dbg("Finished write: op: %f transfer: %f, comp: %f", t1, t2, t3);
+
+  return iopen.stat;
   /* struct scr_transfer_ctl *ctl; */
   /* size_t offset = 0; */
   /* size_t chunk_size = CHUNK_SIZE; */
@@ -107,7 +193,7 @@ ssize_t ibtl_write(int fd, void *buf, size_t count)
   /* ibtl_dbg("start"); */
   /* RDMA_Recv(buf + offset, 0, NULL, RDMA_ANY_SOURCE, RDMA_ANY_TAG, &comm); */
   /* ibtl_dbg("end"); */
-  return count;
+  /*  return count;*/
 }
 
 ssize_t ibtl_read(int fd, void *buf, size_t count) 

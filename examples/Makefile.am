@@ -76,4 +76,6 @@ install-data-hook:
 uninstall-local:
 	-rm -f $(DESTDIR)$(examplesdir)/makefile
 
+clean-local:
+	rm -f *.core
 

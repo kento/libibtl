@@ -9,7 +9,7 @@
 #include "scr_list_queue.h"
 #include "fdmi_util.h"
 #include "pgz.h"
-
+#include "ibvio_common.h"
 
 #define COMPRESS 0
 #define BUF_SIZE (2 * 1024 * 1024 * 1024L)
@@ -38,19 +38,130 @@ uint64_t buff_size = BUF_SIZE;
 uint64_t chunk_size = CHUNK_SIZE;
 uint64_t allocated_size = 0;
 
-char data[4];
+char data[TEST_BUFF_SIZE];
+
+struct ibvio_sfile_info
+{
+  int stat;
+  char path[256];
+  char *cache;
+};
+
+struct ibvio_sopen_info {
+  char fd;
+  struct ibvio_sfile_info *file_info;
+};
+struct ibvio_sopen_info open_info[1024];
+
+static int ibvio_sopen(FMI_Status *stat)
+{
+  FMI_Request req;
+  struct ibvio_open iopen;
+  int fd;
+
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+  fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
+
+  iopen.fd = open(iopen.path, iopen.flags, iopen.mode);
+
+  fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+  fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
+
+
+  open_info[iopen.fd].file_info = (struct ibvio_sfile_info *)malloc(sizeof(struct ibvio_sfile_info));
+  open_info[iopen.fd].file_info->cache =  (char *)malloc(BUF_SIZE);
+
+  memset(open_info[iopen.fd].file_info->cache, 0, BUF_SIZE);
+
+  fdmi_dbg("OPEN: path: %s, flags: %d, mode: %d", iopen.path, iopen.flags, iopen.mode);
+  return;
+}
+
+static int ibvio_swrite(int fd, FMI_Status *stat)
+{
+  FMI_Request req;
+  struct ibvio_open iopen;
+  char *buf;
+  int write_size, current_recv_size = 0;
+  int write_chunk_size, chunk_size = IBVIO_CHUNK_SIZE;
+
+  fdmi_dbg("Write start");
+
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+  fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
+
+  fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
+
+  while (current_recv_size < iopen.count) {
+    if (current_recv_size + chunk_size > iopen.count) {
+      chunk_size = iopen.count - current_recv_size;
+    }
+    fdmi_verbs_irecv(open_info[fd].file_info->cache + current_recv_size, chunk_size, FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+    if (current_recv_size > 0) {
+      if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
+	fdmi_err("write error");
+      }
+      write_size += write_chunk_size;
+    }
+    fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
+
+    current_recv_size += chunk_size;
+    write_chunk_size = chunk_size;
+  }
+
+  /*Write the last chunk*/
+  if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
+    fdmi_err("write error");
+  }
+  write_size += write_chunk_size;
+  
+
+  fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+  fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
+  fdmi_dbg("Finished Write");
+
+  return;
+}
 
 int main(int argc, char **argv) 
 {
   FMI_Request req;
   FMI_Status stat;
-
+  int flag;
 
   fdmi_verbs_init(&argc, &argv);
-  fdmi_verbs_irecv(data, 4, FMI_BYTE, FMI_ANY_SOURCE, FMI_ANY_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
-  fdmi_dbg("irecv");
-  fdmi_verbs_wait(&req, &stat, FDMI_ABORT);
-  fdmi_dbg("data %s", data);
+  while (1) {
+    fdmi_verbs_iprobe(FMI_ANY_SOURCE, FMI_ANY_TAG, FMI_COMM_WORLD, &flag, &stat);
+    if (flag) {
+      int op, fd;
+      op = IBVIO_OP_NOOP;
+      ibvio_deserialize_tag(&op, &fd, stat.FMI_TAG);
+      fdmi_dbg("Probe data %s from rank: %d, tag: %d => op: %d, fd: %d", data, stat.FMI_SOURCE, stat.FMI_TAG, op, fd);
+      switch (op) {
+      case IBVIO_OP_OPEN:
+	ibvio_sopen(&stat);
+	break;
+      case IBVIO_OP_WRITE:
+	ibvio_swrite(fd, &stat);
+	break;
+      case IBVIO_OP_READ:
+	break;
+      case IBVIO_OP_CLOSE:
+	break;
+      case IBVIO_OP_NOOP:
+	usleep(1000);
+	break;
+      }
+
+    }
+    /* fdmi_verbs_irecv(data, TEST_BUFF_SIZE, FMI_BYTE, FMI_ANY_SOURCE, FMI_ANY_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT); */
+    /* fdmi_dbg("irecv"); */
+    /* fdmi_verbs_wait(&req, &stat, FDMI_ABORT); */
+    /* fdmi_dbg("data %s from rank: %d, tag: %d", data, stat.FMI_SOURCE, stat.FMI_TAG); */
+    /* sprintf(data, "aho"); */
+    /* fdmi_verbs_isend(data, TEST_BUFF_SIZE, FMI_BYTE, stat.FMI_SOURCE, stat.FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT); */
+    /* fdmi_verbs_wait(&req, &stat, FDMI_ABORT); */
+  }
   sleep(11111);
 /*   struct RDMA_communicator comm; */
 /*   struct RDMA_request *req1, *req2; */

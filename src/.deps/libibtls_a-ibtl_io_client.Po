@@ -42,7 +42,8 @@ libibtls_a-ibtl_io_client.o: ibtl_io_client.c ibtl_io_client.h \
  /usr/include/sys/file.h /usr/include/errno.h /usr/include/bits/errno.h \
  /usr/include/linux/errno.h /usr/include/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- fdmi.h fdmi_datatype.h fdmi_pmtv_common.h fdmi_proc_man.h
+ fdmi.h fdmi_datatype.h fdmi_pmtv_common.h fdmi_proc_man.h fdmi_config.h \
+ fdmi_util.h ibvio_common.h
 
 ibtl_io_client.h:
 
@@ -237,3 +238,9 @@ fdmi_datatype.h:
 fdmi_pmtv_common.h:
 
 fdmi_proc_man.h:
+
+fdmi_config.h:
+
+fdmi_util.h:
+
+ibvio_common.h:

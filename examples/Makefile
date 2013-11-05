@@ -134,12 +134,12 @@ am__relativize = \
     dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
   done; \
   reldir="$$dir2"
-ACLOCAL = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run tar
+ACLOCAL = ${SHELL} /g/g90/sato5/lib/libibtl.ccgrid/libibtl/missing --run aclocal-1.11
+AMTAR = ${SHELL} /g/g90/sato5/lib/libibtl.ccgrid/libibtl/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run automake-1.11
+AUTOCONF = ${SHELL} /g/g90/sato5/lib/libibtl.ccgrid/libibtl/missing --run autoconf
+AUTOHEADER = ${SHELL} /g/g90/sato5/lib/libibtl.ccgrid/libibtl/missing --run autoheader
+AUTOMAKE = ${SHELL} /g/g90/sato5/lib/libibtl.ccgrid/libibtl/missing --run automake-1.11
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -163,7 +163,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /usr/bin/ld -m elf_x86_64
+LD = /usr/local/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
@@ -171,7 +171,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run makeinfo
+MAKEINFO = ${SHELL} /g/g90/sato5/lib/libibtl.ccgrid/libibtl/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -192,10 +192,10 @@ SET_MAKE =
 SHELL = /bin/sh
 STRIP = strip
 VERSION = 0.0.1
-abs_builddir = /home/kent/lib/ibtl/libibtl/examples
-abs_srcdir = /home/kent/lib/ibtl/libibtl/examples
-abs_top_builddir = /home/kent/lib/ibtl/libibtl
-abs_top_srcdir = /home/kent/lib/ibtl/libibtl
+abs_builddir = /g/g90/sato5/lib/libibtl.ccgrid/libibtl/examples
+abs_srcdir = /g/g90/sato5/lib/libibtl.ccgrid/libibtl/examples
+abs_top_builddir = /g/g90/sato5/lib/libibtl.ccgrid/libibtl
+abs_top_srcdir = /g/g90/sato5/lib/libibtl.ccgrid/libibtl
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
 am__include = include
@@ -223,7 +223,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/kent/lib/ibtl/libibtl/install-sh
+install_sh = ${SHELL} /g/g90/sato5/lib/libibtl.ccgrid/libibtl/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -669,7 +669,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -744,19 +745,19 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_examplesDATA \
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libtool ctags ctags-recursive distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-data-hook install-dist_examplesDATA \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am \
+	clean-generic clean-libtool clean-local ctags ctags-recursive \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-data-hook \
+	install-dist_examplesDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-dist_examplesDATA \
 	uninstall-local
 
@@ -767,6 +768,9 @@ install-data-hook:
 
 uninstall-local:
 	-rm -f $(DESTDIR)$(examplesdir)/makefile
+
+clean-local:
+	rm -f *.core
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

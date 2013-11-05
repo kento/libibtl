@@ -23,6 +23,7 @@ libibtls_a_SOURCES = \
 	$(SRC_DIR)/fdmi_proc_man.c \
         $(SRC_DIR)/fdmi.c \
         $(INCLUDE_DIR)/fdmi.h \
+        $(SRC_DIR)/ibvio_common.c \
         $(SRC_DIR)/ibtl_io_client.c 
 
 
@@ -46,6 +47,7 @@ libibtls_la_SOURCES = \
 	$(SRC_DIR)/fdmi_datatype.c \
 	$(SRC_DIR)/fdmi_proc_man.c \
         $(SRC_DIR)/fdmi.c \
+        $(SRC_DIR)/ibvio_common.c \
         $(SRC_DIR)/ibtl_io_client.c 
 
 libibtls_la_LIBADD = @LIBOBJS@
@@ -59,7 +61,7 @@ bin_PROGRAMS=ibtl_io_server
 SRC_DIR=./
 INCLUDE_DIR=../include
 
-ibtl_io_server_SOURCES =ibtl_io_server.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
+ibtl_io_server_SOURCES =ibtl_io_server.c ibvio_common.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
 ibtl_io_server_DEPENDENCIES =  ${SRC_DIR}/libibtls.a
 ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
 ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 

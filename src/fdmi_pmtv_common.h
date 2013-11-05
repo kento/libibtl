@@ -15,7 +15,7 @@ struct fdmi_status {
   int _count;
   int _canceled;
 };
-typedef struct fdmi_request FMI_Status;
+typedef struct fdmi_status FMI_Status;
 
 struct fdmi_request {
   int prank;
