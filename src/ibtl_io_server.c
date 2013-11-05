@@ -114,7 +114,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
     fdmi_err("write error");
   }
   write_size += write_chunk_size;
-  
+  fsync(fd);
 
   fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 

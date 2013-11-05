@@ -2139,12 +2139,11 @@ struct fdmi_connection* fdmi_verbs_connect(int rank, char *hostname)
       if (rdma_resolve_addr(new_rcid, NULL, addr->ai_addr, TIMEOUT_IN_MS)) {
 	fdmi_err ("rdma_resolve_addr failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
       }
-      fdmi_dbg("lock: %d, rank:%d, is_connected:%d", ret, rank, sendrecv_channel->peers[rank]->is_connected);
       while (fdmi_is_connected(rank) == 0) {
 	usleep(1000);
 	//	fdmi_dbg("waiting connection to rank:%d", rank);
       }
-      fdmi_dbg("=====> lock: %d, rank:%d, is_connected:%d", ret, rank, sendrecv_channel->peers[rank]->is_connected);
+      fdmi_dbg("Connected: lock: %d, rank:%d, is_connected:%d", ret, rank, sendrecv_channel->peers[rank]->is_connected);
     }
 
   return *conn;
