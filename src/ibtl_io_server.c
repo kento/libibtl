@@ -132,12 +132,6 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
 
-  if (!IBVIO_DELAYED_WRITE) {
-    if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
-      fdmi_err("write error");
-    }
-  }
-
   if (IBVIO_DELAYED_WRITE) {
     s = fdmi_get_time();
     if (write(fd, open_info[fd].file_info->cache, iopen.count) < 0) {
