@@ -137,7 +137,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
     if (write(fd, open_info[fd].file_info->cache, iopen.count) < 0) {
       fdmi_err("write error");
     }
-    //    fsync(fd);
+    fsync(fd);
     t += fdmi_get_time() - s;
   }
   fdmi_dbg("Finished Write: Write: time: %f, bw: %f GB/s", t, iopen.count / t / 1000000000.0);
