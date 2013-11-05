@@ -84,6 +84,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   char *buf;
   int write_size, current_recv_size = 0;
   int write_chunk_size, chunk_size = IBVIO_CHUNK_SIZE;
+  double s, t = 0;
 
   fdmi_dbg("Write start");
 
@@ -98,9 +99,11 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
     }
     fdmi_verbs_irecv(open_info[fd].file_info->cache + current_recv_size, chunk_size, FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
     if (current_recv_size > 0) {
+      s = fdmi_get_time();
       if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
 	fdmi_err("write error");
       }
+      t += fdmi_get_time - s;
       write_size += write_chunk_size;
     }
     fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
@@ -110,15 +113,17 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   }
 
   /*Write the last chunk*/
+  s = fdmi_get_time();
   if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
     fdmi_err("write error");
   }
   write_size += write_chunk_size;
   fsync(fd);
+  t += fdmi_get_time - s;
 
   fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
-  fdmi_dbg("Finished Write");
+  fdmi_dbg("Finished Write: Write: time: %f, bw: %f GB/s", t, iopen.count / t / 1000000000.0);
 
   return;
 }
