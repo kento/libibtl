@@ -103,7 +103,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
       if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
 	fdmi_err("write error");
       }
-      t += fdmi_get_time - s;
+      t += fdmi_get_time() - s;
       write_size += write_chunk_size;
     }
     fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
@@ -119,7 +119,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   }
   write_size += write_chunk_size;
   fsync(fd);
-  t += fdmi_get_time - s;
+  t += fdmi_get_time() - s;
 
   fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
