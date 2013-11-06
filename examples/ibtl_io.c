@@ -29,21 +29,34 @@ int main(int argc, char **argv)
   int fd;
   double s, e;
   char path[256];
+  int is_read_mode;
 
-  sprintf(path, "%s:/tmp/test", argv[1]);
+  if (argc != 3) {
+    fdmi_dbg("a.out <hostname:/path/to/file> <mode:0(write) 1(read)>");
+  }
+
+  sprintf(path, "%s", argv[1]);
+  is_read_mode = atoi(argv[2]);
   fd = ibtl_open(path, O_RDWR | O_CREAT , S_IRWXU);
 
-  memset(data, 0, BUF_SIZE);
-  ibtl_write(fd, data, BUF_SIZE);
-  sleep(5);
-  //  ibtl_write(fd, data, BUF_SIZE);
-  s = get_time();
-  ibtl_write(fd, data, BUF_SIZE);
-  e = get_time();
-  fdmi_dbg("Time: %f, size: %d GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000, BUF_SIZE / (e - s) / 1000000000.0 );
-  sleep(1111);
-  //ibtl_read(fd, data, BUF_SIZE);
-  //  ibtl_close(fd);
+  memset(data, 1, BUF_SIZE);
+
+  if (!is_read_mode) {
+    ibtl_write(fd, data, BUF_SIZE);
+    sleep(5);
+    s = get_time();
+    ibtl_write(fd, data, BUF_SIZE);
+    e = get_time();
+    fdmi_dbg("Write Time: %f, size: %d GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000, BUF_SIZE / (e - s) / 1000000000.0 );
+  } else { 
+    ibtl_read(fd, data, BUF_SIZE);
+    sleep(5);
+    s = get_time();
+    ibtl_read(fd, data, BUF_SIZE);
+    e = get_time();
+    fdmi_dbg("Read Time: %f, size: %d GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000, BUF_SIZE / (e - s) / 1000000000.0 );
+  }
+
   return 0;
 }
 

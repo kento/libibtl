@@ -1641,7 +1641,7 @@ static void* fdmi_poll_event_recv_channel(void* arg)
       //      connected_rank  = (int *)event->param.conn.private_data;
       connected_peer  = peers[connected_rank];
 
-      fdmi_dbg( "connection from %d", connected_rank);
+      //      fdmi_dbg( "connection from %d", connected_rank);
       if (pthread_mutex_trylock(&(connected_peer->on_connecting_lock))) {
 	if ((errno = rdma_reject(event->id, NULL, 0)) > 0 ) {
 	  fdmi_err("P:rdma_reject failed\n", rc);
@@ -2131,7 +2131,6 @@ struct fdmi_connection* fdmi_verbs_connect(int rank, char *hostname)
 #ifdef DEBUG_P_INIT
       fdmi_dbg("A:Connecting: Domain:%p, Hostname:%s(%d), port:%s", *domain, hostname, rank, port);
 #endif
-      fdmi_dbg("A:Connecting: Domain:%p, Hostname:%s(%d), port:%s, peer:%p", *domain, hostname, rank, port, peer);
 
       if(getaddrinfo(hostname, port, NULL, &addr)){
 	fdmi_err("getaddrinfo failed (%s:%s:%d)", __FILE__, __func__, __LINE__);
@@ -2143,7 +2142,7 @@ struct fdmi_connection* fdmi_verbs_connect(int rank, char *hostname)
 	usleep(1000);
 	//	fdmi_dbg("waiting connection to rank:%d", rank);
       }
-      fdmi_dbg("Connected: lock: %d, rank:%d, is_connected:%d", ret, rank, sendrecv_channel->peers[rank]->is_connected);
+      //      fdmi_dbg("Connected: lock: %d, rank:%d, is_connected:%d", ret, rank, sendrecv_channel->peers[rank]->is_connected);
     }
 
   return *conn;

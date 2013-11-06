@@ -87,12 +87,10 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   int write_chunk_size, chunk_size = IBVIO_CHUNK_SIZE;
   double s, t = 0;
 
-  fdmi_dbg("Write start");
-
   fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
 
-  fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
+  //  fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
 
   while (current_recv_size < iopen.count) {
     if (current_recv_size + chunk_size > iopen.count) {
@@ -128,7 +126,6 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   }
 
 
-
   fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
 
@@ -140,7 +137,54 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
     fsync(fd);
     t += fdmi_get_time() - s;
   }
-  fdmi_dbg("Finished Write: Write: time: %f, bw: %f GB/s", t, iopen.count / t / 1000000000.0);
+  fdmi_dbg("WRITE: time: %f, bw: %f GB/s", t, iopen.count / t / 1000000000.0);
+
+  return;
+}
+
+static int ibvio_sread(int fd, FMI_Status *stat)
+{
+  FMI_Request req;
+  struct ibvio_open iopen;
+  char *buf;
+  int read_size = 0, current_send_size = 0;
+  int read_chunk_size = IBVIO_CHUNK_SIZE, chunk_size = IBVIO_CHUNK_SIZE;
+  double s, t = 0;
+
+
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+  fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
+
+  //  fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
+
+
+  s = fdmi_get_time();
+  if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
+    fdmi_err("read error");
+  }
+  read_size += read_chunk_size;
+  t += fdmi_get_time() - s;
+  
+  while (current_send_size < iopen.count) {
+    if (current_send_size + chunk_size > iopen.count) {
+      chunk_size = iopen.count - current_send_size;
+    }
+    fdmi_verbs_isend(open_info[fd].file_info->cache + current_send_size, chunk_size, FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+    current_send_size += chunk_size;
+
+    if (read_size < iopen.count) {
+      s = fdmi_get_time();
+      if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
+	fdmi_err("read error");
+      }
+      t += fdmi_get_time() - s;
+      read_size += read_chunk_size;
+    }
+
+    fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
+  }
+
+  fdmi_dbg("READ: time: %f, bw: %f GB/s", t, iopen.count / t / 1000000000.0);
 
   return;
 }
@@ -158,7 +202,7 @@ int main(int argc, char **argv)
       int op, fd;
       op = IBVIO_OP_NOOP;
       ibvio_deserialize_tag(&op, &fd, stat.FMI_TAG);
-      fdmi_dbg("Probe data %s from rank: %d, tag: %d => op: %d, fd: %d", data, stat.FMI_SOURCE, stat.FMI_TAG, op, fd);
+      //      fdmi_dbg("Probe data %s from rank: %d, tag: %d => op: %d, fd: %d", data, stat.FMI_SOURCE, stat.FMI_TAG, op, fd);
       switch (op) {
       case IBVIO_OP_OPEN:
 	ibvio_sopen(&stat);
@@ -167,6 +211,7 @@ int main(int argc, char **argv)
 	ibvio_swrite(fd, &stat);
 	break;
       case IBVIO_OP_READ:
+	ibvio_sread(fd, &stat);
 	break;
       case IBVIO_OP_CLOSE:
 	break;
