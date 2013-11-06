@@ -158,12 +158,15 @@ static int ibvio_sread(int fd, FMI_Status *stat)
   //  fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
 
 
-  s = fdmi_get_time();
-  if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
-    fdmi_err("read error");
+  if (IBVIO_CACHE_READ) {
+    s = fdmi_get_time();
+    if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
+      fdmi_err("read error");
+    }
+    t += fdmi_get_time() - s;
   }
   read_size += read_chunk_size;
-  t += fdmi_get_time() - s;
+
   
   while (current_send_size < iopen.count) {
     if (current_send_size + chunk_size > iopen.count) {
@@ -173,11 +176,13 @@ static int ibvio_sread(int fd, FMI_Status *stat)
     current_send_size += chunk_size;
 
     if (read_size < iopen.count) {
-      s = fdmi_get_time();
-      if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
-	fdmi_err("read error");
+      if (IBVIO_CACHE_READ) {
+	s = fdmi_get_time();
+	if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
+	  fdmi_err("read error");
+	}
+	t += fdmi_get_time() - s;
       }
-      t += fdmi_get_time() - s;
       read_size += read_chunk_size;
     }
 
