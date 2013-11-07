@@ -50,14 +50,28 @@ struct ibvio_sfile_info
   char *cache;
 };
 
+struct ibvio_sread_info {
+  int fd;
+  FMI_Status stat;
+};
+
 struct ibvio_sopen_info {
   char fd;
+  /*For write operation*/
   size_t write_count;
   size_t current_write_count;
+  size_t current_recv_size;
   pthread_t write_thread;
   pthread_mutex_t fastmutex;
-  size_t current_recv_size;
   double timestamp;
+  /*For read operation*/
+  size_t read_count;
+  size_t current_read_count;
+  size_t current_send_size;
+  pthread_t read_thread;
+  pthread_mutex_t read_mutex;
+  double read_timestamp;
+
   struct ibvio_sfile_info *file_info;
 };
 struct ibvio_sopen_info open_info[1024];
@@ -244,6 +258,8 @@ static int ibvio_swrite_chunk(int fd, FMI_Status *stat)
   return;
 }
 
+
+
 static int ibvio_sread(int fd, FMI_Status *stat)
 {
   FMI_Request req;
@@ -260,7 +276,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
   //  fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
 
 
-  if (IBVIO_CACHE_READ) {
+  if (!IBVIO_CACHE_READ) {
     s = fdmi_get_time();
     if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
       fdmi_err("read error");
@@ -278,7 +294,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
     current_send_size += chunk_size;
 
     if (read_size < iopen.count) {
-      if (IBVIO_CACHE_READ) {
+      if (!IBVIO_CACHE_READ) {
 	s = fdmi_get_time();
 	if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
 	  fdmi_err("read error");
@@ -291,8 +307,33 @@ static int ibvio_sread(int fd, FMI_Status *stat)
     fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
   }
 
-  fdmi_dbg("READ: time: %f, bw: %f GB/s", t, iopen.count / t / 1000000000.0);
+  fdmi_dbg("READ: fd: %d, time: %f, bw: %f GB/s", fd, t, iopen.count / t / 1000000000.0);
 
+  return;
+}
+
+static void* ibvio_sread_thread(void* arg)
+{
+  struct ibvio_sread_info *rinfo;
+  
+  rinfo = (struct ibvio_sread_info*) arg;
+  ibvio_sread(rinfo->fd, &rinfo->stat);
+  
+  return;
+}
+
+
+static int ibvio_sread_async(int fd, FMI_Status *stat)
+{
+  struct ibvio_sopen_info *oinfo;
+  struct ibvio_sread_info *rinfo;
+
+  oinfo = &open_info[fd];
+  rinfo = (struct ibvio_sread_info*)malloc(sizeof(struct ibvio_sread_info));
+  rinfo->fd = fd;
+  rinfo->stat = *stat;
+
+  ibvio_run_thread(&(oinfo->read_thread), ibvio_sread_thread, rinfo);
   return;
 }
 
@@ -326,7 +367,7 @@ int main(int argc, char **argv)
 	ibvio_swrite_chunk(fd, &stat);
 	break;
       case IBVIO_OP_READ:
-	ibvio_sread(fd, &stat);
+	ibvio_sread_async(fd, &stat);
 	break;
       case IBVIO_OP_CLOSE:
 	break;

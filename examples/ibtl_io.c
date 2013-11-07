@@ -57,9 +57,11 @@ int main(int argc, char **argv)
   } else { 
     ibtl_read(fd, data, BUF_SIZE);
     s = get_time();
-    ibtl_read(fd, data, BUF_SIZE);
+    for (i = 0; i < LOOP; i++) {
+      ibtl_read(fd, data, BUF_SIZE);
+    }
     e = get_time();
-    fdmi_dbg("Read Time: %f, size: %d GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000, BUF_SIZE / (e - s) / 1000000000.0 );
+    fdmi_dbg("Read Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
   }
 
   return 0;
