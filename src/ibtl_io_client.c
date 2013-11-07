@@ -221,7 +221,7 @@ ssize_t ibtl_write(int fd, void *buf, size_t count)
   t3 = fdmi_get_time() - s;
   t4 = fdmi_get_time() - st;
   
-  fdmi_dbg("WRITE: op: %f transfer: %f, comp: %f, bw: %f GB/s", t1, t2, t3, count / t4 / 1000000000);
+  fdmi_dbg("WRITE: op: %f transfer: %f, comp: %f, size: %f GB,  bw: %f GB/s", t1, t2, t3, count / 1000000000.0, count / t4 / 1000000000);
 
   return iopen.stat;
 }
