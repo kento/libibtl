@@ -355,10 +355,24 @@ int main(int argc, char **argv)
   FMI_Request req;
   FMI_Status stat;
   int flag;
+  int num_c = 0;
+  int source;
 
+  if (argc == 2) {
+    num_c = atoi(argv[1]);
+  }
+  
   fdmi_verbs_init(&argc, &argv);
   while (1) {
+    if (num_c > 0) {
+      source = 0;
+    } else {
+      source = FMI_ANY_SOURCE;
+    }
     fdmi_verbs_iprobe(FMI_ANY_SOURCE, FMI_ANY_TAG, FMI_COMM_WORLD, &flag, &stat);
+    if (num_c > 0) {
+      source = (source + 1) % num_c;
+    }
     if (flag) {
       int op, fd;
       op = IBVIO_OP_NOOP;
