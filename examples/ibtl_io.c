@@ -32,7 +32,7 @@ int main(int argc, char **argv)
   int is_read_mode;
 
   if (argc != 3) {
-    fdmi_dbg("a.out <hostname:/path/to/file> <mode:0(write) 1(read)>");
+    fdmi_err("a.out <hostname:/path/to/file> <mode:0(write) 1(read)>");
   }
 
   sprintf(path, "%s", argv[1]);

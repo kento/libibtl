@@ -5,6 +5,7 @@
 
 int ibtl_open(const char *pathname, int flags, int mode);
 ssize_t ibtl_read(int fd, void *buf, size_t count);
+ssize_t ibtl_dwrite(int fd, void *buf, size_t count);
 ssize_t ibtl_write(int fd, void *buf, size_t count);
 int ibtl_close(int fd);
 

@@ -134,7 +134,7 @@ int ibtl_open(const char *pathname, int flags, int mode)
   return iopen.fd;
 }
 
-ssize_t ibtl_write(int fd, void *buf, size_t count)
+ssize_t ibtl_dwrite(int fd, void *buf, size_t count)
 {
   struct ibvio_open iopen;
   FMI_Request req;
@@ -157,6 +157,53 @@ ssize_t ibtl_write(int fd, void *buf, size_t count)
   fdmi_verbs_wait(&req, &stat);
   t1 = fdmi_get_time() - s;
 
+  s = fdmi_get_time();
+  while (current_write_size < count) {
+    if (current_write_size + chunk_size > count) {
+      chunk_size = count - current_write_size;
+    }
+    fdmi_verbs_isend((char *)buf + current_write_size, chunk_size, FMI_BYTE, host_id, tag, FMI_COMM_WORLD, &req, 0);
+    fdmi_verbs_wait(&req, &stat);
+    current_write_size += chunk_size;
+  }
+  t2 = fdmi_get_time() - s;
+
+  s = fdmi_get_time();
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, FMI_ANY_TAG, FMI_COMM_WORLD, &req, 0);
+  fdmi_verbs_wait(&req, &stat);
+  t3 = fdmi_get_time() - s;
+  t4 = fdmi_get_time() - st;
+  
+  fdmi_dbg("WRITE: op: %f transfer: %f, comp: %f, bw: %f GB/s", t1, t2, t3, count / t4 / 1000000000);
+
+  return iopen.stat;
+}
+
+ssize_t ibtl_write(int fd, void *buf, size_t count)
+{
+  struct ibvio_open iopen;
+  FMI_Request req;
+  FMI_Status stat;
+  int host_id;
+  int tag;
+  int current_write_size = 0;
+  double s, e, t1, t2, t3;
+  double st, t4;
+  int chunk_size = IBVIO_CHUNK_SIZE;
+
+  host_id = host_ids[fd];
+
+  /*WRITE_BEGIN*/
+  ibvio_serialize_tag(IBVIO_OP_WRITE_BEGIN, fd, &tag);
+  iopen.count = count;
+  s = fdmi_get_time();
+  st = fdmi_get_time();
+  fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, tag, FMI_COMM_WORLD, &req, 0);
+  fdmi_verbs_wait(&req, &stat);
+  t1 = fdmi_get_time() - s;
+
+  /*WRITE_CHUNK*/
+  ibvio_serialize_tag(IBVIO_OP_WRITE_CHUNK, fd, &tag);
   s = fdmi_get_time();
   while (current_write_size < count) {
     if (current_write_size + chunk_size > count) {

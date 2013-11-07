@@ -689,18 +689,25 @@ static void fdmi_bind_addr_and_listen(struct fdmi_sendrecv_channel* sendrecv_cha
     addr->sin_family = AF_INET;
     /* TODO: Better port determination ? */
     port = IBTL_LISTEN_PORT;
-
     addr->sin_port   = htons(port);
     sprintf(iname, "ib0", domain_count);
-#if defined(DEBUG_P_INIT)
-    fdmi_dbg("P:Bind and Listen: iname=%s, port=%d", iname, port);
-#endif
-    fdmi_dbg("P:Bind and Listen: iname=%s, port=%d", iname, port);
     inet_aton(get_ip_addr(iname), (struct in_addr*)&(addr->sin_addr.s_addr));
 
     if (rdma_bind_addr((*domain)->rcid, (struct sockaddr *)addr)) {
-      fdmi_err("RDMA address binding failed: Invalid binding address or port (%s:%s:%d)", __FILE__, __func__, __LINE__);
+      /*If failed, we use another port, which intend I'm client side, 
+	and other client processes were already launched, and using the port */
+      port = 0;
+      addr->sin_port   = htons(port);
+      sprintf(iname, "ib0", domain_count);
+      inet_aton(get_ip_addr(iname), (struct in_addr*)&(addr->sin_addr.s_addr));
+      if (rdma_bind_addr((*domain)->rcid, (struct sockaddr *)addr)) {
+	/*If failed even with different port, return the error */
+	fdmi_err("RDMA address binding failed: Invalid binding address or port (%s:%s:%d)", __FILE__, __func__, __LINE__);
+      }
     }
+#if defined(DEBUG_P_INIT)
+    fdmi_dbg("P:Bind and Listen: iname=%s, port=%d", iname, port);
+#endif
 
     /* TODO: Determine appropriate backlog value
           backlog=10 is arbitrary

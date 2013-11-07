@@ -1,9 +1,11 @@
 
-#define IBVIO_OP_NOOP  (0)
-#define IBVIO_OP_OPEN  (1)
-#define IBVIO_OP_WRITE (2)
-#define IBVIO_OP_READ  (3)
-#define IBVIO_OP_CLOSE (4)
+#define IBVIO_OP_NOOP        (0)
+#define IBVIO_OP_OPEN        (1)
+#define IBVIO_OP_WRITE       (2)
+#define IBVIO_OP_WRITE_BEGIN (3)
+#define IBVIO_OP_WRITE_CHUNK (4)
+#define IBVIO_OP_READ        (5)
+#define IBVIO_OP_CLOSE       (6)
 
 #define IBVIO_CHUNK_SIZE (64 * 1024 * 1024)
 
