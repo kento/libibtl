@@ -493,9 +493,11 @@ static void fdmi_wait_ready()
   struct fdmi_domain		 *domain;
   domain = *(sendrecv_channel->domains);
   while (domain->dctx == NULL) {
-    /*Wait until someone connect to me.                                                                                                                                       
-      If someone do, domain->dctx is allocated by another thread*/
-    usleep(1000);
+    /*Wait until someone connect to me.                                                                                                                                    If someone do, domain->dctx is allocated by another thread*/
+    usleep(100);
+  }
+  while (domain->dctx->query=qp == NULL) {
+    usleep(100);
   }
   return;
 }
