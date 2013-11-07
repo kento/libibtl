@@ -94,7 +94,6 @@ static int ibvio_sopen(FMI_Status *stat)
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT);   
 
 
-
   open_info[iopen.fd].fd = iopen.fd;
   open_info[iopen.fd].file_info = (struct ibvio_sfile_info *)malloc(sizeof(struct ibvio_sfile_info));
   open_info[iopen.fd].file_info->cache =  (char *)malloc(BUF_SIZE);

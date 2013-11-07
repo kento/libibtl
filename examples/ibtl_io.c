@@ -51,14 +51,18 @@ static void test2(int argc, char **argv)
   if (!is_read_mode) {
     ibtl_write(fd, data, SBUF_SIZE);
     s = get_time();
+    fdmi_dbg("timestamp start: %f", s);
     ibtl_write(fd, data1, BUF_SIZE);
     e = get_time();
+    fdmi_dbg("timestamp end: %f", e);
     fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000.0 , BUF_SIZE  / (e - s) / 1000000000.0 );
   } else { 
     ibtl_read(fd, data, SBUF_SIZE);
     s = get_time();
+    fdmi_dbg("timestamp start: %f", s);
     ibtl_read(fd, data1, BUF_SIZE);
     e = get_time();
+    fdmi_dbg("timestamp endt: %f", e);
     fdmi_dbg("Read Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000.0 , BUF_SIZE  / (e - s) / 1000000000.0 );
   }
 
