@@ -496,7 +496,7 @@ static void fdmi_wait_ready()
     /*Wait until someone connect to me.                                                                                                                                    If someone do, domain->dctx is allocated by another thread*/
     usleep(100);
   }
-  while (domain->dctx->query=qp == NULL) {
+  while (domain->dctx->query_qp == NULL) {
     usleep(100);
   }
   return;
