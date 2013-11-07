@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +42,7 @@ int main(int argc, char **argv)
 
   sprintf(path, "%s", argv[1]);
   is_read_mode = atoi(argv[2]);
-  fd = ibtl_open(path, O_RDWR | O_CREAT | O_DIRECT, S_IRWXU);
+  fd = ibtl_open(path, O_RDWR | O_CREAT, S_IRWXU);
 
   memset(data, 1, SBUF_SIZE);
   memset(data1, 1, BUF_SIZE);
