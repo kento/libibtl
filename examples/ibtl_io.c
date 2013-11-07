@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 
   sprintf(path, "%s", argv[1]);
   is_read_mode = atoi(argv[2]);
-  fd = ibtl_open(path, O_RDWR | O_CREAT , S_IRWXU);
+  fd = ibtl_open(path, O_RDWR | O_CREAT | O_DIRECT, S_IRWXU);
 
   memset(data, 1, SBUF_SIZE);
   memset(data1, 1, BUF_SIZE);
@@ -55,10 +55,10 @@ int main(int argc, char **argv)
     e = get_time();
     fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
   } else { 
-    ibtl_read(fd, data, BUF_SIZE);
+    ibtl_read(fd, data, SBUF_SIZE);
     s = get_time();
     for (i = 0; i < LOOP; i++) {
-      ibtl_read(fd, data, BUF_SIZE);
+      ibtl_read(fd, data1, BUF_SIZE);
     }
     e = get_time();
     fdmi_dbg("Read Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
