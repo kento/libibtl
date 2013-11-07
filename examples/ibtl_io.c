@@ -17,9 +17,12 @@
 #define ITE 1000
 #define SLP 1
 
-#define BUF_SIZE (1 * 1024 * 1024 * 1024)
+#define SBUF_SIZE (1024)
+#define BUF_SIZE (1 * 128 * 1024 * 1024)
+#define LOOP (8)
 
-char data[BUF_SIZE];
+char data[SBUF_SIZE];
+char data1[BUF_SIZE];
 
 int get_tag(void);
 double get_time(void);
@@ -30,6 +33,7 @@ int main(int argc, char **argv)
   double s, e;
   char path[256];
   int is_read_mode;
+  int i;
 
   if (argc != 3) {
     fdmi_err("a.out <hostname:/path/to/file> <mode:0(write) 1(read)>");
@@ -39,18 +43,19 @@ int main(int argc, char **argv)
   is_read_mode = atoi(argv[2]);
   fd = ibtl_open(path, O_RDWR | O_CREAT , S_IRWXU);
 
-  memset(data, 1, BUF_SIZE);
+  memset(data, 1, SBUF_SIZE);
+  memset(data1, 1, BUF_SIZE);
 
   if (!is_read_mode) {
-    ibtl_write(fd, data, BUF_SIZE);
-    sleep(5);
+    ibtl_write(fd, data, SBUF_SIZE);
     s = get_time();
-    ibtl_write(fd, data, BUF_SIZE);
+    for (i = 0; i < LOOP; i++) {
+      ibtl_write(fd, data1, BUF_SIZE);
+    }
     e = get_time();
-    fdmi_dbg("Write Time: %f, size: %d GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000, BUF_SIZE / (e - s) / 1000000000.0 );
+    fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
   } else { 
     ibtl_read(fd, data, BUF_SIZE);
-    sleep(5);
     s = get_time();
     ibtl_read(fd, data, BUF_SIZE);
     e = get_time();
