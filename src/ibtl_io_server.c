@@ -194,6 +194,7 @@ static void* ibvio_swrite_chunk_thread(void *arg)
 {
   struct ibvio_sopen_info *oinfo;
   int write_chunk_size = IBVIO_CHUNK_SIZE;
+  double s, t;
 
   oinfo = (struct ibvio_sopen_info *)arg;
 
@@ -202,11 +203,13 @@ static void* ibvio_swrite_chunk_thread(void *arg)
     write_chunk_size = oinfo->write_count - oinfo->current_write_count;
   }
 
+  s = fdmi_get_time();
   if (write(oinfo->fd, oinfo->file_info->cache + oinfo->current_write_count, write_chunk_size) < 0) {
       fdmi_err("write error");
   }
+  t = fdmi_get_time() - s;
   oinfo->current_write_count += write_chunk_size;
-  fdmi_dbg("fd: %d, %f percent done", oinfo->fd, oinfo->current_write_count / (float)oinfo->write_count);
+  fdmi_dbg("fd: %d, %f GB/s  (%f p)", oinfo->fd, write_chunk_size / t / 1000000000.0, oinfo->current_write_count / (float)oinfo->write_count);
   pthread_mutex_unlock(&oinfo->fastmutex);
   
   return;
