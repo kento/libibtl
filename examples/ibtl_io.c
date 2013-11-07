@@ -19,7 +19,7 @@
 #define SLP 1
 
 #define SBUF_SIZE (1024)
-#define BUF_SIZE (1 * 128 * 1024 * 1024)
+#define BUF_SIZE (1 * 1024 * 1024 * 1024)
 #define LOOP (8)
 
 char data[SBUF_SIZE];
@@ -28,9 +28,46 @@ char data1[BUF_SIZE];
 int get_tag(void);
 double get_time(void);
 
-int main(int argc, char **argv)
+
+static void test2(int argc, char **argv)
 {
   int fd;
+  double s, e;
+  char path[256];
+  int is_read_mode;
+  int i;
+
+  if (argc != 3) {
+    fdmi_err("a.out <hostname:/path/to/file> <mode:0(write) 1(read)>");
+  }
+
+  sprintf(path, "%s", argv[1]);
+  is_read_mode = atoi(argv[2]);
+  fd = ibtl_open(path, O_RDWR | O_CREAT, S_IRWXU);
+
+  memset(data, 1, SBUF_SIZE);
+  memset(data1, 1, BUF_SIZE);
+
+  if (!is_read_mode) {
+    ibtl_write(fd, data, SBUF_SIZE);
+    s = get_time();
+    ibtl_write(fd, data1, BUF_SIZE);
+    e = get_time();
+    fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000.0 , BUF_SIZE  / (e - s) / 1000000000.0 );
+  } else { 
+    ibtl_read(fd, data, SBUF_SIZE);
+    s = get_time();
+    ibtl_read(fd, data1, BUF_SIZE);
+    e = get_time();
+    fdmi_dbg("Read Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000.0 , BUF_SIZE  / (e - s) / 1000000000.0 );
+  }
+
+  return 0;
+}
+
+static void test1(int argc, char **argv)
+{
+    int fd;
   double s, e;
   char path[256];
   int is_read_mode;
@@ -66,6 +103,11 @@ int main(int argc, char **argv)
   }
 
   return 0;
+}
+
+int main(int argc, char **argv)
+{
+  test2(argc, argv);
 }
 
 double get_time(void)

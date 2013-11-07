@@ -311,7 +311,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
     fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
   }
 
-  fdmi_dbg("READ: fd: %d, time: %f, bw: %f GB/s", fd, t, iopen.count / t / 1000000000.0);
+  fdmi_dbg("READ: fd: %d, time: %f, count: %f GB, bw: %f GB/s", fd, t, iopen.count / 1000000000.0, iopen.count / t / 1000000000.0);
 
   return;
 }
