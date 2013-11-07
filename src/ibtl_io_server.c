@@ -200,6 +200,8 @@ static void* ibvio_swrite_chunk_thread(void *arg)
   if (write(oinfo->fd, oinfo->file_info->cache + oinfo->current_write_count, write_chunk_size) < 0) {
       fdmi_err("write error");
   }
+  oinfo->current_write_count += write_chunk_size;
+
   pthread_mutex_unlock(&oinfo->fastmutex);
   
   return;
@@ -249,6 +251,7 @@ static int ibvio_swrite_chunk(int fd, FMI_Status *stat)
 
   if (oinfo->current_recv_size == oinfo->write_count) {
     /*If this is the last chunk, reply completion msg*/
+    while (oinfo->current_write_count != oinfo->write_count) {usleep(1000);}
     fsync(fd);
     fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
     fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
