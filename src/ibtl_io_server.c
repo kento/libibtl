@@ -256,7 +256,7 @@ static int ibvio_swrite_chunk(int fd, FMI_Status *stat)
     fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
     fdmi_verbs_wait(&req, NULL, FDMI_ABORT); 
     t = fdmi_get_time() - oinfo->timestamp;
-    fdmi_dbg("WRITE: fd: %d, time: %f, bw: %f GB/s", fd, t, oinfo->write_count / t / 1000000000.0);
+    fdmi_dbg("WRITE: fd: %d, time: %f, count %f GB, bw: %f GB/s", fd, t, oinfo->write_count / 1000000000.0, oinfo->write_count / t / 1000000000.0);
   }
 
   return;
