@@ -2176,12 +2176,13 @@ struct fdmi_connection* fdmi_connect(struct fdmi_sendrecv_channel* sendrecv_chan
 
   //  fdmi_dbg("try connection to %d", rank);
 
+  return;
   /* Assumption:  fdmi_numnode == fdmi_size / fdmi_numproc; */
   fdmi_numnode = fdmi_size / fdmi_numproc;
   nodelist     = (char* )fdmi_malloc(sizeof(char ) * FDMI_HOSTNAME_LIMIT * fdmi_numnode);
   co_nodelist  = (char**)fdmi_malloc(sizeof(char*) * fdmi_numnode);
 
-  //  sprintf(nodelist, "%s", fdmi_param_get("FDMI_NODELIST"));
+  sprintf(nodelist, "%s", fdmi_param_get("FDMI_NODELIST"));
   for (i = 0, hostname = strtok(nodelist, ","); hostname != NULL; hostname = strtok(NULL, ","), i++) {
     *(co_nodelist + i) = hostname;
   }
