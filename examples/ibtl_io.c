@@ -98,13 +98,13 @@ static void test1(int argc, char **argv)
     ibtl_write(fd, data1, BUF_SIZE);
     fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
   } else { 
-    ibtl_read(fd, data1, BUF_SIZE);
+    //    ibtl_read(fd, data1, BUF_SIZE);
     s = get_time();
     for (i = 0; i < LOOP; i++) {
       ibtl_read(fd, data1, BUF_SIZE);
     }
     e = get_time();
-    ibtl_read(fd, data1, BUF_SIZE);
+    //    ibtl_read(fd, data1, BUF_SIZE);
     fdmi_dbg("Read Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
   }
 
