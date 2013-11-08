@@ -49,7 +49,7 @@ static void test2(int argc, char **argv)
   memset(data1, 1, BUF_SIZE);
 
   if (!is_read_mode) {
-    ibtl_write(fd, data, SBUF_SIZE);
+    ibtl_write(fd, data, BUF_SIZE);
     s = get_time();
     fdmi_dbg("timestamp start: %f", s);
     ibtl_write(fd, data1, BUF_SIZE);
@@ -57,7 +57,7 @@ static void test2(int argc, char **argv)
     fdmi_dbg("timestamp end: %f", e);
     fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE / 1000000000.0 , BUF_SIZE  / (e - s) / 1000000000.0 );
   } else { 
-    ibtl_read(fd, data, SBUF_SIZE);
+    ibtl_read(fd, data, BUF_SIZE);
     s = get_time();
     fdmi_dbg("timestamp start: %f", s);
     ibtl_read(fd, data1, BUF_SIZE);
