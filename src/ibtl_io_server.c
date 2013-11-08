@@ -185,9 +185,7 @@ static int ibvio_swrite_begin(int fd, FMI_Status *stat)
 
   open_info[fd].write_count = iopen.count;
   open_info[fd].current_recv_size = 0;
-  open_info[iopen.fd].write_count = 0;
-  open_info[iopen.fd].current_write_count = 0;
-
+  open_info[fd].current_write_count = 0;
 
   return;
 }
