@@ -20,7 +20,7 @@
 
 #define SBUF_SIZE (1024)
 #define BUF_SIZE (1 * 1024 * 1024 * 1024)
-#define LOOP (8)
+#define LOOP (1)
 
 char data[SBUF_SIZE];
 char data1[BUF_SIZE];
