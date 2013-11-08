@@ -283,7 +283,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
   double s, t = 0;
 
   
-  pthread_mutex_lock(&oinfo->fastmutex);
+  pthread_mutex_lock(open_info[fd].fastmutex);
   fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
 
@@ -322,7 +322,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
   }
 
   fdmi_dbg("READ: fd: %d, time: %f, count: %f GB, bw: %f GB/s", fd, t, iopen.count / 1000000000.0, iopen.count / t / 1000000000.0);
-  pthread_mutex_unlock(&oinfo->fastmutex);
+  pthread_mutex_unlock(open_info[fd].fastmutex);
   return;
 }
 
