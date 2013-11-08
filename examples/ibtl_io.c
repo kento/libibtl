@@ -91,13 +91,11 @@ static void test1(int argc, char **argv)
   if (!is_read_mode) {
     ibtl_write(fd, data1, BUF_SIZE);
     s = get_time();
-    fdmi_dbg("timestamp start: %f", s);
     for (i = 0; i < LOOP; i++) {
       ibtl_write(fd, data1, BUF_SIZE);
     }
     e = get_time();
     ibtl_write(fd, data1, BUF_SIZE);
-    fdmi_dbg("timestamp end: %f", e);
     fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
   } else { 
     ibtl_read(fd, data, SBUF_SIZE);
