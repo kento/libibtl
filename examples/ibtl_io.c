@@ -19,7 +19,7 @@
 #define SLP 1
 
 #define SBUF_SIZE (1024)
-#define BUF_SIZE (1 * 128 * 1024 * 1024)
+#define BUF_SIZE (1 * 256 * 1024 * 1024)
 #define LOOP (1)
 
 char data[SBUF_SIZE];
@@ -96,6 +96,7 @@ static void test1(int argc, char **argv)
       ibtl_write(fd, data1, BUF_SIZE);
     }
     e = get_time();
+    ibtl_write(fd, data1, BUF_SIZE);
     fdmi_dbg("timestamp end: %f", e);
     fdmi_dbg("Write Time: %f, size: %f GB, bw: %f GB/s", e - s, BUF_SIZE * LOOP / 1000000000.0 , BUF_SIZE * LOOP / (e - s) / 1000000000.0 );
   } else { 
