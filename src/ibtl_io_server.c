@@ -282,10 +282,11 @@ static int ibvio_sread(int fd, FMI_Status *stat)
 
   
   pthread_mutex_lock(&open_info[fd].fastmutex);
+  fdmi_dbg("READ: start");
   fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
 
-  //  fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
+  //fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
 
 
   if (!IBVIO_CACHE_READ) {
@@ -302,7 +303,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
     if (current_send_size + chunk_size > iopen.count) {
       chunk_size = iopen.count - current_send_size;
     }
-    //    fdmi_verbs_isend(open_info[fd].file_info->cache + current_send_size, chunk_size, FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
+    fdmi_verbs_isend(open_info[fd].file_info->cache + current_send_size, chunk_size, FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
     current_send_size += chunk_size;
 
     if (read_size < iopen.count) {
@@ -316,7 +317,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
       read_size += read_chunk_size;
     }
 
-    //    fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
+    fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
   }
 
   fdmi_dbg("READ: fd: %d, time: %f, count: %f GB, bw: %f GB/s", fd, t, iopen.count / 1000000000.0, iopen.count / t / 1000000000.0);
