@@ -89,7 +89,7 @@ static void test1(int argc, char **argv)
   memset(data1, 1, BUF_SIZE);
 
   if (!is_read_mode) {
-    ibtl_write(fd, data, BUF_SIZE);
+    ibtl_write(fd, data1, BUF_SIZE);
     s = get_time();
     fdmi_dbg("timestamp start: %f", s);
     for (i = 0; i < LOOP; i++) {
