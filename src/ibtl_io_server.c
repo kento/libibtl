@@ -102,8 +102,7 @@ static int ibvio_sopen(FMI_Status *stat)
   pthread_mutex_init(&open_info[iopen.fd].fastmutex, NULL);
   open_info[iopen.fd].current_recv_size = 0;
 
-
-  //  memset(open_info[iopen.fd].file_info->cache, 0, BUF_SIZE);  
+  memset(open_info[iopen.fd].file_info->cache, 0, BUF_SIZE);  
 
 
   fdmi_dbg("OPEN: path: %s, flags: %d, mode: %d, time: %f", iopen.path, iopen.flags, iopen.mode, t);
