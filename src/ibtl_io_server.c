@@ -282,11 +282,11 @@ static int ibvio_sread(int fd, FMI_Status *stat)
 
   
   pthread_mutex_lock(&open_info[fd].fastmutex);
-  fdmi_dbg("READ: start");
+  //  fdmi_dbg("READ: start");
   fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT);
   fdmi_verbs_wait(&req, NULL, FDMI_ABORT);
 
-  //fdmi_dbg("fd: %d, count: %d", fd, iopen.count);
+  fdmi_dbg("READ: fd: %d, count: %d, start", fd, iopen.count);
 
 
   if (!IBVIO_CACHE_READ) {
