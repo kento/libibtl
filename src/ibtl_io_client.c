@@ -210,6 +210,7 @@ ssize_t ibtl_write(int fd, void *buf, size_t count)
       chunk_size = count - current_write_size;
     }
     fdmi_verbs_isend((char *)buf + current_write_size, chunk_size, FMI_BYTE, host_id, tag, FMI_COMM_WORLD, &req, 0);
+    usleep(1000);
     fdmi_verbs_wait(&req, &stat);
     current_write_size += chunk_size;
   }
