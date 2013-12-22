@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (main) 0.0.1
-# Libtool was configured on host sierra0:
+# Libtool was configured on host rc010.m.gsic.titech.ac.jp:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -86,7 +86,7 @@ NM="/usr/bin/nm -B"
 LN_S="ln -s"
 
 # What is the maximum length of a command?
-max_cmd_len=3458764513820540925
+max_cmd_len=1966080
 
 # Object file suffix (normally "o").
 objext=o
@@ -234,10 +234,10 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.4.7 /usr/lib64 /lib64"
+sys_lib_search_path_spec="/usr/lib/gcc/x86_64-redhat-linux/4.4.5 /usr/lib64 /lib64 /opt/intel/composer_xe_2011_sp1.6.233/compiler/lib/intel64 /opt/intel/composer_xe_2011_sp1.6.233/ipp/lib/intel64 /opt/intel/composer_xe_2011_sp1.6.233/mkl/lib/intel64 /opt/intel/composer_xe_2011_sp1.6.233/tbb/lib/intel64/cc4.1.0_libc2.4_kernel2.6.16.21"
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib /usr/lib64/R/lib /usr/lib64/atlas-sse3 /usr/lib64/atlas /usr/lib64/dyninst /usr/lib64/ldapotp /usr/lib64/ldapotp /usr/lib64/mysql /usr/lib64/nvidia /usr/lib/nvidia /usr/lib64/octave/3.4.3 /usr/lib64/qt-3.3/lib /usr/StorMan /usr/lib64/tcl8.5/tclx8.4 /usr/lib64/tcl8.5 /usr/lib64/xulrunner "
+sys_lib_dlsearch_path_spec="/lib64 /usr/lib64 /lib /usr/lib /usr/lib64/atlas /usr/lib64/mysql /usr/lib/nvidia /usr/lib64/nvidia "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
@@ -254,7 +254,7 @@ striplib="strip --strip-unneeded"
 
 
 # The linker used to build libraries.
-LD="/usr/local/bin/ld -m elf_x86_64"
+LD="/usr/bin/ld -m elf_x86_64"
 
 # Commands used to build an old-style archive.
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
@@ -275,7 +275,7 @@ wl="-Wl,"
 pic_flag=" -fPIC -DPIC"
 
 # Compiler flag to prevent dynamic linking.
-link_static_flag="-static"
+link_static_flag=""
 
 # Does compiler simultaneously support -c and -o options?
 compiler_c_o="yes"
