@@ -18,7 +18,7 @@ Directly Structure
 
 HOW to Build & Install
 ------------
-* Run commands below
+Run commands below:   
     $ ./configure --prefix=/path/to/install/dir
     $ make 
     $ make install
@@ -29,30 +29,30 @@ Quick Start
 -------------
 ### Build examples ###
 
-* Run commands below  
+Run commands below:
     $ cd /path/to/install/dir
     $ cd examples
 
-* Edit makefile (examples/makefile)  
+Edit makefile (examples/makefile):  
     INSTALL_DIR = /path/to/install/dir
 
-* Make  
+Make:  
     $ make
 
 ### Run example 1: Simple communication ###
 The example codes simply exchanges messages (Ping-Pong) initiated by a client side
 
-* Run server code  
+Run server code:  
     sierra0$ ./example_server
-* Run client cond    
+Run client cond:  
     sierra1$ ./example_client sierra0
 
 ### Run example 2: RDMA I/O  ###
 The client example code wirte/read a spedified file on the remote server.
 
-* Run server code    
+Run server code:  
     sierra0$ ./ibio_server
-* Run client code  
+Run client code:  
     sierra1$ ./ibio_test sierra0:/path/to/file 0 # write
     sierra1$ ./ibio_test sierra0:/path/to/file 1 # read
 
