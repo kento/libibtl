@@ -35,7 +35,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
-bin_PROGRAMS = ibtl_io$(EXEEXT)
+bin_PROGRAMS = ibtl_io$(EXEEXT) ibtl_io_server$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(dist_examples_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -49,13 +49,24 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(examplesdir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ibtl_io_OBJECTS = ibtl_io-ibtl_io.$(OBJEXT)
+am_ibtl_io_OBJECTS = ibtl_io-ibtl_io.$(OBJEXT) \
+	ibtl_io-ibtl_io_client.$(OBJEXT) \
+	ibtl_io-ibvio_common.$(OBJEXT)
 ibtl_io_OBJECTS = $(am_ibtl_io_OBJECTS)
 am__DEPENDENCIES_1 =
 ibtl_io_DEPENDENCIES = ${SRC_DIR}/libibtls.a $(am__DEPENDENCIES_1)
 ibtl_io_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(ibtl_io_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
+am_ibtl_io_server_OBJECTS = ibtl_io_server-ibtl_io_server.$(OBJEXT) \
+	ibtl_io_server-ibvio_common.$(OBJEXT) \
+	ibtl_io_server-yarn.$(OBJEXT) ibtl_io_server-pgz.$(OBJEXT)
+ibtl_io_server_OBJECTS = $(am_ibtl_io_server_OBJECTS)
+ibtl_io_server_DEPENDENCIES = ${SRC_DIR}/libibtls.a \
+	$(am__DEPENDENCIES_1)
+ibtl_io_server_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(ibtl_io_server_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -69,8 +80,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(ibtl_io_SOURCES)
-DIST_SOURCES = $(ibtl_io_SOURCES)
+SOURCES = $(ibtl_io_SOURCES) $(ibtl_io_server_SOURCES)
+DIST_SOURCES = $(ibtl_io_SOURCES) $(ibtl_io_server_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -134,12 +145,12 @@ am__relativize = \
     dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
   done; \
   reldir="$$dir2"
-ACLOCAL = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run tar
+ACLOCAL = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run aclocal-1.11
+AMTAR = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run automake-1.11
+AUTOCONF = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run autoconf
+AUTOHEADER = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run autoheader
+AUTOMAKE = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run automake-1.11
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -163,7 +174,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /usr/bin/ld -m elf_x86_64
+LD = /usr/local/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
@@ -171,7 +182,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run makeinfo
+MAKEINFO = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -192,10 +203,10 @@ SET_MAKE =
 SHELL = /bin/sh
 STRIP = strip
 VERSION = 0.0.1
-abs_builddir = /home/kent/lib/ibtl/libibtl/examples
-abs_srcdir = /home/kent/lib/ibtl/libibtl/examples
-abs_top_builddir = /home/kent/lib/ibtl/libibtl
-abs_top_srcdir = /home/kent/lib/ibtl/libibtl
+abs_builddir = /g/g90/sato5/lib/libibtl/examples
+abs_srcdir = /g/g90/sato5/lib/libibtl/examples
+abs_top_builddir = /g/g90/sato5/lib/libibtl
+abs_top_srcdir = /g/g90/sato5/lib/libibtl
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
 am__include = include
@@ -223,7 +234,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/kent/lib/ibtl/libibtl/install-sh
+install_sh = ${SHELL} /g/g90/sato5/lib/libibtl/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -233,7 +244,7 @@ mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /usr/local
+prefix = /g/g90/sato5/lib/libibtl-install
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -248,47 +259,28 @@ SUBDIRS = ../src
 SRC_DIR = ../src
 INCLUDE_DIR = ../include 
 TARGET = $(SRC_DIR)/list_queue.c	$(INCLUDE_DIR)/list_queue.h $(SRC_DIR)/rdma_ppool.c $(INCLUDE_DIR)/rdma_ppool.h $(SRC_DIR)/rdma_client.c $(INCLUDE_DIR)/rdma_client.h $(SRC_DIR)/rdma_server.c $(INCLUDE_DIR)/rdma_server.h $(SRC_DIR)/rdma_common.c $(INCLUDE_DIR)/rdma_common.h $(SRC_DIR)/common.c $(INCLUDE_DIR)/common.h $(SRC_DIR)/ibtls.c $(INCLUDE_DIR)/ibtls.h 
-ibtl_io_SOURCES = ibtl_io.c
+ibtl_io_SOURCES = ibtl_io.c ibtl_io_client.c ibvio_common.c
 ibtl_io_CFLAGS = -I$(INCLUDE_DIR) -I../src
 ibtl_io_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
-rdma_client_test_SOURCES = rdma_client_test.c $(TARGET)
-rdma_client_test_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_server_test_SOURCES = rdma_server_test.c $(TARGET)
-rdma_server_test_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_client_latency_SOURCES = rdma_client_latency.c $(TARGET)
-rdma_client_latency_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_latency_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_server_latency_SOURCES = rdma_server_latency.c $(TARGET)
-rdma_server_latency_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_latency_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_client_silent_SOURCES = rdma_client_silent.c $(TARGET)
-rdma_client_silent_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_server_silent_SOURCES = rdma_server_silent.c $(TARGET)
-rdma_server_silent_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_client_offset_SOURCES = rdma_client_offset.c $(TARGET)
-rdma_client_offset_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-rdma_server_offset_SOURCES = rdma_server_offset.c $(TARGET)
-rdma_server_offset_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+ibtl_io_server_SOURCES = ibtl_io_server.c ibvio_common.c  yarn.c pgz.c
+ibtl_io_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
+ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread -lz
 
 # ================
 # For installation
 # ================
 examplesdir = $(exec_prefix)/examples
 dist_examples_DATA = \
-	rdma_client_test.c \
-	rdma_server_test.c \
-	rdma_client_offset.c \
-	rdma_server_offset.c \
-	rdma_client_silent.c \
-	rdma_server_silent.c \
-	rdma_client_latency.c \
-	rdma_server_latency.c 
+	ibtl_io.c \
+	ibtl_io_server.c \
+	ibtl_io_client.c \
+	ibtl_io_client.h \
+	ibvio_common.c \
+	ibvio_common.h \
+	pgz.c \
+	pgz.h \
+	yarn.c \
+	yarn.h 
 
 EXTRA_DIST = makefile.example
 all: all-recursive
@@ -371,6 +363,9 @@ clean-binPROGRAMS:
 ibtl_io$(EXEEXT): $(ibtl_io_OBJECTS) $(ibtl_io_DEPENDENCIES) 
 	@rm -f ibtl_io$(EXEEXT)
 	$(ibtl_io_LINK) $(ibtl_io_OBJECTS) $(ibtl_io_LDADD) $(LIBS)
+ibtl_io_server$(EXEEXT): $(ibtl_io_server_OBJECTS) $(ibtl_io_server_DEPENDENCIES) 
+	@rm -f ibtl_io_server$(EXEEXT)
+	$(ibtl_io_server_LINK) $(ibtl_io_server_OBJECTS) $(ibtl_io_server_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -379,6 +374,12 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/ibtl_io-ibtl_io.Po
+include ./$(DEPDIR)/ibtl_io-ibtl_io_client.Po
+include ./$(DEPDIR)/ibtl_io-ibvio_common.Po
+include ./$(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
+include ./$(DEPDIR)/ibtl_io_server-ibvio_common.Po
+include ./$(DEPDIR)/ibtl_io_server-pgz.Po
+include ./$(DEPDIR)/ibtl_io_server-yarn.Po
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -414,6 +415,90 @@ ibtl_io-ibtl_io.obj: ibtl_io.c
 #	source='ibtl_io.c' object='ibtl_io-ibtl_io.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibtl_io.obj `if test -f 'ibtl_io.c'; then $(CYGPATH_W) 'ibtl_io.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io.c'; fi`
+
+ibtl_io-ibtl_io_client.o: ibtl_io_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibtl_io_client.o -MD -MP -MF $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo -c -o ibtl_io-ibtl_io_client.o `test -f 'ibtl_io_client.c' || echo '$(srcdir)/'`ibtl_io_client.c
+	$(am__mv) $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo $(DEPDIR)/ibtl_io-ibtl_io_client.Po
+#	source='ibtl_io_client.c' object='ibtl_io-ibtl_io_client.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibtl_io_client.o `test -f 'ibtl_io_client.c' || echo '$(srcdir)/'`ibtl_io_client.c
+
+ibtl_io-ibtl_io_client.obj: ibtl_io_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibtl_io_client.obj -MD -MP -MF $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo -c -o ibtl_io-ibtl_io_client.obj `if test -f 'ibtl_io_client.c'; then $(CYGPATH_W) 'ibtl_io_client.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_client.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo $(DEPDIR)/ibtl_io-ibtl_io_client.Po
+#	source='ibtl_io_client.c' object='ibtl_io-ibtl_io_client.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibtl_io_client.obj `if test -f 'ibtl_io_client.c'; then $(CYGPATH_W) 'ibtl_io_client.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_client.c'; fi`
+
+ibtl_io-ibvio_common.o: ibvio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibvio_common.o -MD -MP -MF $(DEPDIR)/ibtl_io-ibvio_common.Tpo -c -o ibtl_io-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+	$(am__mv) $(DEPDIR)/ibtl_io-ibvio_common.Tpo $(DEPDIR)/ibtl_io-ibvio_common.Po
+#	source='ibvio_common.c' object='ibtl_io-ibvio_common.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+
+ibtl_io-ibvio_common.obj: ibvio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibvio_common.obj -MD -MP -MF $(DEPDIR)/ibtl_io-ibvio_common.Tpo -c -o ibtl_io-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io-ibvio_common.Tpo $(DEPDIR)/ibtl_io-ibvio_common.Po
+#	source='ibvio_common.c' object='ibtl_io-ibvio_common.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
+
+ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibtl_io_server.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo -c -o ibtl_io_server-ibtl_io_server.o `test -f 'ibtl_io_server.c' || echo '$(srcdir)/'`ibtl_io_server.c
+	$(am__mv) $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo $(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
+#	source='ibtl_io_server.c' object='ibtl_io_server-ibtl_io_server.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibtl_io_server.o `test -f 'ibtl_io_server.c' || echo '$(srcdir)/'`ibtl_io_server.c
+
+ibtl_io_server-ibtl_io_server.obj: ibtl_io_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibtl_io_server.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo -c -o ibtl_io_server-ibtl_io_server.obj `if test -f 'ibtl_io_server.c'; then $(CYGPATH_W) 'ibtl_io_server.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_server.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo $(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
+#	source='ibtl_io_server.c' object='ibtl_io_server-ibtl_io_server.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibtl_io_server.obj `if test -f 'ibtl_io_server.c'; then $(CYGPATH_W) 'ibtl_io_server.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_server.c'; fi`
+
+ibtl_io_server-ibvio_common.o: ibvio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
+#	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+
+ibtl_io_server-ibvio_common.obj: ibvio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
+#	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
+
+ibtl_io_server-yarn.o: yarn.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-yarn.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-yarn.Tpo -c -o ibtl_io_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
+	$(am__mv) $(DEPDIR)/ibtl_io_server-yarn.Tpo $(DEPDIR)/ibtl_io_server-yarn.Po
+#	source='yarn.c' object='ibtl_io_server-yarn.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
+
+ibtl_io_server-yarn.obj: yarn.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-yarn.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-yarn.Tpo -c -o ibtl_io_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io_server-yarn.Tpo $(DEPDIR)/ibtl_io_server-yarn.Po
+#	source='yarn.c' object='ibtl_io_server-yarn.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
+
+ibtl_io_server-pgz.o: pgz.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-pgz.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-pgz.Tpo -c -o ibtl_io_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
+	$(am__mv) $(DEPDIR)/ibtl_io_server-pgz.Tpo $(DEPDIR)/ibtl_io_server-pgz.Po
+#	source='pgz.c' object='ibtl_io_server-pgz.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
+
+ibtl_io_server-pgz.obj: pgz.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-pgz.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-pgz.Tpo -c -o ibtl_io_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
+	$(am__mv) $(DEPDIR)/ibtl_io_server-pgz.Tpo $(DEPDIR)/ibtl_io_server-pgz.Po
+#	source='pgz.c' object='ibtl_io_server-pgz.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

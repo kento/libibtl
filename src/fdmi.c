@@ -2270,17 +2270,12 @@ int fdmi_verbs_comm_vrank(struct fdmi_communicator *comm, int *vrank)
   return 0;
 }
 
-int fdmi_verbs_wait(struct fdmi_request* request, struct fdmi_status *status, int op)
+int fdmi_verbs_wait(struct fdmi_request* request, struct fdmi_status *status)
 {
   int errno;
 
-  if (!(op & FDMI_FORCE)) {
-    while(!fdmi_verbs_test(request, status)) {
-      //      if(fdmi_check_failure() != FDMI_COMPUTE) return FMI_RECOVERY;
-    }
-  } else {
-    while(!fdmi_verbs_test(request, status));
-  }
+  while(!fdmi_verbs_test(request, status));
+
   if (status != NULL) {
     status->FMI_SOURCE = request->prank;
     status->FMI_TAG    = request->tag;
@@ -2346,7 +2341,7 @@ void show_query_qp_content()
 
 
 //TODO: NOT struct fdmi_communicator* but struct fdmi_communiocator
-int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, int vdest, int tag, struct fdmi_communicator *comm, struct fdmi_request *request, int op) 
+int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, int vdest, int tag, struct fdmi_communicator *comm, struct fdmi_request *request) 
 {
   struct fdmi_post_send_param psparam;
   int dest;
@@ -2356,9 +2351,6 @@ int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, 
   fs = fdmi_get_time();
 #endif
 
-  /* if (!(op & FDMI_FORCE)) { */
-  /*   if(fdmi_check_failure() != FDMI_COMPUTE) return FMI_RECOVERY; */
-  /* } */
 
   //  dest = fdmi_comm_get_prank(comm, vdest);
   dest = vdest;
@@ -2376,22 +2368,9 @@ int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, 
   psparam.comm	      = comm;
   psparam.request_flag = &(request->request_flag);
   psparam.request     = request;
-  psparam.op	      = op;
 
-  // TODO: use locked_requst_sem_q
-  /* if ((op & FDMI_ABORT)) { */
-  /*   fdmi_queue_lock_enq(locked_request_sem_q, psparam.request_flag); */
-  /*   fdmi_queue_lock_enq(send_req_q, psparam.request_flag); */
-  /* } */
   fdmi_queue_lock_enq(send_req_q, psparam.request_flag);
 
-  /* if ((errno = sem_init(psparam.request_sem, 0, 0)) > 0) { */
-  /*   fdmi_err ("sem_init failed (%s:%s:%d)", __FILE__, __func__, __LINE__);   */
-  /* } */
-  /* if ((errno = pthread_mutex_init(psparam.request_mtx, NULL)) > 0) { */
-  /*   fdmi_err ("mutex init failed (%s:%s:%d)", __FILE__, __func__, __LINE__);   */
-  /* } */
-  //  fdmi_dbgi(0, "init: addr: %p", psparam.request_flag);
   *(psparam.request_flag) = 0;
   fdmi_post_send_msg_param(&psparam);
 
@@ -2400,29 +2379,18 @@ int fdmi_verbs_isend(const void *buf, int count, struct fdmi_datatype datatype, 
 
 
 //TODO: NOT struct fdmi_communicator* but struct fdmi_communiocator
-int fdmi_verbs_irecv(const void *buf, int count, struct fdmi_datatype datatype,  int vsource, int tag, struct fdmi_communicator *comm, struct fdmi_request *request, int op) 
+int fdmi_verbs_irecv(const void *buf, int count, struct fdmi_datatype datatype,  int vsource, int tag, struct fdmi_communicator *comm, struct fdmi_request *request) 
 {
-  //WANKO
-  //  return 0;
-  //WANKO
   struct fdmi_post_recv_param prparam;
   int source;
 
 
-  /* if (!(op & FDMI_FORCE)) { */
-  /*   if(fdmi_check_failure() != FDMI_COMPUTE) return FMI_RECOVERY; */
-  /* } */
-
   source = fdmi_comm_get_prank(comm, vsource);
-  //  if (comm.id == 5) fdmi_dbg( "here, vsource: %d", vsource);
 
   if (!fdmi_is_connected(source)) {
     fdmi_connect(sendrecv_channel, source);
   }
 
-
-
-  //  prparam.rank = fdmi_rmap_vtop_get(source);
   prparam.rank	      = source;
   prparam.tag	      = tag;
   prparam.addr	      = buf;
@@ -2431,20 +2399,6 @@ int fdmi_verbs_irecv(const void *buf, int count, struct fdmi_datatype datatype, 
   prparam.comm	      = comm;
   prparam.request_flag = &(request->request_flag);
   prparam.request     = request; 
-  prparam.op	      = op; 
-
-
-  if ((op & FDMI_ABORT)) {
-    fdmi_queue_lock_enq(locked_request_sem_q, prparam.request_flag);
-  }
-
-  //  fdmi_dbgi(0, "init: %p", prparam.request_sem);
-  /* if ((errno = sem_init(prparam.request_sem, 0, 0)) > 0) { */
-  /*   fdmi_err ("sem_init failed (%s:%s:%d)", __FILE__, __func__, __LINE__); */
-  /* } */
-  /* if ((errno = pthread_mutex_init(prparam.request_mtx, NULL)) > 0) { */
-  /*   fdmi_err ("mutex init failed (%s:%s:%d)", __FILE__, __func__, __LINE__); */
-  /* } */
 
   *(prparam.request_flag) = 0;
   fdmi_post_recv_msg_param (&prparam);

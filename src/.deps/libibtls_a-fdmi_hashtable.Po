@@ -1,18 +1,19 @@
-libibtls_a-fdmi_hashtable.o: fdmi_hashtable.c fdmi_hashtable.h \
- fdmi_queue.h /usr/include/pthread.h /usr/include/features.h \
- /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
- /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
- /usr/include/endian.h /usr/include/bits/endian.h \
- /usr/include/bits/byteswap.h /usr/include/sched.h \
- /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+libibtls_a-fdmi_hashtable.o: ../src/fdmi_hashtable.c \
+ ../include/fdmi_hashtable.h ../include/fdmi_queue.h \
+ /usr/include/pthread.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sched.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h \
  /usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stddef.h \
  /usr/include/time.h /usr/include/bits/sched.h /usr/include/bits/time.h \
  /usr/include/xlocale.h /usr/include/bits/pthreadtypes.h \
- /usr/include/bits/setjmp.h fdmi_mem.h
+ /usr/include/bits/setjmp.h ../include/fdmi_queue.h ../include/fdmi_mem.h
 
-fdmi_hashtable.h:
+../include/fdmi_hashtable.h:
 
-fdmi_queue.h:
+../include/fdmi_queue.h:
 
 /usr/include/pthread.h:
 
@@ -52,4 +53,6 @@ fdmi_queue.h:
 
 /usr/include/bits/setjmp.h:
 
-fdmi_mem.h:
+../include/fdmi_queue.h:
+
+../include/fdmi_mem.h:

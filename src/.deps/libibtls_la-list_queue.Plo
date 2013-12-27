@@ -1,4 +1,4 @@
-libibtls_la-list_queue.lo: list_queue.c ../include/list_queue.h \
+libibtls_la-list_queue.lo: ../src/list_queue.c ../include/list_queue.h \
  /usr/include/pthread.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h /usr/include/endian.h \

@@ -1,4 +1,4 @@
-libibtls_a-fdmi_proc_man.o: fdmi_proc_man.c /usr/include/stdlib.h \
+libibtls_a-fdmi_proc_man.o: ../src/fdmi_proc_man.c /usr/include/stdlib.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
@@ -16,9 +16,10 @@ libibtls_a-fdmi_proc_man.o: fdmi_proc_man.c /usr/include/stdlib.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
  /usr/include/bits/stdio.h /usr/include/string.h /usr/include/xlocale.h \
  /usr/include/bits/string.h /usr/include/bits/string2.h \
- fdmi_pmtv_common.h fdmi.h /usr/include/netdb.h /usr/include/netinet/in.h \
- /usr/include/stdint.h /usr/include/bits/wchar.h \
- /usr/include/sys/socket.h /usr/include/sys/uio.h /usr/include/bits/uio.h \
+ ../include/fdmi_pmtv_common.h ../include/fdmi.h /usr/include/netdb.h \
+ /usr/include/netinet/in.h /usr/include/stdint.h \
+ /usr/include/bits/wchar.h /usr/include/sys/socket.h \
+ /usr/include/sys/uio.h /usr/include/bits/uio.h \
  /usr/include/bits/socket.h /usr/include/bits/sockaddr.h \
  /usr/include/asm/socket.h /usr/include/asm-generic/socket.h \
  /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h \
@@ -29,9 +30,12 @@ libibtls_a-fdmi_proc_man.o: fdmi_proc_man.c /usr/include/stdlib.h \
  /usr/include/rdma/rdma_cma.h /usr/include/infiniband/verbs.h \
  /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
  /usr/include/bits/setjmp.h /usr/include/infiniband/sa.h \
- /usr/include/semaphore.h /usr/include/bits/semaphore.h fdmi_config.h \
- fdmi_datatype.h fdmi_proc_man.h fdmi_err.h fdmi_mem.h fdmi_hashtable.h \
- fdmi_queue.h
+ /usr/include/semaphore.h /usr/include/bits/semaphore.h \
+ ../include/fdmi_config.h ../include/fdmi_pmtv_common.h \
+ ../include/fdmi_datatype.h ../include/fdmi_proc_man.h \
+ ../include/fdmi_err.h ../include/fdmi_mem.h ../include/fdmi_hashtable.h \
+ ../include/fdmi_queue.h ../include/fdmi_proc_man.h \
+ ../include/fdmi_datatype.h
 
 /usr/include/stdlib.h:
 
@@ -103,9 +107,9 @@ libibtls_a-fdmi_proc_man.o: fdmi_proc_man.c /usr/include/stdlib.h \
 
 /usr/include/bits/string2.h:
 
-fdmi_pmtv_common.h:
+../include/fdmi_pmtv_common.h:
 
-fdmi.h:
+../include/fdmi.h:
 
 /usr/include/netdb.h:
 
@@ -167,16 +171,22 @@ fdmi.h:
 
 /usr/include/bits/semaphore.h:
 
-fdmi_config.h:
+../include/fdmi_config.h:
 
-fdmi_datatype.h:
+../include/fdmi_pmtv_common.h:
 
-fdmi_proc_man.h:
+../include/fdmi_datatype.h:
 
-fdmi_err.h:
+../include/fdmi_proc_man.h:
 
-fdmi_mem.h:
+../include/fdmi_err.h:
 
-fdmi_hashtable.h:
+../include/fdmi_mem.h:
 
-fdmi_queue.h:
+../include/fdmi_hashtable.h:
+
+../include/fdmi_queue.h:
+
+../include/fdmi_proc_man.h:
+
+../include/fdmi_datatype.h:

@@ -18,7 +18,6 @@
 
 
 
-
 pkgdatadir = $(datadir)/main
 pkgincludedir = $(includedir)/main
 pkglibdir = $(libdir)/main
@@ -37,7 +36,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
-bin_PROGRAMS = ibtl_io_server$(EXEEXT)
 subdir = src
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -71,7 +69,7 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libdir)" \
-	"$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
+	"$(DESTDIR)$(includedir)"
 LIBRARIES = $(lib_LIBRARIES)
 ARFLAGS = cru
 libibtls_a_AR = $(AR) $(ARFLAGS)
@@ -82,37 +80,20 @@ am_libibtls_a_OBJECTS = libibtls_a-list_queue.$(OBJEXT) \
 	libibtls_a-fdmi_hashtable.$(OBJEXT) \
 	libibtls_a-fdmi_queue.$(OBJEXT) \
 	libibtls_a-fdmi_datatype.$(OBJEXT) \
-	libibtls_a-fdmi_proc_man.$(OBJEXT) libibtls_a-fdmi.$(OBJEXT) \
-	libibtls_a-ibvio_common.$(OBJEXT) \
-	libibtls_a-ibtl_io_client.$(OBJEXT)
+	libibtls_a-fdmi_proc_man.$(OBJEXT) libibtls_a-fdmi.$(OBJEXT)
 libibtls_a_OBJECTS = $(am_libibtls_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libibtls_la_DEPENDENCIES = 
 am_libibtls_la_OBJECTS = libibtls_la-list_queue.lo \
-	libibtls_la-ibtls.lo libibtls_la-fdmi_err.lo \
-	libibtls_la-fdmi_param.lo libibtls_la-fdmi_mem.lo \
-	libibtls_la-fdmi_util.lo libibtls_la-fdmi_hashtable.lo \
-	libibtls_la-fdmi_queue.lo libibtls_la-fdmi_datatype.lo \
-	libibtls_la-fdmi_proc_man.lo libibtls_la-fdmi.lo \
-	libibtls_la-ibvio_common.lo libibtls_la-ibtl_io_client.lo
+	libibtls_la-fdmi_err.lo libibtls_la-fdmi_param.lo \
+	libibtls_la-fdmi_mem.lo libibtls_la-fdmi_util.lo \
+	libibtls_la-fdmi_hashtable.lo libibtls_la-fdmi_queue.lo \
+	libibtls_la-fdmi_datatype.lo libibtls_la-fdmi_proc_man.lo \
+	libibtls_la-fdmi.lo
 libibtls_la_OBJECTS = $(am_libibtls_la_OBJECTS)
 libibtls_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libibtls_la_CFLAGS) \
 	$(CFLAGS) $(libibtls_la_LDFLAGS) $(LDFLAGS) -o $@
-PROGRAMS = $(bin_PROGRAMS)
-am_ibtl_io_server_OBJECTS = ibtl_io_server-ibtl_io_server.$(OBJEXT) \
-	ibtl_io_server-ibvio_common.$(OBJEXT) \
-	ibtl_io_server-pgz.$(OBJEXT) \
-	ibtl_io_server-scr_list_queue.$(OBJEXT) \
-	ibtl_io_server-fdmi_err.$(OBJEXT) \
-	ibtl_io_server-fdmi_param.$(OBJEXT) \
-	ibtl_io_server-fdmi_util.$(OBJEXT) \
-	ibtl_io_server-yarn.$(OBJEXT)
-ibtl_io_server_OBJECTS = $(am_ibtl_io_server_OBJECTS)
-am__DEPENDENCIES_1 =
-ibtl_io_server_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(ibtl_io_server_CFLAGS) \
-	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -126,20 +107,18 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libibtls_a_SOURCES) $(libibtls_la_SOURCES) \
-	$(ibtl_io_server_SOURCES)
-DIST_SOURCES = $(libibtls_a_SOURCES) $(libibtls_la_SOURCES) \
-	$(ibtl_io_server_SOURCES)
+SOURCES = $(libibtls_a_SOURCES) $(libibtls_la_SOURCES)
+DIST_SOURCES = $(libibtls_a_SOURCES) $(libibtls_la_SOURCES)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run tar
+ACLOCAL = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run aclocal-1.11
+AMTAR = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run automake-1.11
+AUTOCONF = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run autoconf
+AUTOHEADER = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run autoheader
+AUTOMAKE = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run automake-1.11
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -163,7 +142,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LD = /usr/bin/ld -m elf_x86_64
+LD = /usr/local/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBOBJS = 
 LIBS = 
@@ -171,7 +150,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/kent/lib/ibtl/libibtl/missing --run makeinfo
+MAKEINFO = ${SHELL} /g/g90/sato5/lib/libibtl/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -192,10 +171,10 @@ SET_MAKE =
 SHELL = /bin/sh
 STRIP = strip
 VERSION = 0.0.1
-abs_builddir = /home/kent/lib/ibtl/libibtl/src
-abs_srcdir = /home/kent/lib/ibtl/libibtl/src
-abs_top_builddir = /home/kent/lib/ibtl/libibtl
-abs_top_srcdir = /home/kent/lib/ibtl/libibtl
+abs_builddir = /g/g90/sato5/lib/libibtl/src
+abs_srcdir = /g/g90/sato5/lib/libibtl/src
+abs_top_builddir = /g/g90/sato5/lib/libibtl
+abs_top_srcdir = /g/g90/sato5/lib/libibtl
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
 am__include = include
@@ -223,7 +202,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/kent/lib/ibtl/libibtl/install-sh
+install_sh = ${SHELL} /g/g90/sato5/lib/libibtl/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -233,7 +212,7 @@ mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /usr/local
+prefix = /g/g90/sato5/lib/libibtl-install
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -244,7 +223,7 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-SRC_DIR = ./
+SRC_DIR = ../src
 INCLUDE_DIR = ../include
 include_HEADERS = $(INCLUDE_DIR)/*
 
@@ -254,20 +233,16 @@ include_HEADERS = $(INCLUDE_DIR)/*
 lib_LIBRARIES = libibtls.a
 libibtls_a_SOURCES = \
         $(SRC_DIR)/list_queue.c \
-        $(INCLUDE_DIR)/list_queue.h \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \
         $(SRC_DIR)/fdmi_util.c \
         $(SRC_DIR)/fdmi_hashtable.c \
 	$(SRC_DIR)/fdmi_queue.c \
-        $(INCLUDE_DIR)/fdmi_queue.h \
 	$(SRC_DIR)/fdmi_datatype.c \
 	$(SRC_DIR)/fdmi_proc_man.c \
         $(SRC_DIR)/fdmi.c \
-        $(INCLUDE_DIR)/fdmi.h \
-        $(SRC_DIR)/ibvio_common.c \
-        $(SRC_DIR)/ibtl_io_client.c 
+        $(INCLUDE_DIR)/fdmi.h 
 
 libibtls_a_LIBADD = 
 libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
@@ -278,7 +253,6 @@ libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
 lib_LTLIBRARIES = libibtls.la
 libibtls_la_SOURCES = \
         $(SRC_DIR)/list_queue.c \
-        $(SRC_DIR)/ibtls.c \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \
@@ -287,17 +261,11 @@ libibtls_la_SOURCES = \
         $(SRC_DIR)/fdmi_queue.c \
 	$(SRC_DIR)/fdmi_datatype.c \
 	$(SRC_DIR)/fdmi_proc_man.c \
-        $(SRC_DIR)/fdmi.c \
-        $(SRC_DIR)/ibvio_common.c \
-        $(SRC_DIR)/ibtl_io_client.c 
+        $(SRC_DIR)/fdmi.c 
 
 libibtls_la_LIBADD = 
 libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
 libibtls_la_LDFLAGS = -lrdmacm -lpthread -libverbs -version-info 1:0:0 -release 1
-ibtl_io_server_SOURCES = ibtl_io_server.c ibvio_common.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
-ibtl_io_server_DEPENDENCIES = ${SRC_DIR}/libibtls.a
-ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
-ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 
 all: all-am
 
 .SUFFIXES:
@@ -401,52 +369,6 @@ clean-libLTLIBRARIES:
 	done
 libibtls.la: $(libibtls_la_OBJECTS) $(libibtls_la_DEPENDENCIES) 
 	$(libibtls_la_LINK) -rpath $(libdir) $(libibtls_la_OBJECTS) $(libibtls_la_LIBADD) $(LIBS)
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	for p in $$list; do echo "$$p $$p"; done | \
-	sed 's/$(EXEEXT)$$//' | \
-	while read p p1; do if test -f $$p || test -f $$p1; \
-	  then echo "$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
-	sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
-	    else { print "f", $$3 "/" $$4, $$1; } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	    } \
-	; done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
-	      -e 's/$$/$(EXEEXT)/' `; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
-ibtl_io_server$(EXEEXT): $(ibtl_io_server_OBJECTS) $(ibtl_io_server_DEPENDENCIES) 
-	@rm -f ibtl_io_server$(EXEEXT)
-	$(ibtl_io_server_LINK) $(ibtl_io_server_OBJECTS) $(ibtl_io_server_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -454,14 +376,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/ibtl_io_server-fdmi_err.Po
-include ./$(DEPDIR)/ibtl_io_server-fdmi_param.Po
-include ./$(DEPDIR)/ibtl_io_server-fdmi_util.Po
-include ./$(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
-include ./$(DEPDIR)/ibtl_io_server-ibvio_common.Po
-include ./$(DEPDIR)/ibtl_io_server-pgz.Po
-include ./$(DEPDIR)/ibtl_io_server-scr_list_queue.Po
-include ./$(DEPDIR)/ibtl_io_server-yarn.Po
 include ./$(DEPDIR)/libibtls_a-fdmi.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_datatype.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_err.Po
@@ -471,8 +385,6 @@ include ./$(DEPDIR)/libibtls_a-fdmi_param.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_proc_man.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_queue.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_util.Po
-include ./$(DEPDIR)/libibtls_a-ibtl_io_client.Po
-include ./$(DEPDIR)/libibtls_a-ibvio_common.Po
 include ./$(DEPDIR)/libibtls_a-list_queue.Po
 include ./$(DEPDIR)/libibtls_la-fdmi.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_datatype.Plo
@@ -483,9 +395,6 @@ include ./$(DEPDIR)/libibtls_la-fdmi_param.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_proc_man.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_queue.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_util.Plo
-include ./$(DEPDIR)/libibtls_la-ibtl_io_client.Plo
-include ./$(DEPDIR)/libibtls_la-ibtls.Plo
-include ./$(DEPDIR)/libibtls_la-ibvio_common.Plo
 include ./$(DEPDIR)/libibtls_la-list_queue.Plo
 
 .c.o:
@@ -649,47 +558,12 @@ libibtls_a-fdmi.obj: $(SRC_DIR)/fdmi.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi.obj `if test -f '$(SRC_DIR)/fdmi.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi.c'; fi`
 
-libibtls_a-ibvio_common.o: $(SRC_DIR)/ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibvio_common.o -MD -MP -MF $(DEPDIR)/libibtls_a-ibvio_common.Tpo -c -o libibtls_a-ibvio_common.o `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
-	$(am__mv) $(DEPDIR)/libibtls_a-ibvio_common.Tpo $(DEPDIR)/libibtls_a-ibvio_common.Po
-#	source='$(SRC_DIR)/ibvio_common.c' object='libibtls_a-ibvio_common.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibvio_common.o `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
-
-libibtls_a-ibvio_common.obj: $(SRC_DIR)/ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibvio_common.obj -MD -MP -MF $(DEPDIR)/libibtls_a-ibvio_common.Tpo -c -o libibtls_a-ibvio_common.obj `if test -f '$(SRC_DIR)/ibvio_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibvio_common.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-ibvio_common.Tpo $(DEPDIR)/libibtls_a-ibvio_common.Po
-#	source='$(SRC_DIR)/ibvio_common.c' object='libibtls_a-ibvio_common.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibvio_common.obj `if test -f '$(SRC_DIR)/ibvio_common.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibvio_common.c'; fi`
-
-libibtls_a-ibtl_io_client.o: $(SRC_DIR)/ibtl_io_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtl_io_client.o -MD -MP -MF $(DEPDIR)/libibtls_a-ibtl_io_client.Tpo -c -o libibtls_a-ibtl_io_client.o `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
-	$(am__mv) $(DEPDIR)/libibtls_a-ibtl_io_client.Tpo $(DEPDIR)/libibtls_a-ibtl_io_client.Po
-#	source='$(SRC_DIR)/ibtl_io_client.c' object='libibtls_a-ibtl_io_client.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibtl_io_client.o `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
-
-libibtls_a-ibtl_io_client.obj: $(SRC_DIR)/ibtl_io_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-ibtl_io_client.obj -MD -MP -MF $(DEPDIR)/libibtls_a-ibtl_io_client.Tpo -c -o libibtls_a-ibtl_io_client.obj `if test -f '$(SRC_DIR)/ibtl_io_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtl_io_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtl_io_client.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-ibtl_io_client.Tpo $(DEPDIR)/libibtls_a-ibtl_io_client.Po
-#	source='$(SRC_DIR)/ibtl_io_client.c' object='libibtls_a-ibtl_io_client.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-ibtl_io_client.obj `if test -f '$(SRC_DIR)/ibtl_io_client.c'; then $(CYGPATH_W) '$(SRC_DIR)/ibtl_io_client.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/ibtl_io_client.c'; fi`
-
 libibtls_la-list_queue.lo: $(SRC_DIR)/list_queue.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-list_queue.lo -MD -MP -MF $(DEPDIR)/libibtls_la-list_queue.Tpo -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
 	$(am__mv) $(DEPDIR)/libibtls_la-list_queue.Tpo $(DEPDIR)/libibtls_la-list_queue.Plo
 #	source='$(SRC_DIR)/list_queue.c' object='libibtls_la-list_queue.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
-
-libibtls_la-ibtls.lo: $(SRC_DIR)/ibtls.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibtls.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibtls.Tpo -c -o libibtls_la-ibtls.lo `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
-	$(am__mv) $(DEPDIR)/libibtls_la-ibtls.Tpo $(DEPDIR)/libibtls_la-ibtls.Plo
-#	source='$(SRC_DIR)/ibtls.c' object='libibtls_la-ibtls.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-ibtls.lo `test -f '$(SRC_DIR)/ibtls.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtls.c
 
 libibtls_la-fdmi_err.lo: $(SRC_DIR)/fdmi_err.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_err.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_err.Tpo -c -o libibtls_la-fdmi_err.lo `test -f '$(SRC_DIR)/fdmi_err.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_err.c
@@ -753,132 +627,6 @@ libibtls_la-fdmi.lo: $(SRC_DIR)/fdmi.c
 #	source='$(SRC_DIR)/fdmi.c' object='libibtls_la-fdmi.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-fdmi.lo `test -f '$(SRC_DIR)/fdmi.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi.c
-
-libibtls_la-ibvio_common.lo: $(SRC_DIR)/ibvio_common.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibvio_common.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibvio_common.Tpo -c -o libibtls_la-ibvio_common.lo `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
-	$(am__mv) $(DEPDIR)/libibtls_la-ibvio_common.Tpo $(DEPDIR)/libibtls_la-ibvio_common.Plo
-#	source='$(SRC_DIR)/ibvio_common.c' object='libibtls_la-ibvio_common.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-ibvio_common.lo `test -f '$(SRC_DIR)/ibvio_common.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibvio_common.c
-
-libibtls_la-ibtl_io_client.lo: $(SRC_DIR)/ibtl_io_client.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-ibtl_io_client.lo -MD -MP -MF $(DEPDIR)/libibtls_la-ibtl_io_client.Tpo -c -o libibtls_la-ibtl_io_client.lo `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
-	$(am__mv) $(DEPDIR)/libibtls_la-ibtl_io_client.Tpo $(DEPDIR)/libibtls_la-ibtl_io_client.Plo
-#	source='$(SRC_DIR)/ibtl_io_client.c' object='libibtls_la-ibtl_io_client.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-ibtl_io_client.lo `test -f '$(SRC_DIR)/ibtl_io_client.c' || echo '$(srcdir)/'`$(SRC_DIR)/ibtl_io_client.c
-
-ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibtl_io_server.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo -c -o ibtl_io_server-ibtl_io_server.o `test -f 'ibtl_io_server.c' || echo '$(srcdir)/'`ibtl_io_server.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo $(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
-#	source='ibtl_io_server.c' object='ibtl_io_server-ibtl_io_server.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibtl_io_server.o `test -f 'ibtl_io_server.c' || echo '$(srcdir)/'`ibtl_io_server.c
-
-ibtl_io_server-ibtl_io_server.obj: ibtl_io_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibtl_io_server.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo -c -o ibtl_io_server-ibtl_io_server.obj `if test -f 'ibtl_io_server.c'; then $(CYGPATH_W) 'ibtl_io_server.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_server.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo $(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
-#	source='ibtl_io_server.c' object='ibtl_io_server-ibtl_io_server.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibtl_io_server.obj `if test -f 'ibtl_io_server.c'; then $(CYGPATH_W) 'ibtl_io_server.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_server.c'; fi`
-
-ibtl_io_server-ibvio_common.o: ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
-#	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
-
-ibtl_io_server-ibvio_common.obj: ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
-#	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
-
-ibtl_io_server-pgz.o: pgz.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-pgz.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-pgz.Tpo -c -o ibtl_io_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-pgz.Tpo $(DEPDIR)/ibtl_io_server-pgz.Po
-#	source='pgz.c' object='ibtl_io_server-pgz.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
-
-ibtl_io_server-pgz.obj: pgz.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-pgz.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-pgz.Tpo -c -o ibtl_io_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-pgz.Tpo $(DEPDIR)/ibtl_io_server-pgz.Po
-#	source='pgz.c' object='ibtl_io_server-pgz.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
-
-ibtl_io_server-scr_list_queue.o: scr_list_queue.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-scr_list_queue.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-scr_list_queue.Tpo -c -o ibtl_io_server-scr_list_queue.o `test -f 'scr_list_queue.c' || echo '$(srcdir)/'`scr_list_queue.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-scr_list_queue.Tpo $(DEPDIR)/ibtl_io_server-scr_list_queue.Po
-#	source='scr_list_queue.c' object='ibtl_io_server-scr_list_queue.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-scr_list_queue.o `test -f 'scr_list_queue.c' || echo '$(srcdir)/'`scr_list_queue.c
-
-ibtl_io_server-scr_list_queue.obj: scr_list_queue.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-scr_list_queue.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-scr_list_queue.Tpo -c -o ibtl_io_server-scr_list_queue.obj `if test -f 'scr_list_queue.c'; then $(CYGPATH_W) 'scr_list_queue.c'; else $(CYGPATH_W) '$(srcdir)/scr_list_queue.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-scr_list_queue.Tpo $(DEPDIR)/ibtl_io_server-scr_list_queue.Po
-#	source='scr_list_queue.c' object='ibtl_io_server-scr_list_queue.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-scr_list_queue.obj `if test -f 'scr_list_queue.c'; then $(CYGPATH_W) 'scr_list_queue.c'; else $(CYGPATH_W) '$(srcdir)/scr_list_queue.c'; fi`
-
-ibtl_io_server-fdmi_err.o: fdmi_err.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_err.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo -c -o ibtl_io_server-fdmi_err.o `test -f 'fdmi_err.c' || echo '$(srcdir)/'`fdmi_err.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo $(DEPDIR)/ibtl_io_server-fdmi_err.Po
-#	source='fdmi_err.c' object='ibtl_io_server-fdmi_err.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_err.o `test -f 'fdmi_err.c' || echo '$(srcdir)/'`fdmi_err.c
-
-ibtl_io_server-fdmi_err.obj: fdmi_err.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_err.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo -c -o ibtl_io_server-fdmi_err.obj `if test -f 'fdmi_err.c'; then $(CYGPATH_W) 'fdmi_err.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_err.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_err.Tpo $(DEPDIR)/ibtl_io_server-fdmi_err.Po
-#	source='fdmi_err.c' object='ibtl_io_server-fdmi_err.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_err.obj `if test -f 'fdmi_err.c'; then $(CYGPATH_W) 'fdmi_err.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_err.c'; fi`
-
-ibtl_io_server-fdmi_param.o: fdmi_param.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_param.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo -c -o ibtl_io_server-fdmi_param.o `test -f 'fdmi_param.c' || echo '$(srcdir)/'`fdmi_param.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo $(DEPDIR)/ibtl_io_server-fdmi_param.Po
-#	source='fdmi_param.c' object='ibtl_io_server-fdmi_param.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_param.o `test -f 'fdmi_param.c' || echo '$(srcdir)/'`fdmi_param.c
-
-ibtl_io_server-fdmi_param.obj: fdmi_param.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_param.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo -c -o ibtl_io_server-fdmi_param.obj `if test -f 'fdmi_param.c'; then $(CYGPATH_W) 'fdmi_param.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_param.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_param.Tpo $(DEPDIR)/ibtl_io_server-fdmi_param.Po
-#	source='fdmi_param.c' object='ibtl_io_server-fdmi_param.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_param.obj `if test -f 'fdmi_param.c'; then $(CYGPATH_W) 'fdmi_param.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_param.c'; fi`
-
-ibtl_io_server-fdmi_util.o: fdmi_util.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_util.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo -c -o ibtl_io_server-fdmi_util.o `test -f 'fdmi_util.c' || echo '$(srcdir)/'`fdmi_util.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo $(DEPDIR)/ibtl_io_server-fdmi_util.Po
-#	source='fdmi_util.c' object='ibtl_io_server-fdmi_util.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_util.o `test -f 'fdmi_util.c' || echo '$(srcdir)/'`fdmi_util.c
-
-ibtl_io_server-fdmi_util.obj: fdmi_util.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-fdmi_util.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo -c -o ibtl_io_server-fdmi_util.obj `if test -f 'fdmi_util.c'; then $(CYGPATH_W) 'fdmi_util.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_util.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-fdmi_util.Tpo $(DEPDIR)/ibtl_io_server-fdmi_util.Po
-#	source='fdmi_util.c' object='ibtl_io_server-fdmi_util.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-fdmi_util.obj `if test -f 'fdmi_util.c'; then $(CYGPATH_W) 'fdmi_util.c'; else $(CYGPATH_W) '$(srcdir)/fdmi_util.c'; fi`
-
-ibtl_io_server-yarn.o: yarn.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-yarn.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-yarn.Tpo -c -o ibtl_io_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-yarn.Tpo $(DEPDIR)/ibtl_io_server-yarn.Po
-#	source='yarn.c' object='ibtl_io_server-yarn.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
-
-ibtl_io_server-yarn.obj: yarn.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-yarn.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-yarn.Tpo -c -o ibtl_io_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-yarn.Tpo $(DEPDIR)/ibtl_io_server-yarn.Po
-#	source='yarn.c' object='ibtl_io_server-yarn.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -990,11 +738,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
-install-binPROGRAMS: install-libLTLIBRARIES
-
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1024,8 +770,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libLIBRARIES \
-	clean-libLTLIBRARIES clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1051,8 +797,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS install-libLIBRARIES \
-	install-libLTLIBRARIES
+install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1092,28 +837,40 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
-	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libLIBRARIES clean-libLTLIBRARIES \
-	clean-libtool ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-includeHEADERS install-info \
-	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-binPROGRAMS uninstall-includeHEADERS \
-	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am \
+	install-includeHEADERS install-info install-info-am \
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
+
+# ============================================================
+# To build binaries
+# ============================================================
+#bin_PROGRAMS=ibtl_io_server
+#SRC_DIR=./
+#INCLUDE_DIR=../include
+
+#ibtl_io_server_SOURCES =ibtl_io_server.c ibvio_common.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
+#ibtl_io_server_DEPENDENCIES =  ${SRC_DIR}/libibtls.a
+#ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
+#ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

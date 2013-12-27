@@ -1,55 +1,19 @@
 SUBDIRS = ../src
-#bin_PROGRAMS = rdma_server_test \
-#	        rdma_client_test \
-#	        rdma_client_latency \
-#	        rdma_server_latency \
-#	        rdma_client_silent \
-#	        rdma_server_silent \
-#	        rdma_client_offset \
-#	        rdma_server_offset \
-#	       ibtl_io
 
-bin_PROGRAMS = ibtl_io
+bin_PROGRAMS = ibtl_io ibtl_io_server
 
 SRC_DIR=../src
 INCLUDE_DIR=../include 
 TARGET=	$(SRC_DIR)/list_queue.c	$(INCLUDE_DIR)/list_queue.h $(SRC_DIR)/rdma_ppool.c $(INCLUDE_DIR)/rdma_ppool.h $(SRC_DIR)/rdma_client.c $(INCLUDE_DIR)/rdma_client.h $(SRC_DIR)/rdma_server.c $(INCLUDE_DIR)/rdma_server.h $(SRC_DIR)/rdma_common.c $(INCLUDE_DIR)/rdma_common.h $(SRC_DIR)/common.c $(INCLUDE_DIR)/common.h $(SRC_DIR)/ibtls.c $(INCLUDE_DIR)/ibtls.h 
 
-ibtl_io_SOURCES =  ibtl_io.c
+ibtl_io_SOURCES =  ibtl_io.c ibtl_io_client.c ibvio_common.c
 ibtl_io_CFLAGS = -I$(INCLUDE_DIR) -I../src
 ibtl_io_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
 
-rdma_client_test_SOURCES =  rdma_client_test.c $(TARGET)
-rdma_client_test_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
+ibtl_io_server_SOURCES =  ibtl_io_server.c ibvio_common.c  yarn.c pgz.c
+ibtl_io_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
+ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread -lz
 
-rdma_server_test_SOURCES = rdma_server_test.c $(TARGET)
-rdma_server_test_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_test_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-
-rdma_client_latency_SOURCES =  rdma_client_latency.c $(TARGET)
-rdma_client_latency_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_latency_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-
-rdma_server_latency_SOURCES = rdma_server_latency.c $(TARGET)
-rdma_server_latency_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_latency_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-
-rdma_client_silent_SOURCES =  rdma_client_silent.c $(TARGET)
-rdma_client_silent_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-
-rdma_server_silent_SOURCES = rdma_server_silent.c $(TARGET)
-rdma_server_silent_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_silent_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-
-rdma_client_offset_SOURCES =  rdma_client_offset.c $(TARGET)
-rdma_client_offset_CFLAGS = -I$(INCLUDE_DIR)
-rdma_client_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
-
-rdma_server_offset_SOURCES = rdma_server_offset.c $(TARGET)
-rdma_server_offset_CFLAGS = -I$(INCLUDE_DIR)
-rdma_server_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 
 # ================
 # For installation
@@ -58,14 +22,16 @@ rdma_server_offset_LDADD = ${LDFLAGS} -lrdmacm -lpthread
 examplesdir = $(exec_prefix)/examples
 
 dist_examples_DATA = \
-	rdma_client_test.c \
-	rdma_server_test.c \
-	rdma_client_offset.c \
-	rdma_server_offset.c \
-	rdma_client_silent.c \
-	rdma_server_silent.c \
-	rdma_client_latency.c \
-	rdma_server_latency.c 
+	ibtl_io.c \
+	ibtl_io_server.c \
+	ibtl_io_client.c \
+	ibtl_io_client.h \
+	ibvio_common.c \
+	ibvio_common.h \
+	pgz.c \
+	pgz.h \
+	yarn.c \
+	yarn.h 
 
 EXTRA_DIST = makefile.example
 

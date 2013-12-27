@@ -11,20 +11,16 @@ lib_LIBRARIES = libibtls.a
 
 libibtls_a_SOURCES = \
         $(SRC_DIR)/list_queue.c \
-        $(INCLUDE_DIR)/list_queue.h \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \
         $(SRC_DIR)/fdmi_util.c \
         $(SRC_DIR)/fdmi_hashtable.c \
 	$(SRC_DIR)/fdmi_queue.c \
-        $(INCLUDE_DIR)/fdmi_queue.h \
 	$(SRC_DIR)/fdmi_datatype.c \
 	$(SRC_DIR)/fdmi_proc_man.c \
         $(SRC_DIR)/fdmi.c \
-        $(INCLUDE_DIR)/fdmi.h \
-        $(SRC_DIR)/ibvio_common.c \
-        $(SRC_DIR)/ibtl_io_client.c 
+        $(INCLUDE_DIR)/fdmi.h 
 
 
 libibtls_a_LIBADD = @LIBOBJS@
@@ -37,7 +33,6 @@ libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
 lib_LTLIBRARIES	= libibtls.la
 libibtls_la_SOURCES = \
         $(SRC_DIR)/list_queue.c \
-        $(SRC_DIR)/ibtls.c \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \
@@ -46,9 +41,8 @@ libibtls_la_SOURCES = \
         $(SRC_DIR)/fdmi_queue.c \
 	$(SRC_DIR)/fdmi_datatype.c \
 	$(SRC_DIR)/fdmi_proc_man.c \
-        $(SRC_DIR)/fdmi.c \
-        $(SRC_DIR)/ibvio_common.c \
-        $(SRC_DIR)/ibtl_io_client.c 
+        $(SRC_DIR)/fdmi.c 
+
 
 libibtls_la_LIBADD = @LIBOBJS@
 libibtls_la_CFLAGS = -I$(INCLUDE_DIR)
@@ -57,11 +51,11 @@ libibtls_la_LDFLAGS =  -lrdmacm -lpthread -libverbs -version-info 1:0:0 -release
 # ============================================================
 # To build binaries
 # ============================================================
-bin_PROGRAMS=ibtl_io_server
-SRC_DIR=./
-INCLUDE_DIR=../include
+#bin_PROGRAMS=ibtl_io_server
+#SRC_DIR=./
+#INCLUDE_DIR=../include
 
-ibtl_io_server_SOURCES =ibtl_io_server.c ibvio_common.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
-ibtl_io_server_DEPENDENCIES =  ${SRC_DIR}/libibtls.a
-ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
-ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 
+#ibtl_io_server_SOURCES =ibtl_io_server.c ibvio_common.c pgz.c scr_list_queue.c fdmi_err.c fdmi_param.c fdmi_mem fdmi_util.c yarn.c ${SRC_DIR}/libibtls.a
+#ibtl_io_server_DEPENDENCIES =  ${SRC_DIR}/libibtls.a
+#ibtl_io_server_CFLAGS = -g -I$(INCLUDE_DIR) -I. -static #-mcmodel=large 
+#ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a ${LDFLAGS} -L${SRC_DIR} -lrdmacm -lpthread -lz 

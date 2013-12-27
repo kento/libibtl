@@ -1,4 +1,4 @@
-libibtls_la-fdmi_util.lo: fdmi_util.c /usr/include/sys/stat.h \
+libibtls_la-fdmi_util.lo: ../src/fdmi_util.c /usr/include/sys/stat.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h /usr/include/bits/types.h \

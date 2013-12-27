@@ -1,5 +1,5 @@
-libibtls_la-fdmi_datatype.lo: fdmi_datatype.c /usr/include/stdlib.h \
- /usr/include/features.h /usr/include/sys/cdefs.h \
+libibtls_la-fdmi_datatype.lo: ../src/fdmi_datatype.c \
+ /usr/include/stdlib.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
  /usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stddef.h \
@@ -14,7 +14,8 @@ libibtls_la-fdmi_datatype.lo: fdmi_datatype.c /usr/include/stdlib.h \
  /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h fdmi_err.h fdmi_datatype.h
+ /usr/include/bits/stdio.h ../include/fdmi_err.h \
+ ../include/fdmi_datatype.h
 
 /usr/include/stdlib.h:
 
@@ -78,6 +79,6 @@ libibtls_la-fdmi_datatype.lo: fdmi_datatype.c /usr/include/stdlib.h \
 
 /usr/include/bits/stdio.h:
 
-fdmi_err.h:
+../include/fdmi_err.h:
 
-fdmi_datatype.h:
+../include/fdmi_datatype.h:

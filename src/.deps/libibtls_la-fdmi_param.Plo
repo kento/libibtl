@@ -1,4 +1,4 @@
-libibtls_la-fdmi_param.lo: fdmi_param.c /usr/include/stdlib.h \
+libibtls_la-fdmi_param.lo: ../src/fdmi_param.c /usr/include/stdlib.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
@@ -14,7 +14,7 @@ libibtls_la-fdmi_param.lo: fdmi_param.c /usr/include/stdlib.h \
  /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h fdmi_param.h fdmi_mem.h
+ /usr/include/bits/stdio.h ../include/fdmi_param.h ../include/fdmi_mem.h
 
 /usr/include/stdlib.h:
 
@@ -78,6 +78,6 @@ libibtls_la-fdmi_param.lo: fdmi_param.c /usr/include/stdlib.h \
 
 /usr/include/bits/stdio.h:
 
-fdmi_param.h:
+../include/fdmi_param.h:
 
-fdmi_mem.h:
+../include/fdmi_mem.h:
