@@ -1,13 +1,13 @@
 INSTALL_DIR = /g/g90/sato5/lib/libibtl-install
 
-ibtl_io_OBJS = ibtl_io.o ibtl_io_client.c ibvio_common.c
-ibtl_io_PROGRAM = ibtl_io
+ibio_test_OBJS = ibio_test.o ibio_client.c ibio_common.c
+ibio_test_PROGRAM = ibio_test
 
-ibtl_io_server_OBJS = ibtl_io_server.o ibvio_common.o yarn.o pgz.o
-ibtl_io_server_PROGRAM = ibtl_io_server
+ibio_server_OBJS = ibio_server.o ibio_common.o yarn.o pgz.o
+ibio_server_PROGRAM = ibio_server
 
-PROGRAMS= $(ibtl_io_PROGRAM) $(ibtl_io_server_PROGRAM)
-OBJS= $(ibtl_io_OBJS) $(ibtl_io_server_OBJS)
+PROGRAMS= $(ibio_test_PROGRAM) $(ibio_server_PROGRAM)
+OBJS= $(ibio_test_OBJS) $(ibio_server_OBJS)
 
 CC = gcc
 LDFLAGS = -I/usr/include/ -I$(INSTALL_DIR)/include  -L/usr/lib64/   -L$(INSTALL_DIR)/lib  -lrdmacm -lpthread -lz -libtls
@@ -15,12 +15,12 @@ CFLAGS = -Wall -O2
 
 .SUFFIXES: .c .o
 
-all: $(ibtl_io_PROGRAM)  $(ibtl_io_server_PROGRAM) 
+all: $(ibio_test_PROGRAM)  $(ibio_server_PROGRAM) 
 
-$(ibtl_io_PROGRAM): $(ibtl_io_OBJS)
+$(ibio_test_PROGRAM): $(ibio_test_OBJS)
 		    $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-$(ibtl_io_server_PROGRAM): $(ibtl_io_server_OBJS)
+$(ibio_server_PROGRAM): $(ibio_server_OBJS)
 			   $(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 .c.o: 
