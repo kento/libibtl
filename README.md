@@ -58,12 +58,13 @@ The client example code wirte/read a spedified file on the remote server.
 
 RDMA Communication APIs
 -----------------------
+#### Initialization ####	
     int fdmi_verbs_init(int *argc, char ***argv)  
 This function must be called before any communication functions  
 `argc`: Pointer to the number of arguments  
 `argv`: Argument vector  
     
-
+#### Finalization ####	
     int fdmi_verbs_finalize()  
 This function finalize the communications
 
