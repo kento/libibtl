@@ -1,13 +1,15 @@
-*****************************************
+Infiniband-based RDMA communication runtime
+==========================================
+
+
 Build libibtl
-*****************************************
+---------------
 ./configure --prefix=/path/to/install/dir
 make 
 
 
-*****************************************
 Quick Start
-*****************************************
+------------
 
 IBIO Server side:
 source: ./src/ibtl_io_server.c
