@@ -125,4 +125,13 @@ This function returns `flag`=1 if messages with `source` and `tag` is ready to r
 
 ### Variables
 #### Datatype
+* FMI_INT: int
+* FMI_DOUBLE: double
+* FMI_FLOAT: float
+* FMI_BYTE: like unsigned char
+* FMI_CHAR: char
+
 #### Status
+    FMI_Status
+* FMI_SOURCE: `id` of processes sending the message    
+* FMI_TAG:`tag` of the message
