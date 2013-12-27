@@ -29,7 +29,7 @@ Quick Start
 -------------
 ### Build examples ###
 
-Run commands below:
+Run commands below:  
     $ cd /path/to/install/dir
     $ cd examples
 
