@@ -58,7 +58,7 @@ The client example code wirte/read a spedified file on the remote server.
 
 RDMA Communication APIs & Variables
 -----------------------
-# APIs
+### APIs
 
 #### Initialization
     int fdmi_verbs_init(int *argc, char ***argv)  
@@ -71,23 +71,58 @@ This function must be called before any communication functions
 This function finalize the communications
 
 #### Connection (Used by only clients )
-    void fdmi_connection* fdmi_verbs_connect(int rank, char *hostname);
-This function make connection to a specified server, create mapping from `rank` to `hostname`.
-`rank` is used by the rest of communication function calls (send/redv).
-* `rank` [input]: integer to assinge the host
+    void fdmi_connection* fdmi_verbs_connect(int id, char *hostname);
+This function make connection to a specified server, create mapping from `id` to `hostname`.
+`id` is used by the rest of communication function calls (send/redv).
+* `id` [input]: integer to assinge the host
 * `hostname` [input]: a server to connect
     
-#### Send
+#### Non-blocking Send
     int fdmi_verbs_isend (const void* buf, int count, struct fdmi_datatype dataype, int dest, int tag, struct fdmi_communicator *comm, struct fdmi_request* request);
 This function provides non-blocking send.
-* `buf` [input]:
-* `count` [input]:
-* `datatype` [input]: 
+* `buf` [input]: Initial address of send buffer
+* `count` [input]: Number of elements in send buffer
+* `datatype` [input]: Datatype of each send buffer element
+* `dest` [input]: `id` of destination (Assigned `id` via fmdi_verbs_connection)
+* `tag` [input]: Message tag
+* `comm` [input]: Communicator (Must specify FMI_COMM_WORLD)
+* `request` [output]: Communication request
 
-
+#### Non-blocking Recv
     int fdmi_verbs_irecv(const void* buf, int count, struct fdmi_datatype dataype,  int source, int tag, struct fdmi_communicator *comm, struct fdmi_request* request);
-    int fdmi_verbs_test(struct fdmi_request *request, struct fdmi_status *staus);
-    int fdmi_verbs_wait(struct fdmi_request* request, struct fdmi_status *status);
-    int fdmi_verbs_iprobe(int source, int tag, struct fdmi_communicator* comm, int *flag, struct fdmi_status *status);
+This function provides non-blocking receive.
+* `buf` [input]: Initial address of receive buffer
+* `count` [input]: Number of elements in receive buffer
+* `datatype` [input]: Datatype of each receive buffer element
+* `source` [input]: `id` of source (Assigned `id` via fmdi_verbs_connection)
+* `tag` [input]: Message tag
+* `comm` [input]: Communicator (Must specify FMI_COMM_WORLD)
+* `request` [output]: Communication request
 
-# Variables
+#### Test    
+    int fdmi_verbs_test(struct fdmi_request *request, struct fdmi_status *staus);
+This function returns 1 if the send/recv operation identified by `request` is complete. Otherwise, this function returns 0.
+* `request` [input]: Communication request
+* `status` [output]: Status object
+
+#### Wait
+    int fdmi_verbs_wait(struct fdmi_request* request, struct fdmi_status *status);
+This function is blocking fdmi_verbs_test.
+This function returns 1 if the send/recv operation identified by `request` is complete. Otherwise, this function blocks the call until the request gets complete.
+* `request` [input]: Communication request
+* `status` [output]: Status object
+
+#### Iprove
+    int fdmi_verbs_iprobe(int source, int tag, struct fdmi_communicator* comm, int *flag, struct fdmi_status *status);
+This function allows checkpoint of incoming messages without actual receipt of them.
+The user can then decide how to receive them, based on the information returned by this function.
+This function returns `flag`=1 if messages with `source` and `tag` is ready to receive, then put the information to `status`. Otherwise this function just returns `flag`=0.
+* `source` [input]: Source `id ` or FMI_ANY_SOURCE
+* `tag` [input]: Tag value or FMI_ANY_TAG
+* `comm` [input]: Communicator (Must specify FMI_COMM_WORLD)
+* `flag` [output]: Message-waiting flag
+* `status` [output]: Status object
+
+### Variables
+#### Datatype
+#### Status
