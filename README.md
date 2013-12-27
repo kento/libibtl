@@ -62,9 +62,9 @@ RDMA Communication APIs
 This function must be called before any communication functions  
 * `argc`: Pointer to the number of arguments
 * `argv`: Argument vector  
-  
-
-
+    
+     
+    
     int fdmi_verbs_finalize()  
 This function finalize the communications
 
