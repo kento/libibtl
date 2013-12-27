@@ -59,6 +59,8 @@ The client example code wirte/read a spedified file on the remote server.
 RDMA Communication APIs
 -----------------------
     int fdmi_verbs_init(int *argc, char ***argv);
+* `argc`
+* `argv`
     int fdmi_verbs_finalize();
     void fdmi_connection* fdmi_verbs_connect(int rank, char *hostname);
     int fdmi_verbs_isend (const void* buf, int count, struct fdmi_datatype dataype, int dest, int tag, struct fdmi_communicator *comm, struct fdmi_request* request);
