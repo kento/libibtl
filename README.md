@@ -1,9 +1,22 @@
-Infiniband-based RDMA communication runtime
-==========================================
+====================================================
+RDMA Communication Runtime
+====================================================
+
+This runtime is a client/server model communication runtime over infiniband interconntects.
+The runtime is develeped by using ibverbs.
+
+----------------------------------------------------
+Directly Structure
+----------------------------------------------------
+libibtl
+ |---- src    : Directory for source codes
+ |---- include: Directory for header files
+ |---- example: Directory for example codes
 
 
-Build libibtl
----------------
+----------------------------------------------------
+HOW to Build
+----------------------------------------------------
 ./configure --prefix=/path/to/install/dir
 make 
 

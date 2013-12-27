@@ -749,7 +749,7 @@ PACKAGE_VERSION='0.0.1'
 PACKAGE_STRING='main 0.0.1'
 PACKAGE_BUGREPORT='kent@matsulab.is.titech.ac.jp'
 
-ac_unique_file="examples/rdma_client_test.c"
+ac_unique_file="examples/example_client.c"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>

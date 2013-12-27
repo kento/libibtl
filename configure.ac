@@ -5,7 +5,7 @@ AC_PREREQ(2.59)
 AC_INIT([main], [0.0.1], [kent@matsulab.is.titech.ac.jp])
 AM_INIT_AUTOMAKE(main, 0.0.1)
 
-AC_CONFIG_SRCDIR([examples/rdma_client_test.c])
+AC_CONFIG_SRCDIR([examples/example_client.c])
 AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
