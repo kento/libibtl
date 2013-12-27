@@ -64,7 +64,7 @@ This function must be called before any communication functions
 * `argv`: Argument vector  
     
      
-    
+kmc:    
     int fdmi_verbs_finalize()  
 This function finalize the communications
 
