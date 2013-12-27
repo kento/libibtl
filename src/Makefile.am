@@ -10,7 +10,6 @@ include_HEADERS = $(INCLUDE_DIR)/*
 lib_LIBRARIES = libibtls.a
 
 libibtls_a_SOURCES = \
-        $(SRC_DIR)/list_queue.c \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \
@@ -32,7 +31,6 @@ libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
 # ============================================================
 lib_LTLIBRARIES	= libibtls.la
 libibtls_la_SOURCES = \
-        $(SRC_DIR)/list_queue.c \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \

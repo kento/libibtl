@@ -15,7 +15,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "ibtl_io_client.h"
+#include "ibio_client.h"
 #include "transfer.h"
 #include "fdmi.h"
 #include "fdmi_datatype.h"
@@ -23,7 +23,7 @@
 #include "fdmi_proc_man.h"
 #include "fdmi_config.h"
 #include "fdmi_util.h"
-#include "ibvio_common.h"
+#include "ibio_common.h"
 
 /*For RDMA transfer*/
 #define IBTL_FILE_BUF_SIZE ((512 + 128) * 1024 * 1024)

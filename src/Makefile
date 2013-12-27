@@ -74,9 +74,9 @@ LIBRARIES = $(lib_LIBRARIES)
 ARFLAGS = cru
 libibtls_a_AR = $(AR) $(ARFLAGS)
 libibtls_a_DEPENDENCIES = 
-am_libibtls_a_OBJECTS = libibtls_a-list_queue.$(OBJEXT) \
-	libibtls_a-fdmi_err.$(OBJEXT) libibtls_a-fdmi_param.$(OBJEXT) \
-	libibtls_a-fdmi_mem.$(OBJEXT) libibtls_a-fdmi_util.$(OBJEXT) \
+am_libibtls_a_OBJECTS = libibtls_a-fdmi_err.$(OBJEXT) \
+	libibtls_a-fdmi_param.$(OBJEXT) libibtls_a-fdmi_mem.$(OBJEXT) \
+	libibtls_a-fdmi_util.$(OBJEXT) \
 	libibtls_a-fdmi_hashtable.$(OBJEXT) \
 	libibtls_a-fdmi_queue.$(OBJEXT) \
 	libibtls_a-fdmi_datatype.$(OBJEXT) \
@@ -84,12 +84,11 @@ am_libibtls_a_OBJECTS = libibtls_a-list_queue.$(OBJEXT) \
 libibtls_a_OBJECTS = $(am_libibtls_a_OBJECTS)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libibtls_la_DEPENDENCIES = 
-am_libibtls_la_OBJECTS = libibtls_la-list_queue.lo \
-	libibtls_la-fdmi_err.lo libibtls_la-fdmi_param.lo \
-	libibtls_la-fdmi_mem.lo libibtls_la-fdmi_util.lo \
-	libibtls_la-fdmi_hashtable.lo libibtls_la-fdmi_queue.lo \
-	libibtls_la-fdmi_datatype.lo libibtls_la-fdmi_proc_man.lo \
-	libibtls_la-fdmi.lo
+am_libibtls_la_OBJECTS = libibtls_la-fdmi_err.lo \
+	libibtls_la-fdmi_param.lo libibtls_la-fdmi_mem.lo \
+	libibtls_la-fdmi_util.lo libibtls_la-fdmi_hashtable.lo \
+	libibtls_la-fdmi_queue.lo libibtls_la-fdmi_datatype.lo \
+	libibtls_la-fdmi_proc_man.lo libibtls_la-fdmi.lo
 libibtls_la_OBJECTS = $(am_libibtls_la_OBJECTS)
 libibtls_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libibtls_la_CFLAGS) \
@@ -232,7 +231,6 @@ include_HEADERS = $(INCLUDE_DIR)/*
 # =======================================
 lib_LIBRARIES = libibtls.a
 libibtls_a_SOURCES = \
-        $(SRC_DIR)/list_queue.c \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \
@@ -252,7 +250,6 @@ libibtls_a_CFLAGS = -I$(INCLUDE_DIR)
 # ============================================================
 lib_LTLIBRARIES = libibtls.la
 libibtls_la_SOURCES = \
-        $(SRC_DIR)/list_queue.c \
         $(SRC_DIR)/fdmi_err.c \
         $(SRC_DIR)/fdmi_param.c \
         $(SRC_DIR)/fdmi_mem.c \
@@ -385,7 +382,6 @@ include ./$(DEPDIR)/libibtls_a-fdmi_param.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_proc_man.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_queue.Po
 include ./$(DEPDIR)/libibtls_a-fdmi_util.Po
-include ./$(DEPDIR)/libibtls_a-list_queue.Po
 include ./$(DEPDIR)/libibtls_la-fdmi.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_datatype.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_err.Plo
@@ -395,7 +391,6 @@ include ./$(DEPDIR)/libibtls_la-fdmi_param.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_proc_man.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_queue.Plo
 include ./$(DEPDIR)/libibtls_la-fdmi_util.Plo
-include ./$(DEPDIR)/libibtls_la-list_queue.Plo
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -417,20 +412,6 @@ include ./$(DEPDIR)/libibtls_la-list_queue.Plo
 #	source='$<' object='$@' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LTCOMPILE) -c -o $@ $<
-
-libibtls_a-list_queue.o: $(SRC_DIR)/list_queue.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-list_queue.o -MD -MP -MF $(DEPDIR)/libibtls_a-list_queue.Tpo -c -o libibtls_a-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
-	$(am__mv) $(DEPDIR)/libibtls_a-list_queue.Tpo $(DEPDIR)/libibtls_a-list_queue.Po
-#	source='$(SRC_DIR)/list_queue.c' object='libibtls_a-list_queue.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-list_queue.o `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
-
-libibtls_a-list_queue.obj: $(SRC_DIR)/list_queue.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-list_queue.obj -MD -MP -MF $(DEPDIR)/libibtls_a-list_queue.Tpo -c -o libibtls_a-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
-	$(am__mv) $(DEPDIR)/libibtls_a-list_queue.Tpo $(DEPDIR)/libibtls_a-list_queue.Po
-#	source='$(SRC_DIR)/list_queue.c' object='libibtls_a-list_queue.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-list_queue.obj `if test -f '$(SRC_DIR)/list_queue.c'; then $(CYGPATH_W) '$(SRC_DIR)/list_queue.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/list_queue.c'; fi`
 
 libibtls_a-fdmi_err.o: $(SRC_DIR)/fdmi_err.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -MT libibtls_a-fdmi_err.o -MD -MP -MF $(DEPDIR)/libibtls_a-fdmi_err.Tpo -c -o libibtls_a-fdmi_err.o `test -f '$(SRC_DIR)/fdmi_err.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_err.c
@@ -557,13 +538,6 @@ libibtls_a-fdmi.obj: $(SRC_DIR)/fdmi.c
 #	source='$(SRC_DIR)/fdmi.c' object='libibtls_a-fdmi.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_a_CFLAGS) $(CFLAGS) -c -o libibtls_a-fdmi.obj `if test -f '$(SRC_DIR)/fdmi.c'; then $(CYGPATH_W) '$(SRC_DIR)/fdmi.c'; else $(CYGPATH_W) '$(srcdir)/$(SRC_DIR)/fdmi.c'; fi`
-
-libibtls_la-list_queue.lo: $(SRC_DIR)/list_queue.c
-	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-list_queue.lo -MD -MP -MF $(DEPDIR)/libibtls_la-list_queue.Tpo -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
-	$(am__mv) $(DEPDIR)/libibtls_la-list_queue.Tpo $(DEPDIR)/libibtls_la-list_queue.Plo
-#	source='$(SRC_DIR)/list_queue.c' object='libibtls_la-list_queue.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -c -o libibtls_la-list_queue.lo `test -f '$(SRC_DIR)/list_queue.c' || echo '$(srcdir)/'`$(SRC_DIR)/list_queue.c
 
 libibtls_la-fdmi_err.lo: $(SRC_DIR)/fdmi_err.c
 	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libibtls_la_CFLAGS) $(CFLAGS) -MT libibtls_la-fdmi_err.lo -MD -MP -MF $(DEPDIR)/libibtls_la-fdmi_err.Tpo -c -o libibtls_la-fdmi_err.lo `test -f '$(SRC_DIR)/fdmi_err.c' || echo '$(srcdir)/'`$(SRC_DIR)/fdmi_err.c

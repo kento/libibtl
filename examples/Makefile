@@ -15,6 +15,10 @@
 
 
 
+# ================
+# Building for debuging
+# ================
+
 
 
 pkgdatadir = $(datadir)/main
@@ -35,7 +39,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = x86_64-unknown-linux-gnu
 host_triplet = x86_64-unknown-linux-gnu
-bin_PROGRAMS = ibtl_io$(EXEEXT) ibtl_io_server$(EXEEXT)
+bin_PROGRAMS = example_client$(EXEEXT) example_server$(EXEEXT) \
+	ibio_test$(EXEEXT) ibio_server$(EXEEXT)
 subdir = examples
 DIST_COMMON = $(dist_examples_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -49,23 +54,36 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(examplesdir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_ibtl_io_OBJECTS = ibtl_io-ibtl_io.$(OBJEXT) \
-	ibtl_io-ibtl_io_client.$(OBJEXT) \
-	ibtl_io-ibvio_common.$(OBJEXT)
-ibtl_io_OBJECTS = $(am_ibtl_io_OBJECTS)
+am_example_client_OBJECTS = example_client-example_client.$(OBJEXT)
+example_client_OBJECTS = $(am_example_client_OBJECTS)
 am__DEPENDENCIES_1 =
-ibtl_io_DEPENDENCIES = ${SRC_DIR}/libibtls.a $(am__DEPENDENCIES_1)
-ibtl_io_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(ibtl_io_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-am_ibtl_io_server_OBJECTS = ibtl_io_server-ibtl_io_server.$(OBJEXT) \
-	ibtl_io_server-ibvio_common.$(OBJEXT) \
-	ibtl_io_server-yarn.$(OBJEXT) ibtl_io_server-pgz.$(OBJEXT)
-ibtl_io_server_OBJECTS = $(am_ibtl_io_server_OBJECTS)
-ibtl_io_server_DEPENDENCIES = ${SRC_DIR}/libibtls.a \
+example_client_DEPENDENCIES = ${SRC_DIR}/libibtls.a \
 	$(am__DEPENDENCIES_1)
-ibtl_io_server_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(ibtl_io_server_CFLAGS) \
+example_client_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(example_client_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_example_server_OBJECTS = example_server-example_server.$(OBJEXT)
+example_server_OBJECTS = $(am_example_server_OBJECTS)
+example_server_DEPENDENCIES = ${SRC_DIR}/libibtls.a \
+	$(am__DEPENDENCIES_1)
+example_server_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(example_server_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_ibio_server_OBJECTS = ibio_server-ibio_server.$(OBJEXT) \
+	ibio_server-ibio_common.$(OBJEXT) ibio_server-yarn.$(OBJEXT) \
+	ibio_server-pgz.$(OBJEXT)
+ibio_server_OBJECTS = $(am_ibio_server_OBJECTS)
+ibio_server_DEPENDENCIES = ${SRC_DIR}/libibtls.a $(am__DEPENDENCIES_1)
+ibio_server_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(ibio_server_CFLAGS) \
+	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_ibio_test_OBJECTS = ibio_test-ibio_test.$(OBJEXT) \
+	ibio_test-ibio_client.$(OBJEXT) \
+	ibio_test-ibio_common.$(OBJEXT)
+ibio_test_OBJECTS = $(am_ibio_test_OBJECTS)
+ibio_test_DEPENDENCIES = ${SRC_DIR}/libibtls.a $(am__DEPENDENCIES_1)
+ibio_test_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(ibio_test_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -80,8 +98,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(ibtl_io_SOURCES) $(ibtl_io_server_SOURCES)
-DIST_SOURCES = $(ibtl_io_SOURCES) $(ibtl_io_server_SOURCES)
+SOURCES = $(example_client_SOURCES) $(example_server_SOURCES) \
+	$(ibio_server_SOURCES) $(ibio_test_SOURCES)
+DIST_SOURCES = $(example_client_SOURCES) $(example_server_SOURCES) \
+	$(ibio_server_SOURCES) $(ibio_test_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -258,25 +278,30 @@ top_srcdir = ..
 SUBDIRS = ../src
 SRC_DIR = ../src
 INCLUDE_DIR = ../include 
-TARGET = $(SRC_DIR)/list_queue.c	$(INCLUDE_DIR)/list_queue.h $(SRC_DIR)/rdma_ppool.c $(INCLUDE_DIR)/rdma_ppool.h $(SRC_DIR)/rdma_client.c $(INCLUDE_DIR)/rdma_client.h $(SRC_DIR)/rdma_server.c $(INCLUDE_DIR)/rdma_server.h $(SRC_DIR)/rdma_common.c $(INCLUDE_DIR)/rdma_common.h $(SRC_DIR)/common.c $(INCLUDE_DIR)/common.h $(SRC_DIR)/ibtls.c $(INCLUDE_DIR)/ibtls.h 
-ibtl_io_SOURCES = ibtl_io.c ibtl_io_client.c ibvio_common.c
-ibtl_io_CFLAGS = -I$(INCLUDE_DIR) -I../src
-ibtl_io_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
-ibtl_io_server_SOURCES = ibtl_io_server.c ibvio_common.c  yarn.c pgz.c
-ibtl_io_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
-ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread -lz
+example_client_SOURCES = example_client.c
+example_client_CFLAGS = -I$(INCLUDE_DIR) -I../src
+example_client_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
+example_server_SOURCES = example_server.c
+example_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
+example_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
+ibio_test_SOURCES = ibio_test.c ibio_client.c ibio_common.c
+ibio_test_CFLAGS = -I$(INCLUDE_DIR) -I../src
+ibio_test_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
+ibio_server_SOURCES = ibio_server.c ibio_common.c  yarn.c pgz.c
+ibio_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
+ibio_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread -lz
 
 # ================
 # For installation
 # ================
 examplesdir = $(exec_prefix)/examples
 dist_examples_DATA = \
-	ibtl_io.c \
-	ibtl_io_server.c \
-	ibtl_io_client.c \
-	ibtl_io_client.h \
-	ibvio_common.c \
-	ibvio_common.h \
+	ibio_test.c \
+	ibio_server.c \
+	ibio_client.c \
+	ibio_client.h \
+	ibio_common.c \
+	ibio_common.h \
 	pgz.c \
 	pgz.h \
 	yarn.c \
@@ -360,12 +385,18 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-ibtl_io$(EXEEXT): $(ibtl_io_OBJECTS) $(ibtl_io_DEPENDENCIES) 
-	@rm -f ibtl_io$(EXEEXT)
-	$(ibtl_io_LINK) $(ibtl_io_OBJECTS) $(ibtl_io_LDADD) $(LIBS)
-ibtl_io_server$(EXEEXT): $(ibtl_io_server_OBJECTS) $(ibtl_io_server_DEPENDENCIES) 
-	@rm -f ibtl_io_server$(EXEEXT)
-	$(ibtl_io_server_LINK) $(ibtl_io_server_OBJECTS) $(ibtl_io_server_LDADD) $(LIBS)
+example_client$(EXEEXT): $(example_client_OBJECTS) $(example_client_DEPENDENCIES) 
+	@rm -f example_client$(EXEEXT)
+	$(example_client_LINK) $(example_client_OBJECTS) $(example_client_LDADD) $(LIBS)
+example_server$(EXEEXT): $(example_server_OBJECTS) $(example_server_DEPENDENCIES) 
+	@rm -f example_server$(EXEEXT)
+	$(example_server_LINK) $(example_server_OBJECTS) $(example_server_LDADD) $(LIBS)
+ibio_server$(EXEEXT): $(ibio_server_OBJECTS) $(ibio_server_DEPENDENCIES) 
+	@rm -f ibio_server$(EXEEXT)
+	$(ibio_server_LINK) $(ibio_server_OBJECTS) $(ibio_server_LDADD) $(LIBS)
+ibio_test$(EXEEXT): $(ibio_test_OBJECTS) $(ibio_test_DEPENDENCIES) 
+	@rm -f ibio_test$(EXEEXT)
+	$(ibio_test_LINK) $(ibio_test_OBJECTS) $(ibio_test_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -373,13 +404,15 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/ibtl_io-ibtl_io.Po
-include ./$(DEPDIR)/ibtl_io-ibtl_io_client.Po
-include ./$(DEPDIR)/ibtl_io-ibvio_common.Po
-include ./$(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
-include ./$(DEPDIR)/ibtl_io_server-ibvio_common.Po
-include ./$(DEPDIR)/ibtl_io_server-pgz.Po
-include ./$(DEPDIR)/ibtl_io_server-yarn.Po
+include ./$(DEPDIR)/example_client-example_client.Po
+include ./$(DEPDIR)/example_server-example_server.Po
+include ./$(DEPDIR)/ibio_server-ibio_common.Po
+include ./$(DEPDIR)/ibio_server-ibio_server.Po
+include ./$(DEPDIR)/ibio_server-pgz.Po
+include ./$(DEPDIR)/ibio_server-yarn.Po
+include ./$(DEPDIR)/ibio_test-ibio_client.Po
+include ./$(DEPDIR)/ibio_test-ibio_common.Po
+include ./$(DEPDIR)/ibio_test-ibio_test.Po
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -402,103 +435,131 @@ include ./$(DEPDIR)/ibtl_io_server-yarn.Po
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(LTCOMPILE) -c -o $@ $<
 
-ibtl_io-ibtl_io.o: ibtl_io.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibtl_io.o -MD -MP -MF $(DEPDIR)/ibtl_io-ibtl_io.Tpo -c -o ibtl_io-ibtl_io.o `test -f 'ibtl_io.c' || echo '$(srcdir)/'`ibtl_io.c
-	$(am__mv) $(DEPDIR)/ibtl_io-ibtl_io.Tpo $(DEPDIR)/ibtl_io-ibtl_io.Po
-#	source='ibtl_io.c' object='ibtl_io-ibtl_io.o' libtool=no \
+example_client-example_client.o: example_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_client_CFLAGS) $(CFLAGS) -MT example_client-example_client.o -MD -MP -MF $(DEPDIR)/example_client-example_client.Tpo -c -o example_client-example_client.o `test -f 'example_client.c' || echo '$(srcdir)/'`example_client.c
+	$(am__mv) $(DEPDIR)/example_client-example_client.Tpo $(DEPDIR)/example_client-example_client.Po
+#	source='example_client.c' object='example_client-example_client.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibtl_io.o `test -f 'ibtl_io.c' || echo '$(srcdir)/'`ibtl_io.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_client_CFLAGS) $(CFLAGS) -c -o example_client-example_client.o `test -f 'example_client.c' || echo '$(srcdir)/'`example_client.c
 
-ibtl_io-ibtl_io.obj: ibtl_io.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibtl_io.obj -MD -MP -MF $(DEPDIR)/ibtl_io-ibtl_io.Tpo -c -o ibtl_io-ibtl_io.obj `if test -f 'ibtl_io.c'; then $(CYGPATH_W) 'ibtl_io.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io-ibtl_io.Tpo $(DEPDIR)/ibtl_io-ibtl_io.Po
-#	source='ibtl_io.c' object='ibtl_io-ibtl_io.obj' libtool=no \
+example_client-example_client.obj: example_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_client_CFLAGS) $(CFLAGS) -MT example_client-example_client.obj -MD -MP -MF $(DEPDIR)/example_client-example_client.Tpo -c -o example_client-example_client.obj `if test -f 'example_client.c'; then $(CYGPATH_W) 'example_client.c'; else $(CYGPATH_W) '$(srcdir)/example_client.c'; fi`
+	$(am__mv) $(DEPDIR)/example_client-example_client.Tpo $(DEPDIR)/example_client-example_client.Po
+#	source='example_client.c' object='example_client-example_client.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibtl_io.obj `if test -f 'ibtl_io.c'; then $(CYGPATH_W) 'ibtl_io.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_client_CFLAGS) $(CFLAGS) -c -o example_client-example_client.obj `if test -f 'example_client.c'; then $(CYGPATH_W) 'example_client.c'; else $(CYGPATH_W) '$(srcdir)/example_client.c'; fi`
 
-ibtl_io-ibtl_io_client.o: ibtl_io_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibtl_io_client.o -MD -MP -MF $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo -c -o ibtl_io-ibtl_io_client.o `test -f 'ibtl_io_client.c' || echo '$(srcdir)/'`ibtl_io_client.c
-	$(am__mv) $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo $(DEPDIR)/ibtl_io-ibtl_io_client.Po
-#	source='ibtl_io_client.c' object='ibtl_io-ibtl_io_client.o' libtool=no \
+example_server-example_server.o: example_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_server_CFLAGS) $(CFLAGS) -MT example_server-example_server.o -MD -MP -MF $(DEPDIR)/example_server-example_server.Tpo -c -o example_server-example_server.o `test -f 'example_server.c' || echo '$(srcdir)/'`example_server.c
+	$(am__mv) $(DEPDIR)/example_server-example_server.Tpo $(DEPDIR)/example_server-example_server.Po
+#	source='example_server.c' object='example_server-example_server.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibtl_io_client.o `test -f 'ibtl_io_client.c' || echo '$(srcdir)/'`ibtl_io_client.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_server_CFLAGS) $(CFLAGS) -c -o example_server-example_server.o `test -f 'example_server.c' || echo '$(srcdir)/'`example_server.c
 
-ibtl_io-ibtl_io_client.obj: ibtl_io_client.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibtl_io_client.obj -MD -MP -MF $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo -c -o ibtl_io-ibtl_io_client.obj `if test -f 'ibtl_io_client.c'; then $(CYGPATH_W) 'ibtl_io_client.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_client.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io-ibtl_io_client.Tpo $(DEPDIR)/ibtl_io-ibtl_io_client.Po
-#	source='ibtl_io_client.c' object='ibtl_io-ibtl_io_client.obj' libtool=no \
+example_server-example_server.obj: example_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_server_CFLAGS) $(CFLAGS) -MT example_server-example_server.obj -MD -MP -MF $(DEPDIR)/example_server-example_server.Tpo -c -o example_server-example_server.obj `if test -f 'example_server.c'; then $(CYGPATH_W) 'example_server.c'; else $(CYGPATH_W) '$(srcdir)/example_server.c'; fi`
+	$(am__mv) $(DEPDIR)/example_server-example_server.Tpo $(DEPDIR)/example_server-example_server.Po
+#	source='example_server.c' object='example_server-example_server.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibtl_io_client.obj `if test -f 'ibtl_io_client.c'; then $(CYGPATH_W) 'ibtl_io_client.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_client.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(example_server_CFLAGS) $(CFLAGS) -c -o example_server-example_server.obj `if test -f 'example_server.c'; then $(CYGPATH_W) 'example_server.c'; else $(CYGPATH_W) '$(srcdir)/example_server.c'; fi`
 
-ibtl_io-ibvio_common.o: ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibvio_common.o -MD -MP -MF $(DEPDIR)/ibtl_io-ibvio_common.Tpo -c -o ibtl_io-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
-	$(am__mv) $(DEPDIR)/ibtl_io-ibvio_common.Tpo $(DEPDIR)/ibtl_io-ibvio_common.Po
-#	source='ibvio_common.c' object='ibtl_io-ibvio_common.o' libtool=no \
+ibio_server-ibio_server.o: ibio_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-ibio_server.o -MD -MP -MF $(DEPDIR)/ibio_server-ibio_server.Tpo -c -o ibio_server-ibio_server.o `test -f 'ibio_server.c' || echo '$(srcdir)/'`ibio_server.c
+	$(am__mv) $(DEPDIR)/ibio_server-ibio_server.Tpo $(DEPDIR)/ibio_server-ibio_server.Po
+#	source='ibio_server.c' object='ibio_server-ibio_server.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-ibio_server.o `test -f 'ibio_server.c' || echo '$(srcdir)/'`ibio_server.c
 
-ibtl_io-ibvio_common.obj: ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -MT ibtl_io-ibvio_common.obj -MD -MP -MF $(DEPDIR)/ibtl_io-ibvio_common.Tpo -c -o ibtl_io-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io-ibvio_common.Tpo $(DEPDIR)/ibtl_io-ibvio_common.Po
-#	source='ibvio_common.c' object='ibtl_io-ibvio_common.obj' libtool=no \
+ibio_server-ibio_server.obj: ibio_server.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-ibio_server.obj -MD -MP -MF $(DEPDIR)/ibio_server-ibio_server.Tpo -c -o ibio_server-ibio_server.obj `if test -f 'ibio_server.c'; then $(CYGPATH_W) 'ibio_server.c'; else $(CYGPATH_W) '$(srcdir)/ibio_server.c'; fi`
+	$(am__mv) $(DEPDIR)/ibio_server-ibio_server.Tpo $(DEPDIR)/ibio_server-ibio_server.Po
+#	source='ibio_server.c' object='ibio_server-ibio_server.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_CFLAGS) $(CFLAGS) -c -o ibtl_io-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-ibio_server.obj `if test -f 'ibio_server.c'; then $(CYGPATH_W) 'ibio_server.c'; else $(CYGPATH_W) '$(srcdir)/ibio_server.c'; fi`
 
-ibtl_io_server-ibtl_io_server.o: ibtl_io_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibtl_io_server.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo -c -o ibtl_io_server-ibtl_io_server.o `test -f 'ibtl_io_server.c' || echo '$(srcdir)/'`ibtl_io_server.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo $(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
-#	source='ibtl_io_server.c' object='ibtl_io_server-ibtl_io_server.o' libtool=no \
+ibio_server-ibio_common.o: ibio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-ibio_common.o -MD -MP -MF $(DEPDIR)/ibio_server-ibio_common.Tpo -c -o ibio_server-ibio_common.o `test -f 'ibio_common.c' || echo '$(srcdir)/'`ibio_common.c
+	$(am__mv) $(DEPDIR)/ibio_server-ibio_common.Tpo $(DEPDIR)/ibio_server-ibio_common.Po
+#	source='ibio_common.c' object='ibio_server-ibio_common.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibtl_io_server.o `test -f 'ibtl_io_server.c' || echo '$(srcdir)/'`ibtl_io_server.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-ibio_common.o `test -f 'ibio_common.c' || echo '$(srcdir)/'`ibio_common.c
 
-ibtl_io_server-ibtl_io_server.obj: ibtl_io_server.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibtl_io_server.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo -c -o ibtl_io_server-ibtl_io_server.obj `if test -f 'ibtl_io_server.c'; then $(CYGPATH_W) 'ibtl_io_server.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_server.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibtl_io_server.Tpo $(DEPDIR)/ibtl_io_server-ibtl_io_server.Po
-#	source='ibtl_io_server.c' object='ibtl_io_server-ibtl_io_server.obj' libtool=no \
+ibio_server-ibio_common.obj: ibio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-ibio_common.obj -MD -MP -MF $(DEPDIR)/ibio_server-ibio_common.Tpo -c -o ibio_server-ibio_common.obj `if test -f 'ibio_common.c'; then $(CYGPATH_W) 'ibio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibio_common.c'; fi`
+	$(am__mv) $(DEPDIR)/ibio_server-ibio_common.Tpo $(DEPDIR)/ibio_server-ibio_common.Po
+#	source='ibio_common.c' object='ibio_server-ibio_common.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibtl_io_server.obj `if test -f 'ibtl_io_server.c'; then $(CYGPATH_W) 'ibtl_io_server.c'; else $(CYGPATH_W) '$(srcdir)/ibtl_io_server.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-ibio_common.obj `if test -f 'ibio_common.c'; then $(CYGPATH_W) 'ibio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibio_common.c'; fi`
 
-ibtl_io_server-ibvio_common.o: ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
-#	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.o' libtool=no \
+ibio_server-yarn.o: yarn.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-yarn.o -MD -MP -MF $(DEPDIR)/ibio_server-yarn.Tpo -c -o ibio_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
+	$(am__mv) $(DEPDIR)/ibio_server-yarn.Tpo $(DEPDIR)/ibio_server-yarn.Po
+#	source='yarn.c' object='ibio_server-yarn.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.o `test -f 'ibvio_common.c' || echo '$(srcdir)/'`ibvio_common.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
 
-ibtl_io_server-ibvio_common.obj: ibvio_common.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-ibvio_common.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-ibvio_common.Tpo $(DEPDIR)/ibtl_io_server-ibvio_common.Po
-#	source='ibvio_common.c' object='ibtl_io_server-ibvio_common.obj' libtool=no \
+ibio_server-yarn.obj: yarn.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-yarn.obj -MD -MP -MF $(DEPDIR)/ibio_server-yarn.Tpo -c -o ibio_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
+	$(am__mv) $(DEPDIR)/ibio_server-yarn.Tpo $(DEPDIR)/ibio_server-yarn.Po
+#	source='yarn.c' object='ibio_server-yarn.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-ibvio_common.obj `if test -f 'ibvio_common.c'; then $(CYGPATH_W) 'ibvio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibvio_common.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
 
-ibtl_io_server-yarn.o: yarn.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-yarn.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-yarn.Tpo -c -o ibtl_io_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-yarn.Tpo $(DEPDIR)/ibtl_io_server-yarn.Po
-#	source='yarn.c' object='ibtl_io_server-yarn.o' libtool=no \
+ibio_server-pgz.o: pgz.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-pgz.o -MD -MP -MF $(DEPDIR)/ibio_server-pgz.Tpo -c -o ibio_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
+	$(am__mv) $(DEPDIR)/ibio_server-pgz.Tpo $(DEPDIR)/ibio_server-pgz.Po
+#	source='pgz.c' object='ibio_server-pgz.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-yarn.o `test -f 'yarn.c' || echo '$(srcdir)/'`yarn.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
 
-ibtl_io_server-yarn.obj: yarn.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-yarn.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-yarn.Tpo -c -o ibtl_io_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-yarn.Tpo $(DEPDIR)/ibtl_io_server-yarn.Po
-#	source='yarn.c' object='ibtl_io_server-yarn.obj' libtool=no \
+ibio_server-pgz.obj: pgz.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -MT ibio_server-pgz.obj -MD -MP -MF $(DEPDIR)/ibio_server-pgz.Tpo -c -o ibio_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
+	$(am__mv) $(DEPDIR)/ibio_server-pgz.Tpo $(DEPDIR)/ibio_server-pgz.Po
+#	source='pgz.c' object='ibio_server-pgz.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-yarn.obj `if test -f 'yarn.c'; then $(CYGPATH_W) 'yarn.c'; else $(CYGPATH_W) '$(srcdir)/yarn.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_server_CFLAGS) $(CFLAGS) -c -o ibio_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
 
-ibtl_io_server-pgz.o: pgz.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-pgz.o -MD -MP -MF $(DEPDIR)/ibtl_io_server-pgz.Tpo -c -o ibtl_io_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
-	$(am__mv) $(DEPDIR)/ibtl_io_server-pgz.Tpo $(DEPDIR)/ibtl_io_server-pgz.Po
-#	source='pgz.c' object='ibtl_io_server-pgz.o' libtool=no \
+ibio_test-ibio_test.o: ibio_test.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -MT ibio_test-ibio_test.o -MD -MP -MF $(DEPDIR)/ibio_test-ibio_test.Tpo -c -o ibio_test-ibio_test.o `test -f 'ibio_test.c' || echo '$(srcdir)/'`ibio_test.c
+	$(am__mv) $(DEPDIR)/ibio_test-ibio_test.Tpo $(DEPDIR)/ibio_test-ibio_test.Po
+#	source='ibio_test.c' object='ibio_test-ibio_test.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-pgz.o `test -f 'pgz.c' || echo '$(srcdir)/'`pgz.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -c -o ibio_test-ibio_test.o `test -f 'ibio_test.c' || echo '$(srcdir)/'`ibio_test.c
 
-ibtl_io_server-pgz.obj: pgz.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -MT ibtl_io_server-pgz.obj -MD -MP -MF $(DEPDIR)/ibtl_io_server-pgz.Tpo -c -o ibtl_io_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
-	$(am__mv) $(DEPDIR)/ibtl_io_server-pgz.Tpo $(DEPDIR)/ibtl_io_server-pgz.Po
-#	source='pgz.c' object='ibtl_io_server-pgz.obj' libtool=no \
+ibio_test-ibio_test.obj: ibio_test.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -MT ibio_test-ibio_test.obj -MD -MP -MF $(DEPDIR)/ibio_test-ibio_test.Tpo -c -o ibio_test-ibio_test.obj `if test -f 'ibio_test.c'; then $(CYGPATH_W) 'ibio_test.c'; else $(CYGPATH_W) '$(srcdir)/ibio_test.c'; fi`
+	$(am__mv) $(DEPDIR)/ibio_test-ibio_test.Tpo $(DEPDIR)/ibio_test-ibio_test.Po
+#	source='ibio_test.c' object='ibio_test-ibio_test.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibtl_io_server_CFLAGS) $(CFLAGS) -c -o ibtl_io_server-pgz.obj `if test -f 'pgz.c'; then $(CYGPATH_W) 'pgz.c'; else $(CYGPATH_W) '$(srcdir)/pgz.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -c -o ibio_test-ibio_test.obj `if test -f 'ibio_test.c'; then $(CYGPATH_W) 'ibio_test.c'; else $(CYGPATH_W) '$(srcdir)/ibio_test.c'; fi`
+
+ibio_test-ibio_client.o: ibio_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -MT ibio_test-ibio_client.o -MD -MP -MF $(DEPDIR)/ibio_test-ibio_client.Tpo -c -o ibio_test-ibio_client.o `test -f 'ibio_client.c' || echo '$(srcdir)/'`ibio_client.c
+	$(am__mv) $(DEPDIR)/ibio_test-ibio_client.Tpo $(DEPDIR)/ibio_test-ibio_client.Po
+#	source='ibio_client.c' object='ibio_test-ibio_client.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -c -o ibio_test-ibio_client.o `test -f 'ibio_client.c' || echo '$(srcdir)/'`ibio_client.c
+
+ibio_test-ibio_client.obj: ibio_client.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -MT ibio_test-ibio_client.obj -MD -MP -MF $(DEPDIR)/ibio_test-ibio_client.Tpo -c -o ibio_test-ibio_client.obj `if test -f 'ibio_client.c'; then $(CYGPATH_W) 'ibio_client.c'; else $(CYGPATH_W) '$(srcdir)/ibio_client.c'; fi`
+	$(am__mv) $(DEPDIR)/ibio_test-ibio_client.Tpo $(DEPDIR)/ibio_test-ibio_client.Po
+#	source='ibio_client.c' object='ibio_test-ibio_client.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -c -o ibio_test-ibio_client.obj `if test -f 'ibio_client.c'; then $(CYGPATH_W) 'ibio_client.c'; else $(CYGPATH_W) '$(srcdir)/ibio_client.c'; fi`
+
+ibio_test-ibio_common.o: ibio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -MT ibio_test-ibio_common.o -MD -MP -MF $(DEPDIR)/ibio_test-ibio_common.Tpo -c -o ibio_test-ibio_common.o `test -f 'ibio_common.c' || echo '$(srcdir)/'`ibio_common.c
+	$(am__mv) $(DEPDIR)/ibio_test-ibio_common.Tpo $(DEPDIR)/ibio_test-ibio_common.Po
+#	source='ibio_common.c' object='ibio_test-ibio_common.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -c -o ibio_test-ibio_common.o `test -f 'ibio_common.c' || echo '$(srcdir)/'`ibio_common.c
+
+ibio_test-ibio_common.obj: ibio_common.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -MT ibio_test-ibio_common.obj -MD -MP -MF $(DEPDIR)/ibio_test-ibio_common.Tpo -c -o ibio_test-ibio_common.obj `if test -f 'ibio_common.c'; then $(CYGPATH_W) 'ibio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibio_common.c'; fi`
+	$(am__mv) $(DEPDIR)/ibio_test-ibio_common.Tpo $(DEPDIR)/ibio_test-ibio_common.Po
+#	source='ibio_common.c' object='ibio_test-ibio_common.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ibio_test_CFLAGS) $(CFLAGS) -c -o ibio_test-ibio_common.obj `if test -f 'ibio_common.c'; then $(CYGPATH_W) 'ibio_common.c'; else $(CYGPATH_W) '$(srcdir)/ibio_common.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

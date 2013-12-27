@@ -11,7 +11,7 @@
 #include "scr_list_queue.h"
 #include "fdmi_util.h"
 #include "pgz.h"
-#include "ibvio_common.h"
+#include "ibio_common.h"
 
 #define COMPRESS 0
 #define BUF_SIZE (2 * 1024 * 1024 * 1024L)
@@ -402,117 +402,8 @@ int main(int argc, char **argv)
 	usleep(1000);
 	break;
       }
-
     }
-    /* fdmi_verbs_irecv(data, TEST_BUFF_SIZE, FMI_BYTE, FMI_ANY_SOURCE, FMI_ANY_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT); */
-    /* fdmi_dbg("irecv"); */
-    /* fdmi_verbs_wait(&req, &stat, FDMI_ABORT); */
-    /* fdmi_dbg("data %s from rank: %d, tag: %d", data, stat.FMI_SOURCE, stat.FMI_TAG); */
-    /* sprintf(data, "aho"); */
-    /* fdmi_verbs_isend(data, TEST_BUFF_SIZE, FMI_BYTE, stat.FMI_SOURCE, stat.FMI_TAG, FMI_COMM_WORLD, &req, FDMI_ABORT); */
-    /* fdmi_verbs_wait(&req, &stat, FDMI_ABORT); */
   }
-  sleep(11111);
-/*   struct RDMA_communicator comm; */
-/*   struct RDMA_request *req1, *req2; */
-/*   struct scr_transfer_ctl ctl[NUM_BUFF]; */
-/*   struct scr_transfer_ctl file_info; */
-/*   file_info.size = 0; */
-
-/*   char *data[NUM_BUFF]; */
-/*   int i; */
-/*   int buff_index = 0; */
-/*   uint64_t recv_size = -1; */
-/*   uint64_t ckpt_size = 0; */
-/*   pthread_t thread; */
-/*   scr_lq wq; /\*enqueue incomming PFS chkp data*\/ */
-
-/*   struct write_args *pendding_write_args = NULL; */
-/*   int req_num = 2; */
-
-/*   struct RDMA_request req[req_num]; */
-/*   int req_id = 0; */
-/*   int ctl_tag; */
-/*   double rdma_s, rdma_e; */
-/*   int count = 0; */
-/*   int request_status = 0; */
-
-
-/*   RDMA_Passive_Init(&comm); */
-/*   scr_lq_init(&wq); */
-
-
-/*   while(1) { */
-/*     /\*Colloect RDMA read requests until buffer exceeds*\/ */
-/*     usleep(1000); */
-/*     while (allocated_size < buff_size) { */
-/*       struct write_args *wa; */
-/*       request_status = RDMA_Iprobe(RDMA_ANY_SOURCE, 0, &comm); */
-/*       if (!request_status) { */
-/*         break; */
-/*       } */
-/*       RDMA_Recv(&file_info, sizeof(file_info), NULL, RDMA_ANY_SOURCE, 0, &comm); */
-/*       ibtl_dbg("PATH: %s, ID: %d size:%lu\n", file_info.path, file_info.id, file_info.size); */
-
-/*       wa = (struct write_args*)malloc(sizeof(struct write_args)); */
-/*       wa->id = file_info.id; */
-/*       wa->path = (char *)malloc (128); */
-/*       sprintf(wa->path, "%s", file_info.path); */
-/*       wa->size = file_info.size; */
-/*       wa->offset = 0; */
-/*       allocated_size += file_info.size; */
-/*       wa->addr = RDMA_Alloc(file_info.size); */
-/*       //      fprintf(stderr, "%lu/%lu\n", allocated_size, buff_size ); */
-/*       scr_lq_enq(&wq, wa); */
-/*     } */
-
-/*     while (RDMA_Iprobe(RDMA_ANY_SOURCE, 1, &comm)) { */
-/*       struct write_args* recv_wa; */
-/*       req_id = RDMA_Reqid(&comm, 1); */
-/*       recv_wa = get_write_arg(&wq, req_id); */
-/*       //      fprintf(stderr, "req_id: %d, recv_wa: %p\n", req_id, recv_wa); */
-/*       //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id);  */
-/*       //     ibtl_dbg("%d: Offset: %lu, size: %lu, req_id:%d", req_id, recv_wa->offset, recv_wa->size, req_id);  */
-
-/*       RDMA_Recv(recv_wa->addr + recv_wa->offset, 0, NULL, req_id, 1, &comm); */
-/*       recv_wa->offset += chunk_size; */
-/*       if (recv_wa->offset > recv_wa->size) { */
-/*         recv_wa->offset = recv_wa->size; */
-/*       } */
-/*       //      fprintf(stderr, "%d: Offset: %lu, size: %lu, req_id:%d\n", req_id, recv_wa->offset, recv_wa->size, req_id); */
-
-/*       if (recv_wa->size == recv_wa->offset) { */
-/*       /\*If I receive the all data to the buffer, I start writing the data to a file system *\/ */
-/* 	ibtl_dbg("start"); */
-/* 	RDMA_Send(recv_wa->addr + recv_wa->offset - CHUNK_SIZE, CHUNK_SIZE, NULL, req_id, 1, &comm); */
-/* 	ibtl_dbg("end"); */
-/* #if COMPRESS == 1 */
-/*         pthread_mutex_lock(&compress_mutex); */
-/*         if (pthread_create(&thread, NULL, (void *)compress_write, recv_wa)) { */
-/*           fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__); */
-/*           exit(1); */
-/*         } */
-/* #else */
-
-/*         pthread_mutex_lock(&dump_mutex); */
-/*         if (pthread_create(&thread, NULL, (void *)simple_write, recv_wa)) { */
-/*           fprintf(stderr, "RDMA lib: SEND: ERROR: pthread create failed @ %s:%d", __FILE__, __LINE__); */
-/*           exit(1); */
-/*         } */
-/* #endif */
-        
-/*         if (pthread_detach(thread)) { */
-/*           fprintf(stderr, "RDMA lib: SEND: ERROR: pthread detach failed @ %s:%d", __FILE__, __LINE__); */
-/*           exit(1); */
-/*         } */
-/*         scr_lq_remove(&wq, recv_wa); */
-
-/*       } else if  (recv_wa->size <= recv_wa->offset) { */
-/*         fprintf(stderr, "Received size exceeded the actual file size: file size=%lu, Received size=%lu\n", recv_wa->size, recv_wa->offset); */
-/*       } */
-/*     } */
-/*   } */
-/*   return 1; */
 }
 
 static struct write_args* get_write_arg(scr_lq *q, int id)

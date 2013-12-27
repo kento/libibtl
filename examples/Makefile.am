@@ -1,18 +1,27 @@
+# ================
+# Building for debuging
+# ================
+
 SUBDIRS = ../src
-
-bin_PROGRAMS = ibtl_io ibtl_io_server
-
+bin_PROGRAMS = example_client example_server ibio_test ibio_server 
 SRC_DIR=../src
 INCLUDE_DIR=../include 
-TARGET=	$(SRC_DIR)/list_queue.c	$(INCLUDE_DIR)/list_queue.h $(SRC_DIR)/rdma_ppool.c $(INCLUDE_DIR)/rdma_ppool.h $(SRC_DIR)/rdma_client.c $(INCLUDE_DIR)/rdma_client.h $(SRC_DIR)/rdma_server.c $(INCLUDE_DIR)/rdma_server.h $(SRC_DIR)/rdma_common.c $(INCLUDE_DIR)/rdma_common.h $(SRC_DIR)/common.c $(INCLUDE_DIR)/common.h $(SRC_DIR)/ibtls.c $(INCLUDE_DIR)/ibtls.h 
 
-ibtl_io_SOURCES =  ibtl_io.c ibtl_io_client.c ibvio_common.c
-ibtl_io_CFLAGS = -I$(INCLUDE_DIR) -I../src
-ibtl_io_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
+example_client_SOURCES =  example_client.c
+example_client_CFLAGS = -I$(INCLUDE_DIR) -I../src
+example_client_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
 
-ibtl_io_server_SOURCES =  ibtl_io_server.c ibvio_common.c  yarn.c pgz.c
-ibtl_io_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
-ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread -lz
+example_server_SOURCES =  example_server.c
+example_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
+example_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
+
+ibio_test_SOURCES =  ibio_test.c ibio_client.c ibio_common.c
+ibio_test_CFLAGS = -I$(INCLUDE_DIR) -I../src
+ibio_test_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread
+
+ibio_server_SOURCES =  ibio_server.c ibio_common.c  yarn.c pgz.c
+ibio_server_CFLAGS = -I$(INCLUDE_DIR) -I../src
+ibio_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread -lz
 
 
 # ================
@@ -22,12 +31,12 @@ ibtl_io_server_LDADD = ${SRC_DIR}/libibtls.a  ${LDFLAGS} -lrdmacm -lpthread -lz
 examplesdir = $(exec_prefix)/examples
 
 dist_examples_DATA = \
-	ibtl_io.c \
-	ibtl_io_server.c \
-	ibtl_io_client.c \
-	ibtl_io_client.h \
-	ibvio_common.c \
-	ibvio_common.h \
+	ibio_test.c \
+	ibio_server.c \
+	ibio_client.c \
+	ibio_client.h \
+	ibio_common.c \
+	ibio_common.h \
 	pgz.c \
 	pgz.h \
 	yarn.c \

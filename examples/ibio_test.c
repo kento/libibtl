@@ -12,7 +12,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
-#include "ibtl_io_client.h"
+#include "ibio_client.h"
 
 #define NUM 1
 #define ITE 1000

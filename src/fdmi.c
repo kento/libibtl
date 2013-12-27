@@ -2047,6 +2047,11 @@ static void fdmi_init_proc_man(void) {
 }
 
 
+int fdmi_verbs_finalize()
+{
+  /*TODO*/
+  return 0;
+}
 int fdmi_verbs_init(int *argc, char ***argv)
 {
   struct rdma_cm_event *event = NULL;

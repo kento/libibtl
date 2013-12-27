@@ -65,6 +65,7 @@ enum fdmi_option {
 
 
 int	fdmi_verbs_init(int *argc, char ***argv);
+int	fdmi_verbs_finalize();
 struct fdmi_connection* fdmi_verbs_connect(int rank, char *hostname);
 
 int	fdmi_verbs_comm_size(struct fdmi_communicator *comm, int *size);
