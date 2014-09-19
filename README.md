@@ -237,7 +237,8 @@ Ping-Pong examples initiated by a client
 Troubleshooting
 -------
 ### Shortage of Max Locked Memory
-Run commands below:   
+
+Run commands below:  
     $ ./configure --prefix=/path/to/install/dir
     $ make 
     $ make install
