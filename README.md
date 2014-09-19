@@ -238,7 +238,7 @@ Troubleshooting
 -------
 ### Shortage of Max Locked Memory
 - Error:  
- 
+
     FDMI:ERROR:sierra0:8128: ibv_reg_mr failed after several trial: pd:0x2aaab0000a70, addr:0x2aaab0000f70, size:65688 error:Cannot allocate memory (../src/fdmi.c:fdmi_reg_mr:2589)
 
 - Answer:
@@ -246,7 +246,6 @@ This error is usually caused by shortage of Max Locked Memory. You can check the
 
     $ ulimit -l
     $ 7168
-
 
 To give ibio enought locked memory size, "unlimited" locked memory is recommended
 
