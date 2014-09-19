@@ -49,13 +49,13 @@ The example codes simply exchanges messages (Ping-Pong) initiated by a client si
 
 Run server code:  
 
-    export LD_LIBRARY_PATH=/path/to/install/dir/lib
+    sierra0$ export LD_LIBRARY_PATH=/path/to/install/dir/lib
     sierra0$ ./example_server
 
 
 Run client cond:  
 
-    export LD_LIBRARY_PATH=/path/to/install/dir/lib
+    sierra1$ export LD_LIBRARY_PATH=/path/to/install/dir/lib
     sierra1$ ./example_client sierra0
 
 
