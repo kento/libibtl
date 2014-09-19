@@ -262,5 +262,8 @@ This error is usually caused by shortage of Max Locked Memory. You can check the
 To give ibio enought locked memory size, "unlimited" locked memory is recommended
 
     $ ulimite -l unlimited
+To give ibio enought locked memory size, "unlimited" locked memory is recommended
+
+    $ ulimite -l unlimited
 
 
