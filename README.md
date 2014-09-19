@@ -237,6 +237,12 @@ Ping-Pong examples initiated by a client
 Troubleshooting
 -------
 ### Shortage of Max Locked Memory
+
+- Error:  
+
+    $ make
+
+
 - Error:  
 
     FDMI:ERROR:sierra0:8128: ibv_reg_mr failed after several trial: pd:0x2aaab0000a70, addr:0x2aaab0000f70, size:65688 error:Cannot allocate memory (../src/fdmi.c:fdmi_reg_mr:2589)
