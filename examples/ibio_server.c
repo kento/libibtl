@@ -51,12 +51,12 @@ struct ibvio_sfile_info
 };
 
 struct ibvio_sread_info {
-  int fd;
+  size_t fd;
   FMI_Status stat;
 };
 
 struct ibvio_sopen_info {
-  char fd;
+  size_t fd;
   /*For write operation*/
   size_t write_count;
   size_t current_write_count;
@@ -88,6 +88,13 @@ static int ibvio_sopen(FMI_Status *stat)
 
 
   iopen.fd = open(iopen.path, iopen.flags, iopen.mode);
+
+  //sagar
+  if (fd <= 0) {
+    fprintf(stderr, "error(%d): path: |%s|, fd=%d\n",  errno, iopen.path, fd);
+    exit(1);
+  }
+
 
 
   fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req);
@@ -397,6 +404,7 @@ int main(int argc, char **argv)
 	ibvio_sread_async(fd, &stat);
 	break;
       case IBVIO_OP_CLOSE:
+	printf("Close called\n");
 	break;
       case IBVIO_OP_NOOP:
 	usleep(1000);
