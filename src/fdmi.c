@@ -212,15 +212,15 @@ struct fdmi_ft_msg {
   int id;
   int msg_type;
   int rlength;
-  int ranks[128];
+  int ranks[128*2];
 
   int plength;
-  int offset[128];
-  int range[128];
+  int offset[128*2];
+  int range[128*2];
 
   int elength;
-  int eoffset[128];
-  int erange[128];
+  int eoffset[128*2];
+  int erange[128*2];
 
   int epoch;
 };
@@ -842,8 +842,10 @@ static struct fdmi_query* fdmi_get_matched_query2(int rank, int tag, struct fdmi
        tmp_query = (struct fdmi_query*)fdmi_queue_iterate(queue, FDMI_QUEUE_NEXT)) {
 
     if (fdmi_is_matched_query2(rank, tag, comm, tmp_query)) {
+      //      fdmi_dbg("Matched: msg1: %d %d <=> msg: %d %d (query:%p)", rank, tag, tmp_query->msg->rank, tmp_query->msg->tag);
       return tmp_query;
     }
+
   }
   return NULL;
 }
@@ -864,8 +866,6 @@ static int fdmi_is_matched_query2(int rank, int tag, struct fdmi_communicator* c
   /*Communicator matching*/
   if (!(comm->id == msg->comm_id)) {
 #ifdef DEBUG_QP
-
-
     fdmi_dbg("P: MISCHG: msg1: %d %d %d <=> msg: %d %d %d", comm_id, rank, tag, msg->comm_id, msg->rank, msg->tag);
 #endif
     return 0;
@@ -875,6 +875,7 @@ static int fdmi_is_matched_query2(int rank, int tag, struct fdmi_communicator* c
   if (!(rank == FMI_ANY_SOURCE ||
 	msg->rank == FMI_ANY_SOURCE ||
 	rank == msg->rank)) {
+    //    fdmi_dbg("MISS MISCHG: msg1: %d %d <=> msg: %d %d (query:%p)", rank, tag, msg->rank, msg->tag, query);
 #ifdef DEBUG_QP
   fdmi_dbg("P: MISCHG: msg1: %d %d <=> msg: %d %d", rank, tag, msg->rank, msg->tag);
 #endif
@@ -911,7 +912,6 @@ static void fdmi_on_recv_cq_wc_recv(struct fdmi_domain_context* dctx, struct fdm
 	return;
     }
   }
-
 
   msg = active_query->msg;
   /* Search qp(passive queue) and find out If RECV is alrady called */
@@ -1244,6 +1244,7 @@ void fdmi_post_recv_msg_param(struct fdmi_post_recv_param* prparam)
     query_qp = domain->dctx->query_qp;
     fdmi_queue_lock(query_qp->aq);
     fdmi_queue_lock(query_qp->pq);
+
     /* Search aq(active queue) and find out If the message has alrady arrived */
     if ((matched_active_query = fdmi_get_matched_query2(prparam->rank, prparam->tag, prparam->comm, query_qp->aq)) !=NULL) {
       /*If already arrived, ...*/
@@ -1652,15 +1653,16 @@ static void* fdmi_poll_event_recv_channel(void* arg)
 
       //      fdmi_dbg( "connection from %d", connected_rank);
       if (pthread_mutex_trylock(&(connected_peer->on_connecting_lock))) {
-	if ((errno = rdma_reject(event->id, NULL, 0)) > 0 ) {
-	  fdmi_err("P:rdma_reject failed\n", rc);
-	}
-	//	fdmi_dbg("rejected connection");
-	break;
+      	if ((errno = rdma_reject(event->id, NULL, 0)) > 0 ) {
+      	  fdmi_err("P:rdma_reject failed\n", rc);
+      	}
+      	//	fdmi_dbg("rejected connection");
+      	break;
       }
 
       fdmi_create_qp (&(domain->dctx), event->id);
       conn = fdmi_create_connection(event->id, domain->dctx);
+
       connected_peer->conn[domain_id] = conn;
 
 
@@ -1671,9 +1673,9 @@ static void* fdmi_poll_event_recv_channel(void* arg)
       //kento
       /*Process mapping*/
       fdmi_rmap_itop_add((void*)conn->rcid, connected_rank);
-
       connected_rank++; /*Increment for next connecting rank*/
 
+      fdmi_dbg("fdmi_size: %d, connected rank: %d, connected_peer: %p, domain_id: %d", fdmi_size, connected_rank, connected_peer, domain_id);
       break;
     case RDMA_CM_EVENT_ESTABLISHED:
 
@@ -2042,7 +2044,7 @@ static void fdmi_make_ring_connection(struct fdmi_sendrecv_channel* sendrecv_cha
 static void fdmi_init_proc_man(void) {
   int i;
   /*TODO: I multipled size of rank_map_vtop by 2(extra) for dynamic scaling, but the magic number should be removed */
-  fdmi_proc_man_init(100, 0, 1, 0);
+  fdmi_proc_man_init(1024 * 1024, 0, 1, 0);
   /**/
 }
 
@@ -2270,7 +2272,6 @@ int fdmi_verbs_comm_vrank(struct fdmi_communicator *comm, int *vrank)
 {
 
   *vrank = fdmi_comm_get_vrank(comm, prank);
-  // Fri Mar 15 20:19:53
   //  *vrank = comm.vrank;
   return 0;
 }
@@ -2405,6 +2406,8 @@ int fdmi_verbs_irecv(const void *buf, int count, struct fdmi_datatype datatype, 
   prparam.request_flag = &(request->request_flag);
   prparam.request     = request; 
 
+  //  fdmi_dbg("irecv match: vsource %d source %d tag %d", vsource, prparam.rank, prparam.tag);
+
   *(prparam.request_flag) = 0;
   fdmi_post_recv_msg_param (&prparam);
 
@@ -2443,6 +2446,7 @@ int fdmi_verbs_iprobe(int source, int tag, struct fdmi_communicator* comm, int *
     if (status != NULL)  {
       status->FMI_SOURCE = msg->rank;
       status->FMI_TAG    = msg->tag;
+      //      fdmi_dbg("temp_query: %p source:%d tag: %d", tmp_query, status->FMI_SOURCE, status->FMI_TAG);
     }
     break;
   }
@@ -2461,7 +2465,7 @@ static int fdmi_set_envs ()
   if ((value = fdmi_param_get("FDMI_SIZE")) != NULL) {
     fdmi_size = atoi(value);
   } else {
-    fdmi_size = 128; //TODO:
+    fdmi_size = 1024 * 1024; //TODO:
   }
 
   if ((value = fdmi_param_get("FDMI_NUMPROC")) != NULL) {

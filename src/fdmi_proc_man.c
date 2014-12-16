@@ -382,7 +382,7 @@ int fdmi_verbs_comm_dup(struct fdmi_communicator *comm, struct fdmi_communicator
       
 int fdmi_comm_get_vrank(struct fdmi_communicator *comm, int prank)
 {
-  struct fdmi_communicator *comms[128];
+  struct fdmi_communicator *comms[128 * 2];
   struct fdmi_communicator *cur_comm;
   int i, index, rank;
   index = 0;
