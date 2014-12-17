@@ -760,7 +760,7 @@ static int fdmi_get_wc(int nument, struct ibv_cq** tmp_cq,  struct ibv_comp_chan
     ibv_ack_cq_events(*tmp_cq, 1);
 
     if (ibv_req_notify_cq(*tmp_cq, 0) > 0) {
-      fdmi_err ("ibv_req_notify_cq (%s:%s:%d)", __FILE__, __func__, __LINE__);
+      fdmi_err ("ibv_req_notify_cq failed: %s (%d)  (%s:%s:%d)", rdma_err_status_str(errno), errno,  __FILE__, __func__, __LINE__);
     }
   }
   return 0;
@@ -1675,7 +1675,7 @@ static void* fdmi_poll_event_recv_channel(void* arg)
       fdmi_rmap_itop_add((void*)conn->rcid, connected_rank);
       connected_rank++; /*Increment for next connecting rank*/
 
-      fdmi_dbg("fdmi_size: %d, connected rank: %d, connected_peer: %p, domain_id: %d", fdmi_size, connected_rank, connected_peer, domain_id);
+      //      fdmi_dbg("fdmi_size: %d, connected rank: %d, connected_peer: %p, domain_id: %d", fdmi_size, connected_rank, connected_peer, domain_id);
       break;
     case RDMA_CM_EVENT_ESTABLISHED:
 
