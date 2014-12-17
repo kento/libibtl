@@ -80,6 +80,7 @@ int ibtl_open(const char *pathname, int flags, int mode)
 
   if (!is_init) {
     fdmi_verbs_init(0, NULL);
+    is_init = 1;
   }
 
   s = fdmi_get_time();
@@ -271,7 +272,32 @@ ssize_t ibtl_read(int fd, void *buf, size_t count)
 
 int ibtl_close(int fd)
 {
-  printf("close called\n");
+  struct ibvio_open iopen;
+  FMI_Request req;
+  FMI_Status stat;
+  int host_id;
+  int tag;
+  int current_write_size = 0;
+  double s, e, t1, t2, t3;
+  double st, t4;
+  int chunk_size = IBVIO_CHUNK_SIZE;
+
+  host_id = host_ids[fd];
+
+  ibvio_serialize_tag(IBVIO_OP_CLOSE, fd, &tag);
+
+  s = fdmi_get_time();
+
+  fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, tag, FMI_COMM_WORLD, &req);
+  fdmi_verbs_wait(&req, &stat);
+
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, host_id, FMI_ANY_TAG, FMI_COMM_WORLD, &req);
+  fdmi_verbs_wait(&req, &stat);
+  e = fdmi_get_time();
+  
+  fdmi_dbg("CLOSE: time: %f", e - s);
+
+  return iopen.stat;
 }
 
 static int transfer_init(void)

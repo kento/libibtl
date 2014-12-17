@@ -760,7 +760,7 @@ static int fdmi_get_wc(int nument, struct ibv_cq** tmp_cq,  struct ibv_comp_chan
     ibv_ack_cq_events(*tmp_cq, 1);
 
     if (ibv_req_notify_cq(*tmp_cq, 0) > 0) {
-      fdmi_err ("ibv_req_notify_cq failed: %s (%d)  (%s:%s:%d)", rdma_err_status_str(errno), errno,  __FILE__, __func__, __LINE__);
+      fdmi_err("ibv_req_notify_cq failed: %s (%d)  (%s:%s:%d)", rdma_err_status_str(errno), errno,  __FILE__, __func__, __LINE__);
     }
   }
   return 0;
@@ -842,7 +842,7 @@ static struct fdmi_query* fdmi_get_matched_query2(int rank, int tag, struct fdmi
        tmp_query = (struct fdmi_query*)fdmi_queue_iterate(queue, FDMI_QUEUE_NEXT)) {
 
     if (fdmi_is_matched_query2(rank, tag, comm, tmp_query)) {
-      //      fdmi_dbg("Matched: msg1: %d %d <=> msg: %d %d (query:%p)", rank, tag, tmp_query->msg->rank, tmp_query->msg->tag);
+      //fdmi_dbg("Matched: msg1: %d %d <=> msg: %d %d (query:%p)", rank, tag, tmp_query->msg->rank, tmp_query->msg->tag);
       return tmp_query;
     }
 
@@ -1261,7 +1261,6 @@ void fdmi_post_recv_msg_param(struct fdmi_post_recv_param* prparam)
 	/*If the data is too big for the eager buffer space, 
 	  read the data using RDMA from remote send buffer*/
 	passive_query = fdmi_init_passive_query(prparam);
-
 	passive_query->active_query_to_free = matched_active_query;
 	fdmi_post_rdma_read(passive_query, matched_active_query);
       }
@@ -2406,7 +2405,7 @@ int fdmi_verbs_irecv(const void *buf, int count, struct fdmi_datatype datatype, 
   prparam.request_flag = &(request->request_flag);
   prparam.request     = request; 
 
-  //  fdmi_dbg("irecv match: vsource %d source %d tag %d", vsource, prparam.rank, prparam.tag);
+  // fdmi_dbg("irecv match: vsource %d source %d tag %d", vsource, prparam.rank, prparam.tag);
 
   *(prparam.request_flag) = 0;
   fdmi_post_recv_msg_param (&prparam);

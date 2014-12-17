@@ -15,6 +15,7 @@
 
 #define COMPRESS 0
 #define BUF_SIZE (2 * 1024 * 1024 * 1024L)
+#define MAX_FILE_OPEN (1024 * 1024)
 
 struct write_args {
   int id;
@@ -74,7 +75,7 @@ struct ibvio_sopen_info {
 
   struct ibvio_sfile_info *file_info;
 };
-struct ibvio_sopen_info open_info[1024];
+struct ibvio_sopen_info open_info[MAX_FILE_OPEN];
 
 static int ibvio_sopen(FMI_Status *stat)
 {
@@ -86,20 +87,10 @@ static int ibvio_sopen(FMI_Status *stat)
   fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req);
   fdmi_verbs_wait(&req, NULL);
 
-
   iopen.fd = open(iopen.path, iopen.flags, iopen.mode);
-
-  //sagar
-  if (fd <= 0) {
-    fprintf(stderr, "error(%d): path: |%s|, fd=%d\n",  errno, iopen.path, fd);
-    exit(1);
-  }
-
-
 
   fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req);
   fdmi_verbs_wait(&req, NULL);   
-
 
   open_info[iopen.fd].fd = iopen.fd;
   open_info[iopen.fd].file_info = (struct ibvio_sfile_info *)malloc(sizeof(struct ibvio_sfile_info));
@@ -109,11 +100,11 @@ static int ibvio_sopen(FMI_Status *stat)
   pthread_mutex_init(&open_info[iopen.fd].fastmutex, NULL);
   open_info[iopen.fd].current_recv_size = 0;
 
-  //  memset(open_info[iopen.fd].file_info->cache, 0, BUF_SIZE);  
-
 
   fdmi_dbg("OPEN: path: %s, flags: %d, mode: %d, time: %f", iopen.path, iopen.flags, iopen.mode, t);
   return;
+
+
 }
 
 static int ibvio_swrite(int fd, FMI_Status *stat)
@@ -139,7 +130,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
       if (current_recv_size > 0) {
 	s = fdmi_get_time();
 	if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
-	  fdmi_err("write error");
+	  fdmi_err("Write Error (%s:%s:%d)\n", __FILE__, __func__, __LINE__);
 	}
 	t += fdmi_get_time() - s;
 	write_size += write_chunk_size;
@@ -156,7 +147,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   if (!IBVIO_DELAYED_WRITE) {
     s = fdmi_get_time();
     if (write(fd, open_info[fd].file_info->cache + write_size, write_chunk_size) < 0) {
-      fdmi_err("write error");
+      fdmi_err("Write Error (%s:%s:%d)\n", __FILE__, __func__, __LINE__);
     }
     write_size += write_chunk_size;
     fsync(fd);
@@ -170,7 +161,7 @@ static int ibvio_swrite(int fd, FMI_Status *stat)
   if (IBVIO_DELAYED_WRITE) {
     s = fdmi_get_time();
     if (write(fd, open_info[fd].file_info->cache, iopen.count) < 0) {
-      fdmi_err("write error");
+      fdmi_err("Write Error (%s:%s:%d)\n", __FILE__, __func__, __LINE__);
     }
     fsync(fd);
     t += fdmi_get_time() - s;
@@ -203,6 +194,7 @@ static void* ibvio_swrite_chunk_thread(void *arg)
 
   oinfo = (struct ibvio_sopen_info *)arg;
 
+  fdmi_dbg("== begin ==");
   pthread_mutex_lock(&oinfo->fastmutex);
   if (oinfo->current_write_count + write_chunk_size > oinfo->write_count) {
     write_chunk_size = oinfo->write_count - oinfo->current_write_count;
@@ -210,13 +202,14 @@ static void* ibvio_swrite_chunk_thread(void *arg)
 
   s = fdmi_get_time();
   if (write(oinfo->fd, oinfo->file_info->cache + oinfo->current_write_count, write_chunk_size) < 0) {
-      fdmi_err("write error");
+      fdmi_err("Write Error (%s:%s:%d)\n", __FILE__, __func__, __LINE__);
   }
   fsync(oinfo->fd);
   t = fdmi_get_time() - s;
   oinfo->current_write_count += write_chunk_size;
-  fdmi_dbg("fd: %d, %f GB/s  (%f p)", oinfo->fd, write_chunk_size / t / 1000000000.0, oinfo->current_write_count / (float)oinfo->write_count);
+  //  fdmi_dbg("fd: %d, %f GB/s  (%f p)", oinfo->fd, write_chunk_size / t / 1000000000.0, oinfo->current_write_count / (float)oinfo->write_count);
   pthread_mutex_unlock(&oinfo->fastmutex);
+  fdmi_dbg("== end ==");
   
   return;
 }
@@ -257,10 +250,13 @@ static int ibvio_swrite_chunk(int fd, FMI_Status *stat)
     chunk_size = oinfo->write_count - oinfo->current_recv_size;
   }
 
+  fdmi_dbg("== irecv ==: %d %d %p", stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD);
+
   fdmi_verbs_irecv(oinfo->file_info->cache + oinfo->current_recv_size, chunk_size, FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req);
   fdmi_verbs_wait(&req, NULL);
   oinfo->current_recv_size += chunk_size;
 
+  fdmi_dbg("== run thread ==");
   ibvio_run_thread(&(oinfo->write_thread), ibvio_swrite_chunk_thread, oinfo);
 
   if (oinfo->current_recv_size == oinfo->write_count) {
@@ -299,7 +295,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
   if (!IBVIO_CACHE_READ) {
     s = fdmi_get_time();
     if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
-      fdmi_err("read error");
+      fdmi_err("Read Error (%s:%s:%d)\n", __FILE__, __func__, __LINE__);
     }
     t += fdmi_get_time() - s;
   }
@@ -317,7 +313,7 @@ static int ibvio_sread(int fd, FMI_Status *stat)
       if (!IBVIO_CACHE_READ) {
 	s = fdmi_get_time();
 	if (read(fd, open_info[fd].file_info->cache + read_size, read_chunk_size) < 0) {
-	  fdmi_err("read error");
+	  fdmi_err("Read Error (%s:%s:%d)\n", __FILE__, __func__, __LINE__);
 	}
 	t += fdmi_get_time() - s;
       }
@@ -358,6 +354,40 @@ static int ibvio_sread_async(int fd, FMI_Status *stat)
 }
 
 
+static int ibvio_sclose(int fd, FMI_Status *stat)
+{
+  FMI_Request req;
+  struct ibvio_open iopen;
+  
+  fdmi_verbs_irecv(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req);
+  fdmi_verbs_wait(&req, NULL);
+
+  iopen.stat = close(fd);
+
+  fdmi_verbs_isend(&iopen, sizeof(struct ibvio_open), FMI_BYTE, stat->FMI_SOURCE, stat->FMI_TAG, FMI_COMM_WORLD, &req);
+  fdmi_verbs_wait(&req, NULL);   
+
+  if (iopen.stat == 0) {
+    open_info[fd].fd = -1;
+    //    free(open_info[fd].file_info->cache);
+    open_info[fd].file_info->cache = NULL;
+    free(open_info[fd].file_info);
+    open_info[fd].file_info = NULL;
+    open_info[fd].write_count = 0;
+    open_info[fd].current_write_count = 0;
+    pthread_mutex_destroy(&open_info[fd].fastmutex);
+    open_info[fd].current_recv_size = 0;
+    memset(&open_info[fd], 0, sizeof(struct ibvio_open));
+  }
+
+  if (iopen.stat == 0) {
+    fdmi_dbg("CLOSE: fd: %d path: %s, flags: %d, mode: %d, time: %f", fd, iopen.path, iopen.flags, iopen.mode);
+  } else {
+    fdmi_dbg("CLOSE failed: fd: %d path: %s, flags: %d, mode: %d, time: %f", fd, iopen.path, iopen.flags, iopen.mode);   
+  }
+  return;
+}
+
 
 int main(int argc, char **argv) 
 {
@@ -378,6 +408,7 @@ int main(int argc, char **argv)
     } else {
       source = FMI_ANY_SOURCE;
     }
+    //    usleep(100000);
     fdmi_verbs_iprobe(FMI_ANY_SOURCE, FMI_ANY_TAG, FMI_COMM_WORLD, &flag, &stat);
     if (num_c > 0) {
       source = (source + 1) % num_c;
@@ -386,7 +417,7 @@ int main(int argc, char **argv)
       int op, fd;
       op = IBVIO_OP_NOOP;
       ibvio_deserialize_tag(&op, &fd, stat.FMI_TAG);
-      //      fdmi_dbg("Probe data %s from rank: %d, tag: %d => op: %d, fd: %d", data, stat.FMI_SOURCE, stat.FMI_TAG, op, fd);
+      fdmi_dbg("Probe data %s from rank: %d, tag: %d => op: %d, fd: %d", data, stat.FMI_SOURCE, stat.FMI_TAG, op, fd);
       switch (op) {
       case IBVIO_OP_OPEN:
 	ibvio_sopen(&stat);
@@ -404,7 +435,7 @@ int main(int argc, char **argv)
 	ibvio_sread_async(fd, &stat);
 	break;
       case IBVIO_OP_CLOSE:
-	printf("Close called\n");
+	ibvio_sclose(fd, &stat);
 	break;
       case IBVIO_OP_NOOP:
 	usleep(1000);
