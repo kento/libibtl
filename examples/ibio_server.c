@@ -14,7 +14,7 @@
 #include "ibio_common.h"
 
 #define COMPRESS 0
-#define BUF_SIZE (2 * 1024 * 1024 * 1024L)
+#define BUF_SIZE (1 * 1024 * 1024 * 1024L)
 #define MAX_FILE_OPEN (1024 * 1024)
 
 struct write_args {
@@ -369,7 +369,7 @@ static int ibvio_sclose(int fd, FMI_Status *stat)
 
   if (iopen.stat == 0) {
     open_info[fd].fd = -1;
-    //    free(open_info[fd].file_info->cache);
+    free(open_info[fd].file_info->cache);
     open_info[fd].file_info->cache = NULL;
     free(open_info[fd].file_info);
     open_info[fd].file_info = NULL;

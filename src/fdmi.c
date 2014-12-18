@@ -1434,11 +1434,15 @@ static void* fdmi_post_rdma_read(struct fdmi_query* passive_query, struct fdmi_q
   swr.wr.rdma.rkey        = remote_mr->rkey;
   swr.imm_data = prank; /*TODO: send more better data*/
   /* ================== */
-
-
-  sge.addr   = (uint64_t)local_mr->addr;
-  sge.length = (uint32_t)local_mr->length;
-  sge.lkey   = (uint32_t)local_mr->lkey;
+  {
+    struct fdmi_msg *local_msg;
+    local_msg = passive_query->msg;
+    // begin address may change after ibv_reg, so using local_msg->addr
+    sge.addr   = (uint64_t)local_msg->addr; //  sge.addr   = (uint64_t)local_mr->addr;
+    // lenght also may change after ibv_reg, so calculate the actual length
+    sge.length = (uint32_t)((local_msg->dtype.stride * (local_msg->dtype.count - 1) + local_msg->dtype.blength) * local_msg->dtype.size * local_msg->count);
+  }
+    sge.lkey   = (uint32_t)local_mr->lkey;
 
 
 #if  defined(DEBUG_RECV) || defined(DEBUG_SEND)

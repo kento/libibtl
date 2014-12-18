@@ -4,6 +4,7 @@
 
 #include "fdmi_err.h"
 
+//#define FDMI_ERR
 #define DEBUG_STDOUT stderr
 
 int rank;
@@ -47,12 +48,14 @@ int fdmi_alert(const char* fmt, ...)
 }
 
 int fdmi_dbg(const char* fmt, ...) {
+#ifdef FDMI_ERR
   va_list argp;
   fprintf(DEBUG_STDOUT, "FDMI:DEBUG:%s:%d: ", hostname, rank);
   va_start(argp, fmt);
   vfprintf(DEBUG_STDOUT, fmt, argp);
   va_end(argp);
   fprintf(DEBUG_STDOUT, "\n");
+#endif
 }
 
 int fdmi_dbgi(int r, const char* fmt, ...) {
